@@ -23,9 +23,13 @@
 """
 
 import os
+import yaml
 
 from qgis.PyQt import uic
 from qgis.PyQt import QtWidgets
+from PyQt5.QtWidgets import QFileDialog, QMessageBox, QDialogButtonBox  # or PyQt6.QtWidgets
+from PyQt5.QtCore import QFile, QTextStream  # Not strictly needed, can use Python file API instead
+
 
 # This loads your .ui file so that PyQt can populate your plugin with the elements from Qt Designer
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
@@ -42,3 +46,53 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
         # http://qt-project.org/doc/qt-4.8/designer-using-a-ui-file.html
         # #widgets-and-dialogs-with-auto-connect
         self.setupUi(self)
+
+
+
+    def on_button_clicked(self, button):
+        role = self.buttonBox.buttonRole(button)
+        print(f"Button clicked: {button.text()}, Role: {role}")
+
+        # You can also check the standard button type
+        if button == self.buttonBox.button(QDialogButtonBox.Save):
+            print("Save button clicked")
+        elif button == self.buttonBox.button(QDialogButtonBox.Open):
+            self.open_file()
+        elif button == self.buttonBox.button(QDialogButtonBox.Close):
+            self.reject()
+
+    def open_file(self):
+        file_name, _ = QFileDialog.getOpenFileName(self, "Open File", "", "YAML Files (*.yml);;All Files (*)")
+        
+        if not file_name:
+            return
+
+        try:
+            with open(file_name, 'r', encoding='utf-8') as file:
+                file_content = file.read()
+                self.parse_yaml(yaml.safe_load(file_content))
+                
+        except Exception as e:
+            QMessageBox.warning(self, "Error", f"Cannot open file:\n{str(e)}")
+
+    def parse_yaml(self, text):
+
+        # bind
+        self.lineEditHost.setText(text['server']['bind']['host'])
+        self.spinBoxPort.setValue(text['server']['bind']['port'])
+
+        # gzip
+        self.checkBoxGzip.setChecked(text['server']['gzip'])
+
+        # pretty print
+        self.checkBoxPretty.setChecked(text['server']['pretty_print'])
+
+        # admin
+        self.checkBoxAdmin.setChecked(text['server']['admin'])
+
+        # map
+        self.lineEditMapUrl.setText(text['server']['map']['url'])
+        self.lineEditAttribution.setText(text['server']['map']['attribution'])
+
+        self.lineEditUrl.setText(text['server']['url'])
+

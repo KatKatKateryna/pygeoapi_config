@@ -35,7 +35,7 @@
          </property>
          <layout class="QGridLayout" name="gridLayout">
           <item row="0" column="1">
-           <widget class="QLineEdit" name="lineEditUrl">
+           <widget class="QLineEdit" name="lineEditHost">
             <property name="inputMask">
              <string>000.0.0.0</string>
             </property>
@@ -82,7 +82,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QLineEdit" name="lineEditUrl_2"/>
+           <widget class="QLineEdit" name="lineEditUrl"/>
           </item>
          </layout>
         </widget>
@@ -104,7 +104,13 @@
            </widget>
           </item>
           <item>
-           <widget class="QComboBox" name="comboBoxMime"/>
+           <widget class="QComboBox" name="comboBoxMime">
+            <item>
+             <property name="text">
+              <string>application/json; charset=UTF-8</string>
+             </property>
+            </item>
+           </widget>
           </item>
          </layout>
         </widget>
@@ -139,12 +145,18 @@
           <item>
            <widget class="QLabel" name="label_5">
             <property name="text">
-             <string>mimetype</string>
+             <string>encoding</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QComboBox" name="comboBoxEncoding"/>
+           <widget class="QComboBox" name="comboBoxEncoding">
+            <item>
+             <property name="text">
+              <string>utf-8</string>
+             </property>
+            </item>
+           </widget>
           </item>
          </layout>
         </widget>
@@ -170,7 +182,7 @@
            </widget>
           </item>
           <item row="0" column="1">
-           <widget class="QLineEdit" name="lineEditUrl_3"/>
+           <widget class="QLineEdit" name="lineEditMapUrl"/>
           </item>
           <item row="1" column="0">
            <widget class="QLabel" name="label_9">
@@ -202,7 +214,33 @@
            </widget>
           </item>
           <item>
-           <widget class="QComboBox" name="comboBox"/>
+           <widget class="QComboBox" name="comboBoxLang">
+            <item>
+             <property name="text">
+              <string>en-US</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>en-GB</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>fr-CA</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>fr-FR</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>pt-PT</string>
+             </property>
+            </item>
+           </widget>
           </item>
          </layout>
         </widget>
@@ -260,9 +298,9 @@
  <connections>
   <connection>
    <sender>buttonBox</sender>
-   <signal>rejected()</signal>
+   <signal>clicked(QAbstractButton*)</signal>
    <receiver>PygeoapiConfigDialogBase</receiver>
-   <slot>reject()</slot>
+   <slot>on_button_clicked()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>271</x>
@@ -275,4 +313,7 @@
    </hints>
   </connection>
  </connections>
+ <slots>
+  <slot>on_button_clicked()</slot>
+ </slots>
 </ui>
