@@ -50,5 +50,22 @@
   </layout>
  </widget>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>rejected()</signal>
+   <receiver>PygeoapiConfigDialogBase</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>271</x>
+     <y>375</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>271</x>
+     <y>198</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>
