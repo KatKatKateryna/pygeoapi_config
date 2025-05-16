@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>PygeoapiConfigDialogBase</class>
+ <widget class="QDialog" name="PygeoapiConfigDialogBase">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>544</width>
+    <height>397</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>pygeoapi configurator</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QTabWidget" name="tabWidget">
+     <property name="currentIndex">
+      <number>0</number>
+     </property>
+     <widget class="QWidget" name="serverTab">
+      <attribute name="title">
+       <string>Server</string>
+      </attribute>
+     </widget>
+     <widget class="QWidget" name="metadataTab">
+      <attribute name="title">
+       <string>Metadata</string>
+      </attribute>
+     </widget>
+     <widget class="QWidget" name="resourcesTab">
+      <attribute name="title">
+       <string>Resources</string>
+      </attribute>
+     </widget>
+    </widget>
+   </item>
+   <item>
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Close|QDialogButtonBox::Open|QDialogButtonBox::Save</set>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
