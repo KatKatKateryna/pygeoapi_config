@@ -1,5 +1,6 @@
 <RCC>
     <qresource prefix="/plugins/pygeoapi_config">
         <file>icon.png</file>
+        <file>byteroad1.jpg</file>
     </qresource>
 </RCC>
