@@ -19,3 +19,14 @@ copy this folder to your QGIS plugin directory. Something like:
  `pb_tool compile`
 
 Modify the user interface by opening pygeoapiconfig_dialog_base.ui in [Qt Creator](https://doc.qt.io/qtcreator/).
+
+ ## Screenshot
+
+![screenshot](/screenshot.png)
+
+## License
+
+This project is released under an [MIT License](./LICENSE)
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
