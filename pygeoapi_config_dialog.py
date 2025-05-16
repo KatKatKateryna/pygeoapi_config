@@ -94,9 +94,6 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
             # url
             self.yaml_str['server']['url'] = self.lineEditUrl.text()
 
-            # QgsMessageLog.logMessage("languages")
-            # QgsMessageLog.logMessage(self.yaml_str['server']['languages'][0])
-
             # language
             self.yaml_str['server']['languages']=[]
             for i in range(self.listWidgetLang.count()):
@@ -111,8 +108,8 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
             self.yaml_str['server']['limits']['on_exceed'] = self.comboBoxExceed.currentText()
 
         except Exception as e:
-            print(f"Error deserializing: {e}")
-            
+            QgsMessageLog.logMessage(f"Error deserializing: {e}")
+
     def save_to_file(self):
 
         file_path, _ = QFileDialog.getSaveFileName(self, "Save File", "", "YAML Files (*.yml);;All Files (*)")
@@ -122,10 +119,9 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
                 with open(file_path, 'w', encoding='utf-8') as file:
                     self.write_yaml()
                     yaml.dump(self.yaml_str, file)
-                print(f"File saved to: {file_path}")
+                QgsMessageLog.logMessage(f"File saved to: {file_path}")
             except Exception as e:
-                print(f"Error saving file: {e}")
-
+                QgsMessageLog.logMessage(f"Error saving file: {e}")
 
     def open_file(self):
         file_name, _ = QFileDialog.getOpenFileName(self, "Open File", "", "YAML Files (*.yml);;All Files (*)")
