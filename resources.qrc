@@ -1,5 +1,5 @@
 <RCC>
-    <qresource prefix="/plugins/pygeoapi_config" >
+    <qresource prefix="/plugins/pygeoapi_config">
         <file>icon.png</file>
     </qresource>
 </RCC>
