@@ -29,7 +29,7 @@ from qgis.PyQt import uic
 from qgis.core import QgsMessageLog
 from qgis.PyQt import QtWidgets
 from PyQt5.QtWidgets import QFileDialog, QMessageBox, QDialogButtonBox, QApplication  # or PyQt6.QtWidgets
-from PyQt5.QtCore import QFile, QTextStream, Qt, QStringListModel  # Not strictly needed, can use Python file API instead
+from PyQt5.QtCore import QFile, QTextStream, Qt, QStringListModel, QSortFilterProxyModel  # Not strictly needed, can use Python file API instead
 
 
 # This loads your .ui file so that PyQt can populate your plugin with the elements from Qt Designer
@@ -212,4 +212,13 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
         self.model = QStringListModel()
         self.model.setStringList(text['resources'])
 
-        self.listViewCollection.setModel(self.model)
+        self.proxy = QSortFilterProxyModel()
+        self.proxy.setSourceModel(self.model);
+        self.listViewCollection.setModel(self.proxy)
+
+
+        #self.listViewCollection.setModel(self.model)
+
+    def filterResources(self, filter):
+        self.proxy.setDynamicSortFilter(True);
+        self.proxy.setFilterFixedString(filter);

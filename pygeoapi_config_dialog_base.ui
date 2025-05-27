@@ -527,6 +527,22 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>lineEditCollection</sender>
+   <signal>textChanged(QString)</signal>
+   <receiver>PygeoapiConfigDialogBase</receiver>
+   <slot>filterResources(QString)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>434</x>
+     <y>91</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>434</x>
+     <y>244</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>open_logfile_dialog()</slot>
