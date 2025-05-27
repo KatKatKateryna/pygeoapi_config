@@ -18,6 +18,13 @@
     <normaloff>icon.png</normaloff>icon.png</iconset>
   </property>
   <layout class="QGridLayout" name="gridLayout_5">
+   <item row="1" column="1">
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Close|QDialogButtonBox::Open|QDialogButtonBox::Save</set>
+     </property>
+    </widget>
+   </item>
    <item row="1" column="0">
     <widget class="QLabel" name="label_12">
      <property name="font">
@@ -30,13 +37,6 @@
      </property>
      <property name="textFormat">
       <enum>Qt::MarkdownText</enum>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="1">
-    <widget class="QDialogButtonBox" name="buttonBox">
-     <property name="standardButtons">
-      <set>QDialogButtonBox::Close|QDialogButtonBox::Open|QDialogButtonBox::Save</set>
      </property>
     </widget>
    </item>
@@ -450,8 +450,8 @@
       <attribute name="title">
        <string>Resources</string>
       </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout_2">
-       <item>
+      <layout class="QGridLayout" name="gridLayout_7">
+       <item row="0" column="0">
         <widget class="QGroupBox" name="groupBox_2">
          <property name="title">
           <string>select collection</string>
@@ -480,11 +480,33 @@
          </layout>
         </widget>
        </item>
-       <item>
+       <item row="1" column="0">
         <widget class="QGroupBox" name="groupBoxCollection">
          <property name="title">
           <string>collection details</string>
          </property>
+         <layout class="QGridLayout" name="gridLayout_6">
+          <item row="0" column="1" colspan="2">
+           <widget class="QLineEdit" name="lineEditTitle"/>
+          </item>
+          <item row="1" column="0" colspan="2">
+           <widget class="QLabel" name="label_16">
+            <property name="text">
+             <string>description</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_15">
+            <property name="text">
+             <string>title</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="2">
+           <widget class="QPlainTextEdit" name="plainTextDescription"/>
+          </item>
+         </layout>
         </widget>
        </item>
       </layout>
@@ -536,6 +558,54 @@
     <hint type="sourcelabel">
      <x>434</x>
      <y>91</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>434</x>
+     <y>244</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>listViewCollection</sender>
+   <signal>clicked(QModelIndex)</signal>
+   <receiver>PygeoapiConfigDialogBase</receiver>
+   <slot>loadCollection(QModelIndex)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>434</x>
+     <y>160</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>434</x>
+     <y>244</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>lineEditTitle</sender>
+   <signal>textEdited(QString)</signal>
+   <receiver>PygeoapiConfigDialogBase</receiver>
+   <slot>editCollectionTitle(QString)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>455</x>
+     <y>321</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>434</x>
+     <y>244</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>plainTextDescription</sender>
+   <signal>textChanged()</signal>
+   <receiver>PygeoapiConfigDialogBase</receiver>
+   <slot>editCollectionDescription()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>475</x>
+     <y>383</y>
     </hint>
     <hint type="destinationlabel">
      <x>434</x>

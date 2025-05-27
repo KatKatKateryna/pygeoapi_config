@@ -41,6 +41,7 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
 
 
     yaml_str = ""
+    curCol = ""
 
     def __init__(self, parent=None):
         """Constructor."""
@@ -213,12 +214,26 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
         self.model.setStringList(text['resources'])
 
         self.proxy = QSortFilterProxyModel()
-        self.proxy.setSourceModel(self.model);
+        self.proxy.setSourceModel(self.model)
         self.listViewCollection.setModel(self.proxy)
 
-
-        #self.listViewCollection.setModel(self.model)
+        self.yaml_str = text
 
     def filterResources(self, filter):
-        self.proxy.setDynamicSortFilter(True);
-        self.proxy.setFilterFixedString(filter);
+        self.proxy.setDynamicSortFilter(True)
+        self.proxy.setFilterFixedString(filter)
+
+    def loadCollection(self, index):
+        self.lineEditTitle.setText(self.yaml_str['resources'][index.data()]['title'])
+        self.plainTextDescription.setPlainText(self.yaml_str['resources'][index.data()]['description'])
+        self.curCol = index.data()
+
+    def editCollectionTitle(self,value):
+        QgsMessageLog.logMessage(f"Current collection - title: {self.curCol}")
+        self.yaml_str['resources'][self.curCol]['title'] = value
+
+    def editCollectionDescription(self):
+        QgsMessageLog.logMessage(f"Current collection - desc: {self.curCol}")
+        #self.yaml_str['resources'][self.curCol]['description'] = self.plainTextDescription.toPlainText()
+        #QMessageBox.warning(self, "Error", self.plainTextDescription.toPlainText())
+        
