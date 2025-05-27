@@ -225,15 +225,15 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
 
     def loadCollection(self, index):
         self.lineEditTitle.setText(self.yaml_str['resources'][index.data()]['title'])
-        self.plainTextDescription.setPlainText(self.yaml_str['resources'][index.data()]['description'])
+        self.lineEditDescription.setText(self.yaml_str['resources'][index.data()]['description'])
         self.curCol = index.data()
 
     def editCollectionTitle(self,value):
         QgsMessageLog.logMessage(f"Current collection - title: {self.curCol}")
         self.yaml_str['resources'][self.curCol]['title'] = value
 
-    def editCollectionDescription(self):
+    def editCollectionDescription(self, value):
         QgsMessageLog.logMessage(f"Current collection - desc: {self.curCol}")
-        #self.yaml_str['resources'][self.curCol]['description'] = self.plainTextDescription.toPlainText()
-        #QMessageBox.warning(self, "Error", self.plainTextDescription.toPlainText())
+        self.yaml_str['resources'][self.curCol]['description'] = value
+
         
