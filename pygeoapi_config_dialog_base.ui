@@ -18,10 +18,32 @@
     <normaloff>icon.png</normaloff>icon.png</iconset>
   </property>
   <layout class="QGridLayout" name="gridLayout_5">
+   <item row="1" column="0">
+    <widget class="QLabel" name="label_12">
+     <property name="font">
+      <font>
+       <family>Liberation Serif</family>
+      </font>
+     </property>
+     <property name="text">
+      <string>Brought to you with ❤️ by ByteRoad</string>
+     </property>
+     <property name="textFormat">
+      <enum>Qt::MarkdownText</enum>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="1">
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Close|QDialogButtonBox::Open|QDialogButtonBox::Save</set>
+     </property>
+    </widget>
+   </item>
    <item row="0" column="0" colspan="2">
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>0</number>
+      <number>2</number>
      </property>
      <widget class="QWidget" name="serverTab">
       <attribute name="title">
@@ -394,7 +416,8 @@
                <string/>
               </property>
               <property name="icon">
-               <iconset theme="folder-open"/>
+               <iconset theme="folder-open">
+                <normaloff>.</normaloff>.</iconset>
               </property>
              </widget>
             </item>
@@ -427,29 +450,45 @@
       <attribute name="title">
        <string>Resources</string>
       </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_2">
+       <item>
+        <widget class="QGroupBox" name="groupBox_2">
+         <property name="title">
+          <string>select collection</string>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_3">
+          <item>
+           <widget class="QLineEdit" name="lineEditCollection"/>
+          </item>
+          <item>
+           <widget class="QListView" name="listViewCollection"/>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushLoadCollection">
+            <property name="text">
+             <string>Load</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushNewCollection">
+            <property name="text">
+             <string>New</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="groupBoxCollection">
+         <property name="title">
+          <string>collection details</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </widget>
-    </widget>
-   </item>
-   <item row="1" column="0">
-    <widget class="QLabel" name="label_12">
-     <property name="font">
-      <font>
-       <family>Liberation Serif</family>
-      </font>
-     </property>
-     <property name="text">
-      <string>Brought to you with ❤️ by ByteRoad</string>
-     </property>
-     <property name="textFormat">
-      <enum>Qt::MarkdownText</enum>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="1">
-    <widget class="QDialogButtonBox" name="buttonBox">
-     <property name="standardButtons">
-      <set>QDialogButtonBox::Close|QDialogButtonBox::Open|QDialogButtonBox::Save</set>
-     </property>
     </widget>
    </item>
   </layout>

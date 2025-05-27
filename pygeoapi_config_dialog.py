@@ -29,7 +29,7 @@ from qgis.PyQt import uic
 from qgis.core import QgsMessageLog
 from qgis.PyQt import QtWidgets
 from PyQt5.QtWidgets import QFileDialog, QMessageBox, QDialogButtonBox, QApplication  # or PyQt6.QtWidgets
-from PyQt5.QtCore import QFile, QTextStream, Qt  # Not strictly needed, can use Python file API instead
+from PyQt5.QtCore import QFile, QTextStream, Qt, QStringListModel  # Not strictly needed, can use Python file API instead
 
 
 # This loads your .ui file so that PyQt can populate your plugin with the elements from Qt Designer
@@ -207,3 +207,9 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
                 self.comboBoxLog.setCurrentText(self.comboBoxLog.itemText(i))
 
         self.lineEditLogfile.setText(text['logging']['logfile'])
+
+        # collections
+        self.model = QStringListModel()
+        self.model.setStringList(text['resources'])
+
+        self.listViewCollection.setModel(self.model)
