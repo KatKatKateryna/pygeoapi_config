@@ -52,9 +52,8 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
         # #widgets-and-dialogs-with-auto-connect
         self.setupUi(self)
 
-
-
     def on_button_clicked(self, button):
+
         role = self.buttonBox.buttonRole(button)
         print(f"Button clicked: {button.text()}, Role: {role}")
 
@@ -66,6 +65,14 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
         elif button == self.buttonBox.button(QDialogButtonBox.Close):
             self.reject()
 
+
+    def open_logfile_dialog(self):
+
+        logFile = QFileDialog.getSaveFileName(self, "Save File","", "Logs (*.log *.txt)")
+
+        if logFile:
+             print(f"path: {logFile}")
+             self.lineEditLogfile.setText(logFile[0])
 
     def write_yaml(self):
 
@@ -106,6 +113,10 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
             self.yaml_str['server']['limits']['max_items'] = self.spinBoxMax.value()
 
             self.yaml_str['server']['limits']['on_exceed'] = self.comboBoxExceed.currentText()
+
+            # logging
+            self.yaml_str['logging']['level'] = self.comboBoxLog.currentText()
+            self.yaml_str['logging']['logfile'] = self.lineEditLogfile.text()
 
         except Exception as e:
             QgsMessageLog.logMessage(f"Error deserializing: {e}")
@@ -184,3 +195,10 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
             if self.comboBoxExceed.itemText(i) == text['server']['limits']['on_exceed']:
                 self.comboBoxExceed.setCurrentText(text['server']['limits']['on_exceed'])
                 break
+
+        # logging
+        for i in range(self.comboBoxLog.count()):
+            if self.comboBoxLog.itemText(i) in text['logging']['level']:
+                self.comboBoxLog.setCurrentText(self.comboBoxLog.itemText(i))
+
+        self.lineEditLogfile.setText(text['logging']['logfile'])

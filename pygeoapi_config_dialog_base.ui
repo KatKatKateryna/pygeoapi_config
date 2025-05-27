@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>870</width>
-    <height>461</height>
+    <height>490</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -28,12 +28,185 @@
        <string>Server</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_4">
-       <item row="5" column="1" rowspan="3">
+       <item row="0" column="0" rowspan="2">
+        <widget class="QGroupBox" name="groupBoxBind">
+         <property name="title">
+          <string>bind</string>
+         </property>
+         <layout class="QGridLayout" name="gridLayout">
+          <item row="0" column="1">
+           <widget class="QLineEdit" name="lineEditHost">
+            <property name="inputMask">
+             <string>000.0.0.0</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="label">
+            <property name="text">
+             <string>host</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_2">
+            <property name="text">
+             <string>port</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QSpinBox" name="spinBoxPort">
+            <property name="maximum">
+             <number>9999</number>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QFrame" name="frame">
+         <property name="frameShape">
+          <enum>QFrame::StyledPanel</enum>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Raised</enum>
+         </property>
+         <layout class="QHBoxLayout" name="horizontalLayout">
+          <item>
+           <widget class="QLabel" name="label_3">
+            <property name="text">
+             <string>url</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLineEdit" name="lineEditUrl"/>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item row="1" column="1" rowspan="3">
+        <widget class="QGroupBox" name="groupBoxMap">
+         <property name="title">
+          <string>map</string>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_2">
+          <item row="0" column="1">
+           <widget class="QLineEdit" name="lineEditMapUrl"/>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_9">
+            <property name="text">
+             <string>attribution</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QLineEdit" name="lineEditAttribution"/>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_8">
+            <property name="text">
+             <string>url</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item row="2" column="0">
+        <layout class="QHBoxLayout" name="horizontalLayout_7">
+         <item>
+          <widget class="QCheckBox" name="checkBoxGzip">
+           <property name="text">
+            <string>gzip</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="checkBoxPretty">
+           <property name="text">
+            <string>pretty print</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item row="3" column="0">
+        <layout class="QHBoxLayout" name="horizontalLayout_4">
+         <item>
+          <widget class="QCheckBox" name="checkBoxAdmin">
+           <property name="text">
+            <string>admin</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="checkBoxCors">
+           <property name="text">
+            <string>cors</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item row="4" column="0">
+        <widget class="QFrame" name="frame_3">
+         <property name="frameShape">
+          <enum>QFrame::StyledPanel</enum>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Raised</enum>
+         </property>
+         <layout class="QHBoxLayout" name="horizontalLayout_3">
+          <item>
+           <widget class="QLabel" name="label_5">
+            <property name="text">
+             <string>encoding</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QComboBox" name="comboBoxEncoding">
+            <item>
+             <property name="text">
+              <string>utf-8</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item row="4" column="1" rowspan="3">
         <widget class="QGroupBox" name="groupBoxLimits">
          <property name="title">
           <string>limits</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_3">
+          <item row="0" column="0">
+           <layout class="QHBoxLayout" name="horizontalLayout_8">
+            <item>
+             <widget class="QLabel" name="label_6">
+              <property name="text">
+               <string>default</string>
+              </property>
+              <property name="wordWrap">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QSpinBox" name="spinBoxDefault">
+              <property name="maximum">
+               <number>9999</number>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
           <item row="1" column="0" colspan="2">
            <layout class="QHBoxLayout" name="horizontalLayout_9">
             <item>
@@ -80,84 +253,38 @@
             </item>
            </layout>
           </item>
-          <item row="0" column="0">
-           <layout class="QHBoxLayout" name="horizontalLayout_8">
-            <item>
-             <widget class="QLabel" name="label_6">
-              <property name="text">
-               <string>default</string>
-              </property>
-              <property name="wordWrap">
-               <bool>true</bool>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QSpinBox" name="spinBoxDefault">
-              <property name="maximum">
-               <number>9999</number>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-          <item row="2" column="0">
-           <spacer name="verticalSpacer">
-            <property name="orientation">
-             <enum>Qt::Vertical</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>20</width>
-              <height>40</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
          </layout>
         </widget>
        </item>
-       <item row="0" column="1">
-        <widget class="QFrame" name="frame">
+       <item row="5" column="0">
+        <widget class="QFrame" name="frame_2">
          <property name="frameShape">
           <enum>QFrame::StyledPanel</enum>
          </property>
          <property name="frameShadow">
           <enum>QFrame::Raised</enum>
          </property>
-         <layout class="QHBoxLayout" name="horizontalLayout">
+         <layout class="QHBoxLayout" name="horizontalLayout_2">
           <item>
-           <widget class="QLabel" name="label_3">
+           <widget class="QLabel" name="label_4">
             <property name="text">
-             <string>url</string>
+             <string>mimetype</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QLineEdit" name="lineEditUrl"/>
+           <widget class="QComboBox" name="comboBoxMime">
+            <item>
+             <property name="text">
+              <string>application/json; charset=UTF-8</string>
+             </property>
+            </item>
+           </widget>
           </item>
          </layout>
         </widget>
        </item>
-       <item row="3" column="0">
-        <layout class="QHBoxLayout" name="horizontalLayout_4">
-         <item>
-          <widget class="QCheckBox" name="checkBoxAdmin">
-           <property name="text">
-            <string>admin</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QCheckBox" name="checkBoxCors">
-           <property name="text">
-            <string>cors</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-       <item row="7" column="0">
+       <item row="6" column="0" rowspan="2">
         <widget class="QFrame" name="frame_5">
          <property name="frameShape">
           <enum>QFrame::StyledPanel</enum>
@@ -208,142 +335,70 @@
          </layout>
         </widget>
        </item>
-       <item row="0" column="0" rowspan="2">
-        <widget class="QGroupBox" name="groupBoxBind">
+       <item row="7" column="1">
+        <widget class="QGroupBox" name="groupBox">
          <property name="title">
-          <string>bind</string>
+          <string>logging</string>
          </property>
-         <layout class="QGridLayout" name="gridLayout">
-          <item row="0" column="1">
-           <widget class="QLineEdit" name="lineEditHost">
-            <property name="inputMask">
-             <string>000.0.0.0</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="0">
-           <widget class="QLabel" name="label">
-            <property name="text">
-             <string>host</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="label_2">
-            <property name="text">
-             <string>port</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="1">
-           <widget class="QSpinBox" name="spinBoxPort">
-            <property name="maximum">
-             <number>9999</number>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item row="1" column="1" rowspan="4">
-        <widget class="QGroupBox" name="groupBoxMap">
-         <property name="title">
-          <string>map</string>
-         </property>
-         <layout class="QGridLayout" name="gridLayout_2">
-          <item row="0" column="1">
-           <widget class="QLineEdit" name="lineEditMapUrl"/>
-          </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="label_9">
-            <property name="text">
-             <string>attribution</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="1">
-           <widget class="QLineEdit" name="lineEditAttribution"/>
-          </item>
-          <item row="0" column="0">
-           <widget class="QLabel" name="label_8">
-            <property name="text">
-             <string>url</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item row="2" column="0">
-        <layout class="QHBoxLayout" name="horizontalLayout_7">
-         <item>
-          <widget class="QCheckBox" name="checkBoxGzip">
-           <property name="text">
-            <string>gzip</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QCheckBox" name="checkBoxPretty">
-           <property name="text">
-            <string>pretty print</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-       <item row="6" column="0">
-        <widget class="QFrame" name="frame_2">
-         <property name="frameShape">
-          <enum>QFrame::StyledPanel</enum>
-         </property>
-         <property name="frameShadow">
-          <enum>QFrame::Raised</enum>
-         </property>
-         <layout class="QHBoxLayout" name="horizontalLayout_2">
+         <layout class="QVBoxLayout" name="verticalLayout">
           <item>
-           <widget class="QLabel" name="label_4">
-            <property name="text">
-             <string>mimetype</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QComboBox" name="comboBoxMime">
+           <layout class="QHBoxLayout" name="horizontalLayout_10">
             <item>
-             <property name="text">
-              <string>application/json; charset=UTF-8</string>
-             </property>
+             <widget class="QLabel" name="label_13">
+              <property name="text">
+               <string>level</string>
+              </property>
+             </widget>
             </item>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item row="4" column="0" rowspan="2">
-        <widget class="QFrame" name="frame_3">
-         <property name="frameShape">
-          <enum>QFrame::StyledPanel</enum>
-         </property>
-         <property name="frameShadow">
-          <enum>QFrame::Raised</enum>
-         </property>
-         <layout class="QHBoxLayout" name="horizontalLayout_3">
-          <item>
-           <widget class="QLabel" name="label_5">
-            <property name="text">
-             <string>encoding</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QComboBox" name="comboBoxEncoding">
             <item>
-             <property name="text">
-              <string>utf-8</string>
-             </property>
+             <widget class="QComboBox" name="comboBoxLog">
+              <item>
+               <property name="text">
+                <string>DEBUG</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>INFO</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>ERROR</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>WARNING</string>
+               </property>
+              </item>
+             </widget>
             </item>
-           </widget>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_11">
+            <item>
+             <widget class="QLabel" name="label_14">
+              <property name="text">
+               <string>logfile</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="lineEditLogfile"/>
+            </item>
+            <item>
+             <widget class="QPushButton" name="pushButtonBrowse">
+              <property name="text">
+               <string/>
+              </property>
+              <property name="icon">
+               <iconset theme="folder-open"/>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </item>
          </layout>
         </widget>
@@ -417,8 +472,24 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>pushButtonBrowse</sender>
+   <signal>clicked()</signal>
+   <receiver>PygeoapiConfigDialogBase</receiver>
+   <slot>open_logfile_dialog()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>822</x>
+     <y>406</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>434</x>
+     <y>244</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
-  <slot>on_button_clicked()</slot>
+  <slot>open_logfile_dialog()</slot>
  </slots>
 </ui>
