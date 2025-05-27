@@ -68,7 +68,7 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
 
     def open_logfile_dialog(self):
 
-        logFile = QFileDialog.getSaveFileName(self, "Save File","", "Logs (*.log *.txt)")
+        logFile = QFileDialog.getSaveFileName(self, "Save Log","", "log Files (*.log);;All Files (*)")
 
         if logFile:
              print(f"path: {logFile}")
