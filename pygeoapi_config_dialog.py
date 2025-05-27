@@ -28,8 +28,8 @@ import yaml
 from qgis.PyQt import uic
 from qgis.core import QgsMessageLog
 from qgis.PyQt import QtWidgets
-from PyQt5.QtWidgets import QFileDialog, QMessageBox, QDialogButtonBox  # or PyQt6.QtWidgets
-from PyQt5.QtCore import QFile, QTextStream  # Not strictly needed, can use Python file API instead
+from PyQt5.QtWidgets import QFileDialog, QMessageBox, QDialogButtonBox, QApplication  # or PyQt6.QtWidgets
+from PyQt5.QtCore import QFile, QTextStream, Qt  # Not strictly needed, can use Python file API instead
 
 
 # This loads your .ui file so that PyQt can populate your plugin with the elements from Qt Designer
@@ -126,6 +126,7 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
         file_path, _ = QFileDialog.getSaveFileName(self, "Save File", "", "YAML Files (*.yml);;All Files (*)")
 
         if file_path:
+            QApplication.setOverrideCursor(Qt.WaitCursor)
             try:
                 with open(file_path, 'w', encoding='utf-8') as file:
                     self.write_yaml()
@@ -133,6 +134,8 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
                 QgsMessageLog.logMessage(f"File saved to: {file_path}")
             except Exception as e:
                 QgsMessageLog.logMessage(f"Error saving file: {e}")
+            finally:
+                QApplication.restoreOverrideCursor()
 
     def open_file(self):
         file_name, _ = QFileDialog.getOpenFileName(self, "Open File", "", "YAML Files (*.yml);;All Files (*)")
@@ -141,6 +144,7 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
             return
 
         try:
+            QApplication.setOverrideCursor(Qt.WaitCursor)
             with open(file_name, 'r', encoding='utf-8') as file:
                 file_content = file.read()
                 self.yaml_str = yaml.safe_load(file_content)
@@ -149,7 +153,8 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
                 
         except Exception as e:
             QMessageBox.warning(self, "Error", f"Cannot open file:\n{str(e)}")
-
+        finally:
+            QApplication.restoreOverrideCursor()
 
     def select_items_by_text(list_widget, texts_to_select):
         for i in range(list_widget.count()):
