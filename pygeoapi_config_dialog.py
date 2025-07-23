@@ -28,19 +28,31 @@ import yaml
 from qgis.PyQt import uic
 from qgis.core import QgsMessageLog
 from qgis.PyQt import QtWidgets
-from PyQt5.QtWidgets import QFileDialog, QMessageBox, QDialogButtonBox, QApplication  # or PyQt6.QtWidgets
-from PyQt5.QtCore import QFile, QTextStream, Qt, QStringListModel, QSortFilterProxyModel  # Not strictly needed, can use Python file API instead
+from PyQt5.QtWidgets import (
+    QFileDialog,
+    QMessageBox,
+    QDialogButtonBox,
+    QApplication,
+)  # or PyQt6.QtWidgets
+from PyQt5.QtCore import (
+    QFile,
+    QTextStream,
+    Qt,
+    QStringListModel,
+    QSortFilterProxyModel,
+)  # Not strictly needed, can use Python file API instead
 
+from .models.YamlConfig import YamlConfig
 
 # This loads your .ui file so that PyQt can populate your plugin with the elements from Qt Designer
-FORM_CLASS, _ = uic.loadUiType(os.path.join(
-    os.path.dirname(__file__), 'pygeoapi_config_dialog_base.ui'))
+FORM_CLASS, _ = uic.loadUiType(
+    os.path.join(os.path.dirname(__file__), "pygeoapi_config_dialog_base.ui")
+)
 
 
 class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
 
-
-    yaml_str = ""
+    yaml_dict = YamlConfig()
     curCol = ""
 
     def __init__(self, parent=None):
@@ -66,72 +78,81 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
         elif button == self.buttonBox.button(QDialogButtonBox.Close):
             self.reject()
 
-
     def open_logfile_dialog(self):
 
-        logFile = QFileDialog.getSaveFileName(self, "Save Log","", "log Files (*.log);;All Files (*)")
+        logFile = QFileDialog.getSaveFileName(
+            self, "Save Log", "", "log Files (*.log);;All Files (*)"
+        )
 
         if logFile:
-             print(f"path: {logFile}")
-             self.lineEditLogfile.setText(logFile[0])
+            print(f"path: {logFile}")
+            self.lineEditLogfile.setText(logFile[0])
 
     def write_yaml(self):
 
         try:
 
             # bind
-            self.yaml_str['server']['bind']['host'] = self.lineEditHost.text()
-            self.yaml_str['server']['bind']['port'] = self.spinBoxPort.value()
+            self.yaml_dict.server["bind"]["host"] = self.lineEditHost.text()
+            self.yaml_dict.server["bind"]["port"] = self.spinBoxPort.value()
 
             # gzip
-            self.yaml_str['server']['gzip'] = self.checkBoxGzip.isChecked()
+            self.yaml_dict.server["gzip"] = self.checkBoxGzip.isChecked()
 
             # pretty print
-            self.yaml_str['server']['pretty_print'] = self.checkBoxPretty.isChecked()
-            
+            self.yaml_dict.server["pretty_print"] = self.checkBoxPretty.isChecked()
+
             # admin
-            self.yaml_str['server']['admin']=self.checkBoxAdmin.isChecked()
+            self.yaml_dict.server["admin"] = self.checkBoxAdmin.isChecked()
 
             # cors
-            self.yaml_str['server']['cors']=self.checkBoxCors.isChecked()
+            self.yaml_dict.server["cors"] = self.checkBoxCors.isChecked()
 
             # map
-            self.yaml_str['server']['map']['url'] = self.lineEditMapUrl.text()
-            self.yaml_str['server']['map']['attribution'] = self.lineEditAttribution.text()
+            self.yaml_dict.server["map"]["url"] = self.lineEditMapUrl.text()
+            self.yaml_dict.server["map"][
+                "attribution"
+            ] = self.lineEditAttribution.text()
 
             # url
-            self.yaml_str['server']['url'] = self.lineEditUrl.text()
+            self.yaml_dict.server["url"] = self.lineEditUrl.text()
 
             # language
-            self.yaml_str['server']['languages']=[]
+            self.yaml_dict.server["languages"] = []
             for i in range(self.listWidgetLang.count()):
                 item = self.listWidgetLang.item(i)
                 if item.isSelected():
-                    self.yaml_str['server']['languages'].append(item.text())
+                    self.yaml_dict.server["languages"].append(item.text())
 
             # limits
-            self.yaml_str['server']['limits']['default_items'] = self.spinBoxDefault.value()
-            self.yaml_str['server']['limits']['max_items'] = self.spinBoxMax.value()
+            self.yaml_dict.server["limits"][
+                "default_items"
+            ] = self.spinBoxDefault.value()
+            self.yaml_st.server["limits"]["max_items"] = self.spinBoxMax.value()
 
-            self.yaml_str['server']['limits']['on_exceed'] = self.comboBoxExceed.currentText()
+            self.yaml_dict.server["limits"][
+                "on_exceed"
+            ] = self.comboBoxExceed.currentText()
 
             # logging
-            self.yaml_str['logging']['level'] = self.comboBoxLog.currentText()
-            self.yaml_str['logging']['logfile'] = self.lineEditLogfile.text()
+            self.yaml_dict.logging["level"] = self.comboBoxLog.currentText()
+            self.yaml_dict.logging["logfile"] = self.lineEditLogfile.text()
 
         except Exception as e:
             QgsMessageLog.logMessage(f"Error deserializing: {e}")
 
     def save_to_file(self):
 
-        file_path, _ = QFileDialog.getSaveFileName(self, "Save File", "", "YAML Files (*.yml);;All Files (*)")
+        file_path, _ = QFileDialog.getSaveFileName(
+            self, "Save File", "", "YAML Files (*.yml);;All Files (*)"
+        )
 
         if file_path:
             QApplication.setOverrideCursor(Qt.WaitCursor)
             try:
-                with open(file_path, 'w', encoding='utf-8') as file:
+                with open(file_path, "w", encoding="utf-8") as file:
                     self.write_yaml()
-                    yaml.dump(self.yaml_str, file)
+                    yaml.dump(self.yaml_dict, file)
                 QgsMessageLog.logMessage(f"File saved to: {file_path}")
             except Exception as e:
                 QgsMessageLog.logMessage(f"Error saving file: {e}")
@@ -139,19 +160,21 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
                 QApplication.restoreOverrideCursor()
 
     def open_file(self):
-        file_name, _ = QFileDialog.getOpenFileName(self, "Open File", "", "YAML Files (*.yml);;All Files (*)")
-        
+        file_name, _ = QFileDialog.getOpenFileName(
+            self, "Open File", "", "YAML Files (*.yml);;All Files (*)"
+        )
+
         if not file_name:
             return
 
         try:
             QApplication.setOverrideCursor(Qt.WaitCursor)
-            with open(file_name, 'r', encoding='utf-8') as file:
+            with open(file_name, "r", encoding="utf-8") as file:
                 file_content = file.read()
-                self.yaml_str = yaml.safe_load(file_content)
+                self.yaml_dict = yaml.safe_load(file_content)
 
-                self.read_yaml(self.yaml_str)
-                
+                self.read_yaml(self.yaml_dict)
+
         except Exception as e:
             QMessageBox.warning(self, "Error", f"Cannot open file:\n{str(e)}")
         finally:
@@ -166,74 +189,76 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
     def read_yaml(self, text):
 
         # bind
-        self.lineEditHost.setText(text['server']['bind']['host'])
-        self.spinBoxPort.setValue(text['server']['bind']['port'])
+        self.lineEditHost.setText(text["server"]["bind"]["host"])
+        self.spinBoxPort.setValue(text["server"]["bind"]["port"])
 
         # gzip
-        self.checkBoxGzip.setChecked(text['server']['gzip'])
+        self.checkBoxGzip.setChecked(text["server"]["gzip"])
 
         # pretty print
-        self.checkBoxPretty.setChecked(text['server']['pretty_print'])
+        self.checkBoxPretty.setChecked(text["server"]["pretty_print"])
 
         # admin
-        self.checkBoxAdmin.setChecked(text['server']['admin'])
+        self.checkBoxAdmin.setChecked(text["server"]["admin"])
 
         # cors
-        self.checkBoxCors.setChecked(text['server']['cors'])
+        self.checkBoxCors.setChecked(text["server"]["cors"])
 
         # map
-        self.lineEditMapUrl.setText(text['server']['map']['url'])
-        self.lineEditAttribution.setText(text['server']['map']['attribution'])
+        self.lineEditMapUrl.setText(text["server"]["map"]["url"])
+        self.lineEditAttribution.setText(text["server"]["map"]["attribution"])
 
-        self.lineEditUrl.setText(text['server']['url'])
+        self.lineEditUrl.setText(text["server"]["url"])
 
         # language
         for i in range(self.listWidgetLang.count()):
             item = self.listWidgetLang.item(i)
-            if item.text() in text['server']['languages']:
+            if item.text() in text["server"]["languages"]:
                 item.setSelected(True)
 
         # limits
-        self.spinBoxDefault.setValue(text['server']['limits']['default_items'])
-        self.spinBoxMax.setValue(text['server']['limits']['max_items'])
+        self.spinBoxDefault.setValue(text["server"]["limits"]["default_items"])
+        self.spinBoxMax.setValue(text["server"]["limits"]["max_items"])
 
         for i in range(self.comboBoxExceed.count()):
-            if self.comboBoxExceed.itemText(i) == text['server']['limits']['on_exceed']:
-                self.comboBoxExceed.setCurrentText(text['server']['limits']['on_exceed'])
+            if self.comboBoxExceed.itemText(i) == text["server"]["limits"]["on_exceed"]:
+                self.comboBoxExceed.setCurrentText(
+                    text["server"]["limits"]["on_exceed"]
+                )
                 break
 
         # logging
         for i in range(self.comboBoxLog.count()):
-            if self.comboBoxLog.itemText(i) in text['logging']['level']:
+            if self.comboBoxLog.itemText(i) in text["logging"]["level"]:
                 self.comboBoxLog.setCurrentText(self.comboBoxLog.itemText(i))
 
-        self.lineEditLogfile.setText(text['logging']['logfile'])
+        self.lineEditLogfile.setText(text["logging"]["logfile"])
 
         # collections
         self.model = QStringListModel()
-        self.model.setStringList(text['resources'])
+        self.model.setStringList(text["resources"])
 
         self.proxy = QSortFilterProxyModel()
         self.proxy.setSourceModel(self.model)
         self.listViewCollection.setModel(self.proxy)
 
-        self.yaml_str = text
+        self.yaml_dict = text
 
     def filterResources(self, filter):
         self.proxy.setDynamicSortFilter(True)
         self.proxy.setFilterFixedString(filter)
 
     def loadCollection(self, index):
-        self.lineEditTitle.setText(self.yaml_str['resources'][index.data()]['title'])
-        self.lineEditDescription.setText(self.yaml_str['resources'][index.data()]['description'])
+        self.lineEditTitle.setText(self.yaml_dict.resources[index.data()]["title"])
+        self.lineEditDescription.setText(
+            self.yaml_dict.resources[index.data()]["description"]
+        )
         self.curCol = index.data()
 
-    def editCollectionTitle(self,value):
+    def editCollectionTitle(self, value):
         QgsMessageLog.logMessage(f"Current collection - title: {self.curCol}")
-        self.yaml_str['resources'][self.curCol]['title'] = value
+        self.yaml_dict.resources[self.curCol]["title"] = value
 
     def editCollectionDescription(self, value):
         QgsMessageLog.logMessage(f"Current collection - desc: {self.curCol}")
-        self.yaml_str['resources'][self.curCol]['description'] = value
-
-        
+        self.yaml_dict.resources[self.curCol]["description"] = value
