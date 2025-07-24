@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+from enum import Enum
 
 
 @dataclass(kw_only=True)
@@ -7,11 +8,17 @@ class BindConfig:
     port: int = field(default=5000)
 
 
+class OnExceed(Enum):
+    # Not currently used
+    THROTTLE = "throttle"
+    ERROR = "error"
+
+
 @dataclass(kw_only=True)
 class LimitsConfig:
     default_items: int = field(default=20)
     max_items: int = field(default=50)
-    on_exceed: str = field(default="throttle")  # TODO: is this a mandatory field?
+    on_exceed: str = field(default="throttle")
 
 
 @dataclass(kw_only=True)
