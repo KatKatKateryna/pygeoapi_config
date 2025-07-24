@@ -169,6 +169,86 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
             self.config_data.logging.logformat = self.lineEditLogformat.text()
             self.config_data.logging.dateformat = self.lineEditDateformat.text()
 
+            # metadata identification
+            self.config_data.metadata.identification.title = (
+                self.lineEditMetadataIdTitle.text()
+            )
+            self.config_data.metadata.identification.description = (
+                self.lineEditMetadataIdDescription.text()
+            )
+            self.config_data.metadata.identification.keywords = (
+                self.lineEditMetadataIdKeywords.text()
+            )
+            self.config_data.metadata.identification.keywords_type = (
+                self.lineEditMetadataIdKeywordsType.text()
+            )
+            self.config_data.metadata.identification.terms_of_service = (
+                self.lineEditMetadataIdTerms.text()
+            )
+            self.config_data.metadata.identification.url = (
+                self.lineEditMetadataIdUrl.text()
+            )
+
+            # metadata license
+            self.config_data.metadata.license.name = (
+                self.lineEditMetadataLicenseName.text()
+            )
+            self.config_data.metadata.license.url = (
+                self.lineEditMetadataLicenseUrl.text()
+            )
+
+            # metadata provider
+            self.config_data.metadata.provider.name = (
+                self.lineEditMetadataProviderName.text()
+            )
+            self.config_data.metadata.provider.url = (
+                self.lineEditMetadataProviderUrl.text()
+            )
+
+            # metadata contact
+            self.config_data.metadata.contact.name = (
+                self.lineEditMetadataContactName.text()
+            )
+            self.config_data.metadata.contact.position = (
+                self.lineEditMetadataContactPosition.text()
+            )
+            self.config_data.metadata.contact.address = (
+                self.lineEditMetadataContactAddress.text()
+            )
+            self.config_data.metadata.contact.city = (
+                self.lineEditMetadataContactCity.text()
+            )
+            self.config_data.metadata.contact.stateorprovince = (
+                self.lineEditMetadataContactState.text()
+            )
+            self.config_data.metadata.contact.postalcode = (
+                self.lineEditMetadataContactPostal.text()
+            )
+            self.config_data.metadata.contact.country = (
+                self.lineEditMetadataContactCountry.text()
+            )
+            self.config_data.metadata.contact.phone = (
+                self.lineEditMetadataContactPhone.text()
+            )
+            self.config_data.metadata.contact.fax = (
+                self.lineEditMetadataContactFax.text()
+            )
+            self.config_data.metadata.contact.email = (
+                self.lineEditMetadataContactEmail.text()
+            )
+            self.config_data.metadata.contact.url = (
+                self.lineEditMetadataContactUrl.text()
+            )
+            self.config_data.metadata.contact.hours = (
+                self.lineEditMetadataContactHours.text()
+            )
+            self.config_data.metadata.contact.instructions = (
+                self.lineEditMetadataContactInstructions.text()
+            )
+            self.config_data.metadata.contact.role = (
+                self.lineEditMetadataContactRole.text()
+            )
+
         except Exception as e:
             QgsMessageLog.logMessage(f"Error deserializing: {e}")
 
@@ -296,6 +376,68 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
         self.lineEditLogfile.setText(self.config_data.logging.logfile)
         self.lineEditLogformat.setText(self.config_data.logging.logformat)
         self.lineEditDateformat.setText(self.config_data.logging.dateformat)
+
+        # metadata identification
+        self.lineEditMetadataIdTitle.setText(
+            self.config_data.metadata.identification.title
+        )
+        self.lineEditMetadataIdDescription.setText(
+            self.config_data.metadata.identification.description
+        )
+        self.lineEditMetadataIdKeywords.setText(
+            str(self.config_data.metadata.identification.keywords)
+        )
+        self.lineEditMetadataIdKeywordsType.setText(
+            self.config_data.metadata.identification.keywords_type
+        )
+        self.lineEditMetadataIdTerms.setText(
+            self.config_data.metadata.identification.terms_of_service
+        )
+        self.lineEditMetadataIdUrl.setText(self.config_data.metadata.identification.url)
+
+        # metadata license
+        self.lineEditMetadataLicenseName.setText(self.config_data.metadata.license.name)
+        self.lineEditMetadataLicenseUrl.setText(self.config_data.metadata.license.url)
+
+        # metadata provider
+        self.lineEditMetadataProviderName.setText(
+            self.config_data.metadata.provider.name
+        )
+        self.lineEditMetadataProviderUrl.setText(self.config_data.metadata.provider.url)
+
+        # metadata contact
+        self.lineEditMetadataContactName.setText(self.config_data.metadata.contact.name)
+        self.lineEditMetadataContactPosition.setText(
+            self.config_data.metadata.contact.position
+        )
+        self.lineEditMetadataContactAddress.setText(
+            self.config_data.metadata.contact.address
+        )
+        self.lineEditMetadataContactCity.setText(self.config_data.metadata.contact.city)
+        self.lineEditMetadataContactState.setText(
+            self.config_data.metadata.contact.stateorprovince
+        )
+        self.lineEditMetadataContactPostal.setText(
+            self.config_data.metadata.contact.postalcode
+        )
+        self.lineEditMetadataContactCountry.setText(
+            self.config_data.metadata.contact.country
+        )
+        self.lineEditMetadataContactPhone.setText(
+            self.config_data.metadata.contact.phone
+        )
+        self.lineEditMetadataContactFax.setText(self.config_data.metadata.contact.fax)
+        self.lineEditMetadataContactEmail.setText(
+            self.config_data.metadata.contact.email
+        )
+        self.lineEditMetadataContactUrl.setText(self.config_data.metadata.contact.url)
+        self.lineEditMetadataContactHours.setText(
+            self.config_data.metadata.contact.hours
+        )
+        self.lineEditMetadataContactInstructions.setText(
+            self.config_data.metadata.contact.instructions
+        )
+        self.lineEditMetadataContactRole.setText(self.config_data.metadata.contact.role)
 
         # collections
         self.model = QStringListModel()

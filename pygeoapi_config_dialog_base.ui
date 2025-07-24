@@ -558,11 +558,360 @@
        </item>
       </layout>
      </widget>
+
+
      <widget class="QWidget" name="metadataTab">
       <attribute name="title">
        <string>Metadata</string>
       </attribute>
+
+      <layout class="QGridLayout" name="gridLayout_20">
+
+       <item row="0" column="0" rowspan="2">
+        <widget class="QGroupBox" name="groupBoxBind">
+         <property name="title">
+          <string>identification</string>
+         </property>
+         <layout class="QGridLayout" name="gridLayout">
+
+          <item row="0" column="0">
+           <widget class="QLabel">
+            <property name="text">
+             <string>title</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QLineEdit" name="lineEditMetadataIdTitle">
+           </widget>
+          </item>
+
+
+          <item row="1" column="0">
+           <widget class="QLabel">
+            <property name="text">
+             <string>description</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QLineEdit" name="lineEditMetadataIdDescription">
+           </widget>
+          </item>
+
+          <item row="2" column="0">
+           <widget class="QLabel">
+            <property name="text">
+             <string>keywords</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QLineEdit" name="lineEditMetadataIdKeywords">
+           </widget>
+          </item>
+
+          <item row="3" column="0">
+           <widget class="QLabel">
+            <property name="text">
+             <string>keywords type</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1">
+           <widget class="QLineEdit" name="lineEditMetadataIdKeywordsType">
+           </widget>
+          </item>
+
+          <item row="4" column="0">
+           <widget class="QLabel">
+            <property name="text">
+             <string>terms of service</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="1">
+           <widget class="QLineEdit" name="lineEditMetadataIdTerms">
+           </widget>
+          </item>
+
+          <item row="5" column="0">
+           <widget class="QLabel">
+            <property name="text">
+             <string>url</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="1">
+           <widget class="QLineEdit" name="lineEditMetadataIdUrl">
+           </widget>
+          </item>
+
+         </layout>
+
+        </widget>
+       </item>
+
+       
+       <item row="2" column="0" rowspan="1">
+          <widget class="QGroupBox" name="groupBoxBind">
+          <property name="title">
+            <string>license</string>
+          </property>
+          <layout class="QGridLayout" name="gridLayout">
+
+            <item row="0" column="0">
+            <widget class="QLabel">
+              <property name="text">
+              <string>name</string>
+              </property>
+            </widget>
+            </item>
+            <item row="0" column="1">
+            <widget class="QLineEdit" name="lineEditMetadataLicenseName">
+            </widget>
+            </item>
+            
+            <item row="1" column="0">
+            <widget class="QLabel">
+              <property name="text">
+              <string>url</string>
+              </property>
+            </widget>
+            </item>
+            <item row="1" column="1">
+            <widget class="QLineEdit" name="lineEditMetadataLicenseUrl">
+            </widget>
+            </item>
+
+          </layout>
+
+          </widget>
+       </item>
+
+       
+       <item row="3" column="0" rowspan="1">
+          <widget class="QGroupBox" name="groupBoxBind">
+          <property name="title">
+            <string>provider</string>
+          </property>
+          <layout class="QGridLayout" name="gridLayout">
+
+            <item row="0" column="0">
+            <widget class="QLabel">
+              <property name="text">
+              <string>name</string>
+              </property>
+            </widget>
+            </item>
+            <item row="0" column="1">
+            <widget class="QLineEdit" name="lineEditMetadataProviderName">
+            </widget>
+            </item>
+            
+            <item row="1" column="0">
+            <widget class="QLabel">
+              <property name="text">
+              <string>url</string>
+              </property>
+            </widget>
+            </item>
+            <item row="1" column="1">
+            <widget class="QLineEdit" name="lineEditMetadataProviderUrl">
+            </widget>
+            </item>
+
+          </layout>
+
+          </widget>
+       </item>
+
+       
+       <item row="0" column="1" rowspan="4">
+          <widget class="QGroupBox" name="groupBoxBind">
+          <property name="title">
+            <string>contact</string>
+          </property>
+          <layout class="QGridLayout" name="gridLayout">
+
+            <item row="0" column="0">
+            <widget class="QLabel">
+              <property name="text">
+              <string>name</string>
+              </property>
+            </widget>
+            </item>
+            <item row="0" column="1">
+            <widget class="QLineEdit" name="lineEditMetadataContactName">
+            </widget>
+            </item>
+            
+            <item row="1" column="0">
+            <widget class="QLabel">
+              <property name="text">
+              <string>position</string>
+              </property>
+            </widget>
+            </item>
+            <item row="1" column="1">
+            <widget class="QLineEdit" name="lineEditMetadataContactPosition">
+            </widget>
+            </item>
+            
+            <item row="2" column="0">
+            <widget class="QLabel">
+              <property name="text">
+              <string>address</string>
+              </property>
+            </widget>
+            </item>
+            <item row="2" column="1">
+            <widget class="QLineEdit" name="lineEditMetadataContactAddress">
+            </widget>
+            </item>
+            
+            <item row="3" column="0">
+            <widget class="QLabel">
+              <property name="text">
+              <string>city</string>
+              </property>
+            </widget>
+            </item>
+            <item row="3" column="1">
+            <widget class="QLineEdit" name="lineEditMetadataContactCity">
+            </widget>
+            </item>
+            
+            <item row="4" column="0">
+            <widget class="QLabel">
+              <property name="text">
+              <string>stateorprovince</string>
+              </property>
+            </widget>
+            </item>
+            <item row="4" column="1">
+            <widget class="QLineEdit" name="lineEditMetadataContactState">
+            </widget>
+            </item>
+            
+            <item row="5" column="0">
+            <widget class="QLabel">
+              <property name="text">
+              <string>postalcode</string>
+              </property>
+            </widget>
+            </item>
+            <item row="5" column="1">
+              <widget class="QLineEdit" name="lineEditMetadataContactPostal">
+            </widget>
+            </item>
+            
+            <item row="6" column="0">
+            <widget class="QLabel">
+              <property name="text">
+              <string>country</string>
+              </property>
+            </widget>
+            </item>
+            <item row="6" column="1">
+              <widget class="QLineEdit" name="lineEditMetadataContactCountry">
+            </widget>
+            </item>
+            
+            <item row="7" column="0">
+            <widget class="QLabel">
+              <property name="text">
+              <string>phone</string>
+              </property>
+            </widget>
+            </item>
+            <item row="7" column="1">
+              <widget class="QLineEdit" name="lineEditMetadataContactPhone">
+            </widget>
+            </item>
+            
+            <item row="8" column="0">
+            <widget class="QLabel">
+              <property name="text">
+              <string>fax</string>
+              </property>
+            </widget>
+            </item>
+            <item row="8" column="1">
+              <widget class="QLineEdit" name="lineEditMetadataContactFax">
+            </widget>
+            </item>
+            
+            <item row="9" column="0">
+            <widget class="QLabel">
+              <property name="text">
+              <string>email</string>
+              </property>
+            </widget>
+            </item>
+            <item row="9" column="1">
+              <widget class="QLineEdit" name="lineEditMetadataContactEmail">
+            </widget>
+            </item>
+            
+            <item row="10" column="0">
+            <widget class="QLabel">
+              <property name="text">
+              <string>url</string>
+              </property>
+            </widget>
+            </item>
+            <item row="10" column="1">
+              <widget class="QLineEdit" name="lineEditMetadataContactUrl">
+            </widget>
+            </item>
+            
+            <item row="11" column="0">
+            <widget class="QLabel">
+              <property name="text">
+              <string>hours</string>
+              </property>
+            </widget>
+            </item>
+            <item row="11" column="1">
+              <widget class="QLineEdit" name="lineEditMetadataContactHours">
+            </widget>
+            </item>
+            
+            <item row="12" column="0">
+            <widget class="QLabel">
+              <property name="text">
+              <string>instructions</string>
+              </property>
+            </widget>
+            </item>
+            <item row="12" column="1">
+              <widget class="QLineEdit" name="lineEditMetadataContactInstructions">
+            </widget>
+            </item>
+            
+            <item row="13" column="0">
+            <widget class="QLabel">
+              <property name="text">
+              <string>role</string>
+              </property>
+            </widget>
+            </item>
+            <item row="13" column="1">
+              <widget class="QLineEdit" name="lineEditMetadataContactRole">
+            </widget>
+            </item>
+
+          </layout>
+
+          </widget>
+       </item>
+
+
+       </layout>
+       
      </widget>
+
      <widget class="QWidget" name="resourcesTab">
       <attribute name="title">
        <string>Resources</string>
