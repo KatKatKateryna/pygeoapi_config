@@ -23,6 +23,20 @@ class MapConfig:
 
 
 @dataclass(kw_only=True)
+class TemplatesConfig:
+    path: str = field(default="/path/to/jinja2/templates/folder")
+    static: str = field(default="/path/to/static/folder")
+
+
+@dataclass(kw_only=True)
+class ApiRulesConfig:
+    api_version: str = field(default="1.2.3")
+    strict_slashes: bool = field(default=True)
+    url_prefix: str = field(default="v{api_major}")
+    version_header: str = field(default="X-API-Version")
+
+
+@dataclass(kw_only=True)
 class ServerConfig:
     """Placeholder class for Server configuration data."""
 
@@ -32,10 +46,12 @@ class ServerConfig:
     encoding: str = field(default="utf-8")
     gzip: bool = field(default=False)
     languages: list = field(default_factory=lambda: ["en-US"])  # to format with " - "
-    cors: bool = field(
-        default=True
-    )  # TODO: seems to be a mandatory field, but commented out here: https://github.com/geopython/pygeoapi/blob/master/pygeoapi-config.yml
+    cors: bool = field(default=True)
     pretty_print: bool = field(default=True)
     limits: LimitsConfig = field(default_factory=lambda: LimitsConfig())
     map: MapConfig = field(default_factory=lambda: MapConfig())
     admin: bool = field(default=False)
+    templates: TemplatesConfig = field(default_factory=lambda: TemplatesConfig())
+
+    # optional fields:
+    api_rules: ApiRulesConfig | None = None

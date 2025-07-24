@@ -3,9 +3,9 @@ from dataclasses import dataclass, field
 
 @dataclass(kw_only=True)
 class IdentificationConfig:
-    title: dict = field(default_factory=lambda: {"en": ""})
-    description: dict = field(default_factory=lambda: {"en": ""})
-    keywords: dict = field(default_factory=lambda: {"en": []})
+    title: str | dict = field(default_factory=lambda: "")
+    description: str | dict = field(default_factory=lambda: "")
+    keywords: list | dict = field(default_factory=lambda: [])
     keywords_type: str = field(default="theme")
     terms_of_service: str = field(
         default="https://creativecommons.org/licenses/by/4.0/"

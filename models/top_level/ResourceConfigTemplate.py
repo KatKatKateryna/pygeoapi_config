@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+from enum import Enum
 
 
 @dataclass(kw_only=True)
@@ -42,6 +43,18 @@ class ExtentsConfig:
 
     # optional fields:
     temporal: dict | None = None
+
+
+class ResourceTypes(Enum):
+    COLLECTION = "collection"
+    PROCESS = "process"
+    STAC = "stac-collection"
+
+
+class ProviderTypes(Enum):
+    FEATURE = "feature"
+    COVERAGE = "coverage"
+    TILE = "tile"
 
 
 @dataclass(kw_only=True)
