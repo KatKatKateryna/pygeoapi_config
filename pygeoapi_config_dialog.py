@@ -25,6 +25,8 @@
 import os
 import yaml
 
+from dataclasses import asdict
+
 from qgis.PyQt import uic
 from qgis.core import QgsMessageLog
 from qgis.PyQt import QtWidgets
@@ -42,7 +44,7 @@ from PyQt5.QtCore import (
     QSortFilterProxyModel,
 )  # Not strictly needed, can use Python file API instead
 
-from .models.YamlConfig import YamlConfig
+from .models.ConfigData import ConfigData
 
 # This loads your .ui file so that PyQt can populate your plugin with the elements from Qt Designer
 FORM_CLASS, _ = uic.loadUiType(
@@ -52,8 +54,8 @@ FORM_CLASS, _ = uic.loadUiType(
 
 class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
 
-    yaml_dict = YamlConfig()
-    curCol = ""
+    config_data = ConfigData()
+    cur_col_index = None
 
     def __init__(self, parent=None):
         """Constructor."""
@@ -93,50 +95,50 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
         try:
 
             # bind
-            self.yaml_dict.server["bind"]["host"] = self.lineEditHost.text()
-            self.yaml_dict.server["bind"]["port"] = self.spinBoxPort.value()
+            self.config_data.server["bind"]["host"] = self.lineEditHost.text()
+            self.config_data.server["bind"]["port"] = self.spinBoxPort.value()
 
             # gzip
-            self.yaml_dict.server["gzip"] = self.checkBoxGzip.isChecked()
+            self.config_data.server["gzip"] = self.checkBoxGzip.isChecked()
 
             # pretty print
-            self.yaml_dict.server["pretty_print"] = self.checkBoxPretty.isChecked()
+            self.config_data.server["pretty_print"] = self.checkBoxPretty.isChecked()
 
             # admin
-            self.yaml_dict.server["admin"] = self.checkBoxAdmin.isChecked()
+            self.config_data.server["admin"] = self.checkBoxAdmin.isChecked()
 
             # cors
-            self.yaml_dict.server["cors"] = self.checkBoxCors.isChecked()
+            self.config_data.server["cors"] = self.checkBoxCors.isChecked()
 
             # map
-            self.yaml_dict.server["map"]["url"] = self.lineEditMapUrl.text()
-            self.yaml_dict.server["map"][
+            self.config_data.server["map"]["url"] = self.lineEditMapUrl.text()
+            self.config_data.server["map"][
                 "attribution"
             ] = self.lineEditAttribution.text()
 
             # url
-            self.yaml_dict.server["url"] = self.lineEditUrl.text()
+            self.config_data.server["url"] = self.lineEditUrl.text()
 
             # language
-            self.yaml_dict.server["languages"] = []
+            self.config_data.server["languages"] = []
             for i in range(self.listWidgetLang.count()):
                 item = self.listWidgetLang.item(i)
                 if item.isSelected():
-                    self.yaml_dict.server["languages"].append(item.text())
+                    self.config_data.server["languages"].append(item.text())
 
             # limits
-            self.yaml_dict.server["limits"][
+            self.config_data.server["limits"][
                 "default_items"
             ] = self.spinBoxDefault.value()
             self.yaml_st.server["limits"]["max_items"] = self.spinBoxMax.value()
 
-            self.yaml_dict.server["limits"][
+            self.config_data.server["limits"][
                 "on_exceed"
             ] = self.comboBoxExceed.currentText()
 
             # logging
-            self.yaml_dict.logging["level"] = self.comboBoxLog.currentText()
-            self.yaml_dict.logging["logfile"] = self.lineEditLogfile.text()
+            self.config_data.logging["level"] = self.comboBoxLog.currentText()
+            self.config_data.logging["logfile"] = self.lineEditLogfile.text()
 
         except Exception as e:
             QgsMessageLog.logMessage(f"Error deserializing: {e}")
@@ -152,7 +154,7 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
             try:
                 with open(file_path, "w", encoding="utf-8") as file:
                     self.write_yaml()
-                    yaml.dump(self.yaml_dict, file)
+                    yaml.dump(self.config_data, file)
                 QgsMessageLog.logMessage(f"File saved to: {file_path}")
             except Exception as e:
                 QgsMessageLog.logMessage(f"Error saving file: {e}")
@@ -171,9 +173,8 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
             QApplication.setOverrideCursor(Qt.WaitCursor)
             with open(file_name, "r", encoding="utf-8") as file:
                 file_content = file.read()
-                self.yaml_dict = yaml.safe_load(file_content)
-
-                self.read_yaml(self.yaml_dict)
+                self.config_data.read_yaml_set_data(yaml.safe_load(file_content))
+                self.set_ui_from_config_data()
 
         except Exception as e:
             QMessageBox.warning(self, "Error", f"Cannot open file:\n{str(e)}")
@@ -186,79 +187,90 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
             if item.text() in texts_to_select:
                 item.setSelected(True)
 
-    def read_yaml(self, text):
+    def set_ui_from_config_data(self):
 
         # bind
-        self.lineEditHost.setText(text["server"]["bind"]["host"])
-        self.spinBoxPort.setValue(text["server"]["bind"]["port"])
+        self.lineEditHost.setText(self.config_data.server.bind.host)
+        self.spinBoxPort.setValue(self.config_data.server.bind.port)
 
         # gzip
-        self.checkBoxGzip.setChecked(text["server"]["gzip"])
+        self.checkBoxGzip.setChecked(self.config_data.server.gzip)
 
         # pretty print
-        self.checkBoxPretty.setChecked(text["server"]["pretty_print"])
+        self.checkBoxPretty.setChecked(self.config_data.server.pretty_print)
 
         # admin
-        self.checkBoxAdmin.setChecked(text["server"]["admin"])
+        self.checkBoxAdmin.setChecked(self.config_data.server.admin)
 
         # cors
-        self.checkBoxCors.setChecked(text["server"]["cors"])
+        self.checkBoxCors.setChecked(self.config_data.server.cors)
 
         # map
-        self.lineEditMapUrl.setText(text["server"]["map"]["url"])
-        self.lineEditAttribution.setText(text["server"]["map"]["attribution"])
+        self.lineEditMapUrl.setText(self.config_data.server.map.url)
+        self.lineEditAttribution.setText(self.config_data.server.map.attribution)
 
-        self.lineEditUrl.setText(text["server"]["url"])
+        self.lineEditUrl.setText(self.config_data.server.url)
 
         # language
         for i in range(self.listWidgetLang.count()):
             item = self.listWidgetLang.item(i)
-            if item.text() in text["server"]["languages"]:
+            if item.text() in self.config_data.server.languages:
                 item.setSelected(True)
+            else:
+                item.setSelected(False)
 
         # limits
-        self.spinBoxDefault.setValue(text["server"]["limits"]["default_items"])
-        self.spinBoxMax.setValue(text["server"]["limits"]["max_items"])
+        self.spinBoxDefault.setValue(self.config_data.server.limits.default_items)
+        self.spinBoxMax.setValue(self.config_data.server.limits.max_items)
 
         for i in range(self.comboBoxExceed.count()):
-            if self.comboBoxExceed.itemText(i) == text["server"]["limits"]["on_exceed"]:
+            if (
+                self.comboBoxExceed.itemText(i)
+                == self.config_data.server.limits.on_exceed
+            ):
                 self.comboBoxExceed.setCurrentText(
-                    text["server"]["limits"]["on_exceed"]
+                    self.config_data.server.limits.on_exceed
                 )
                 break
 
         # logging
         for i in range(self.comboBoxLog.count()):
-            if self.comboBoxLog.itemText(i) in text["logging"]["level"]:
+            if self.comboBoxLog.itemText(i) in self.config_data.logging.level:
                 self.comboBoxLog.setCurrentText(self.comboBoxLog.itemText(i))
 
-        self.lineEditLogfile.setText(text["logging"]["logfile"])
+        self.lineEditLogfile.setText(self.config_data.logging.logfile)
 
         # collections
         self.model = QStringListModel()
-        self.model.setStringList(text["resources"])
+        self.model.setStringList([x.instance_name for x in self.config_data.resources])
 
         self.proxy = QSortFilterProxyModel()
         self.proxy.setSourceModel(self.model)
         self.listViewCollection.setModel(self.proxy)
 
-        self.yaml_dict = text
-
     def filterResources(self, filter):
         self.proxy.setDynamicSortFilter(True)
         self.proxy.setFilterFixedString(filter)
 
-    def loadCollection(self, index):
-        self.lineEditTitle.setText(self.yaml_dict.resources[index.data()]["title"])
-        self.lineEditDescription.setText(
-            self.yaml_dict.resources[index.data()]["description"]
-        )
-        self.curCol = index.data()
+    def loadCollection(self, index: "QModelIndex"):
+        self.cur_col_index = index.row()
+
+        # If title is a dictionary, use the first (default) value
+        title = self.config_data.resources[self.cur_col_index].title
+        if isinstance(title, dict):
+            title = next(iter(title.values()), "")
+        self.lineEditTitle.setText(title)
+
+        # If description is a dictionary, use the first (default) value
+        description = self.config_data.resources[self.cur_col_index].description
+        if isinstance(description, dict):
+            description = next(iter(description.values()), "")
+        self.lineEditDescription.setText(description)
 
     def editCollectionTitle(self, value):
-        QgsMessageLog.logMessage(f"Current collection - title: {self.curCol}")
-        self.yaml_dict.resources[self.curCol]["title"] = value
+        QgsMessageLog.logMessage(f"Current collection - title: {self.cur_col_index}")
+        self.config_data.resources[self.cur_col_index].title = value
 
     def editCollectionDescription(self, value):
-        QgsMessageLog.logMessage(f"Current collection - desc: {self.curCol}")
-        self.yaml_dict.resources[self.curCol]["description"] = value
+        QgsMessageLog.logMessage(f"Current collection - desc: {self.cur_col_index}")
+        self.config_data.resources[self.cur_col_index].description = value

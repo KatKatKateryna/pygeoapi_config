@@ -50,9 +50,9 @@ class ResourceConfigTemplate:
 
     # fields with default values:
     type: str = field(default="collection")
-    title: str = field(default="")
-    description: str = field(default="")
-    keywords: dict = field(default_factory=lambda: {"en": []})
+    title: str | dict = field(default="")
+    description: str | dict = field(default="")
+    keywords: list | dict = field(default_factory=lambda: [])
     links: list[LinkTemplate] = field(default_factory=lambda: [])
     extents: ExtentsConfig = field(default_factory=lambda: ExtentsConfig())
     providers: list[ProviderTemplate] = field(default_factory=lambda: [])
