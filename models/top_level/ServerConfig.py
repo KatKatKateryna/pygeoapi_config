@@ -32,14 +32,13 @@ class MapConfig:
 
 @dataclass(kw_only=True)
 class TemplatesConfig:
-    # Not currently used
     path: str = field(default="/path/to/jinja2/templates/folder")
     static: str = field(default="/path/to/static/folder")
 
 
 @dataclass(kw_only=True)
 class ApiRulesConfig:
-    # Not currently used
+    # Not currently used in the UI
     api_version: str = field(default="1.2.3")
     strict_slashes: bool = field(default=True)
     url_prefix: str = field(default="v{api_major}")
@@ -61,9 +60,8 @@ class ServerConfig:
     limits: LimitsConfig = field(default_factory=lambda: LimitsConfig())
     map: MapConfig = field(default_factory=lambda: MapConfig())
     admin: bool = field(default=False)
-    # Not currently used
     templates: TemplatesConfig = field(default_factory=lambda: TemplatesConfig())
 
     # optional fields:
-    # Not currently used
+    # TODO: Not currently used in the UI
     api_rules: ApiRulesConfig | None = None

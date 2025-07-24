@@ -98,7 +98,6 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
 
         if folder_path:
             self.lineEditTemplatesPath.setText(folder_path)
-            self.config_data.server.templates.path = folder_path
 
     def open_templates_static_dialog(self):
         """Defining Server.templates.static path, called from .ui file."""
@@ -107,7 +106,6 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
 
         if folder_path:
             self.lineEditTemplatesStatic.setText(folder_path)
-            self.config_data.server.templates.static = folder_path
 
     def open_logfile_dialog(self):
         """Defining Logging.logfile path, called from .ui file."""
@@ -118,7 +116,6 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
 
         if logFile:
             self.lineEditLogfile.setText(logFile[0])
-            self.config_data.logging.logfile = logFile[0]
 
     def write_yaml(self):
 
