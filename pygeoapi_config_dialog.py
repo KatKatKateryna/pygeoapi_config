@@ -186,6 +186,9 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
                 self.config_data = ConfigData()
                 self.config_data.set_data_from_yaml(yaml.safe_load(file_content))
                 self.set_ui_from_config_data()
+                QMessageBox.information(
+                    self, "Message", f"{self.config_data.display_message}"
+                )
 
         except Exception as e:
             QMessageBox.warning(self, "Error", f"Cannot open file:\n{str(e)}")
@@ -248,7 +251,7 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
 
         self._set_combo_box_value_from_data(
             combo_box=self.comboBoxExceed,
-            value=self.config_data.server.limits.on_exceeds,
+            value=self.config_data.server.limits.on_exceed,
         )
 
         # logging

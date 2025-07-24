@@ -4,8 +4,9 @@ from typing import get_origin, get_args, Union, get_type_hints
 from .top_level.utils import InlineList
 
 
-def update_dataclass_from_dict(instance, new_dict):
+def update_dataclass_from_dict(instance, new_dict, prop_name: str = "") -> str:
     hints = get_type_hints(type(instance))
+    missing_fields = []
 
     # loop through the instance properties
     for fld in fields(instance):
@@ -19,7 +20,9 @@ def update_dataclass_from_dict(instance, new_dict):
 
             # If field is a dataclass and new_value is a dict, recurse
             if is_dataclass(current_value) and isinstance(new_value, dict):
-                update_dataclass_from_dict(current_value, new_value)
+                update_dataclass_from_dict(
+                    current_value, new_value, f"{prop_name}: {field_name}"
+                )
             else:
                 if _is_instance_of_type(new_value, expected_type):
 
@@ -32,6 +35,9 @@ def update_dataclass_from_dict(instance, new_dict):
                     print(
                         f"Skipped {field_name}: expected {expected_type}, got {type(new_value)}"
                     )
+        else:
+            missing_fields.append(f"{prop_name}: {field_name}")
+    return missing_fields
 
 
 def _is_instance_of_type(value, expected_type) -> bool:

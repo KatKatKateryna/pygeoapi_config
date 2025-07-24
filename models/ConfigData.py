@@ -32,9 +32,16 @@ class ConfigData:
         resources_dict_list = [{k: v} for k, v in resources_config.items()]
 
         # Update the dataclass properties with the new values
-        update_dataclass_from_dict(self.server, server_config)
-        update_dataclass_from_dict(self.logging, logging_config)
-        update_dataclass_from_dict(self.metadata, metadata_config)
+        defaults = []
+        defaults.extend(
+            update_dataclass_from_dict(self.server, server_config, "server")
+        )
+        defaults.extend(
+            update_dataclass_from_dict(self.logging, logging_config, "logging")
+        )
+        defaults.extend(
+            update_dataclass_from_dict(self.metadata, metadata_config, "metadata")
+        )
 
         self.resources = {}
         for res_config in resources_dict_list:
@@ -46,7 +53,27 @@ class ConfigData:
                 new_resource_item = ResourceConfigTemplate(
                     instance_name=resource_instance_name
                 )
-                update_dataclass_from_dict(new_resource_item, resource_data)
+                defaults.extend(
+                    update_dataclass_from_dict(
+                        new_resource_item,
+                        resource_data,
+                        f"resources: {resource_instance_name}",
+                    )
+                )
                 self.resources[resource_instance_name] = new_resource_item
             else:
                 print(f"Skipping invalid resource entry: {res_config}")
+
+        # add dynamic property, so that it is not included in asdict()
+        # ideally, we should overwrite the __init__ method, but it is not so important property
+        if len(defaults) > 0:
+            self._display_message = f"Default values used for fields: {defaults}"
+        else:
+            self._display_message = ""
+
+    @property
+    def display_message(self):
+        # taking precaution here because the property was not explicitly defined in the __init__ method
+        if hasattr(self, "_display_message"):
+            return self._display_message
+        return ""
