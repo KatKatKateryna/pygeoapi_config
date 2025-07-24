@@ -12,7 +12,7 @@ from .top_level import (
 @dataclass(kw_only=True)
 class ConfigData:
     """Placeholder class for Config file data.
-    Only 2 levels of properties have an assigned type,
+    Only 2-3 levels of properties have an assigned type,
     the deeper nested properties (as well as optional properties) are defined as generic dictionaries.
     """
 

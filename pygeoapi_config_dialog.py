@@ -26,6 +26,7 @@ import os
 import yaml
 
 from dataclasses import asdict
+from .models.top_level import InlineList
 
 from qgis.PyQt import uic
 from qgis.core import QgsMessageLog
@@ -56,6 +57,14 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
 
     config_data = ConfigData()
     cur_col_name = ""
+
+    # make sure InlineList is represented as a YAML sequence (e.g. for 'bbox')
+    yaml.add_representer(
+        InlineList,
+        lambda dumper, data: dumper.represent_sequence(
+            "tag:yaml.org,2002:seq", data, flow_style=True
+        ),
+    )
 
     def __init__(self, parent=None):
         """Constructor."""
@@ -148,7 +157,12 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
             try:
                 with open(file_path, "w", encoding="utf-8") as file:
                     self.write_yaml()
-                    yaml.dump(asdict(self.config_data), file)
+                    yaml.dump(
+                        asdict(self.config_data),
+                        file,
+                        default_flow_style=False,
+                        sort_keys=False,
+                    )
                 QgsMessageLog.logMessage(f"File saved to: {file_path}")
             except Exception as e:
                 QgsMessageLog.logMessage(f"Error saving file: {e}")

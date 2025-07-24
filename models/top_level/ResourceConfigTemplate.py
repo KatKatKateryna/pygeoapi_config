@@ -1,6 +1,8 @@
 from dataclasses import dataclass, field
 from enum import Enum
 
+from .utils import InlineList
+
 
 @dataclass(kw_only=True)
 class ProviderTemplate:
@@ -30,16 +32,17 @@ class LinkTemplate:
 
 
 @dataclass(kw_only=True)
+class SpatialConfig:
+    bbox: InlineList = field(default_factory=lambda: InlineList([-180, -90, 180, 90]))
+    crs: str = field(default="http://www.opengis.net/def/crs/OGC/1.3/CRS84")
+
+
+@dataclass(kw_only=True)
 class ExtentsConfig:
     """Class to represent Extents configuration template."""
 
     # fields with default values:
-    spatial: dict = field(
-        default_factory=lambda: {
-            "bbox": [-180, -90, 180, 90],
-            "crs": "http://www.opengis.net/def/crs/OGC/1.3/CRS84",
-        }
-    )
+    spatial: dict = field(default_factory=lambda: SpatialConfig())
 
     # optional fields:
     temporal: dict | None = None

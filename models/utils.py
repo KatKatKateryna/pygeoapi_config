@@ -1,6 +1,8 @@
 from dataclasses import is_dataclass, fields
 from typing import get_origin, get_args, Union, get_type_hints
 
+from .top_level.utils import InlineList
+
 
 def update_dataclass_from_dict(instance, new_dict):
     hints = get_type_hints(type(instance))
@@ -20,6 +22,11 @@ def update_dataclass_from_dict(instance, new_dict):
                 update_dataclass_from_dict(current_value, new_value)
             else:
                 if _is_instance_of_type(new_value, expected_type):
+
+                    # exception: remap list to internally used InlineList (needed later for YAML formatting)
+                    if expected_type is InlineList:
+                        new_value = InlineList(new_value)
+
                     setattr(instance, field_name, new_value)
                 else:
                     print(
@@ -56,6 +63,14 @@ def _is_instance_of_type(value, expected_type) -> bool:
                 for k, v in value.items()
             )
         return True
+
+    # Exception for InlineList
+    if expected_type is InlineList:
+        if isinstance(value, list):
+            return True
+        return False
+
+    # TODO: Exceptions for Records(Enums)
 
     # Fallback for normal types
     return isinstance(value, expected_type)
