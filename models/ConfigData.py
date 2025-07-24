@@ -21,7 +21,7 @@ class ConfigData:
     metadata: MetadataConfig = field(default_factory=lambda: MetadataConfig())
     resources: list[ResourceConfigTemplate] = field(default_factory=lambda: [])
 
-    def read_yaml_set_data(self, dict_content: dict):
+    def set_data_from_yaml(self, dict_content: dict):
         """Parse YAML file content and overwride .config_data properties where available."""
 
         # Read the content of the YAML file for each of the top level properties
