@@ -91,15 +91,34 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
         elif button == self.buttonBox.button(QDialogButtonBox.Close):
             self.reject()
 
+    def open_templates_path_dialog(self):
+        """Defining Server.templates.path path, called from .ui file."""
+
+        folder_path = QFileDialog.getExistingDirectory(None, "Select Folder")
+
+        if folder_path:
+            self.lineEditTemplatesPath.setText(folder_path)
+            self.config_data.server.templates.path = folder_path
+
+    def open_templates_static_dialog(self):
+        """Defining Server.templates.static path, called from .ui file."""
+
+        folder_path = QFileDialog.getExistingDirectory(None, "Select Folder")
+
+        if folder_path:
+            self.lineEditTemplatesStatic.setText(folder_path)
+            self.config_data.server.templates.static = folder_path
+
     def open_logfile_dialog(self):
+        """Defining Logging.logfile path, called from .ui file."""
 
         logFile = QFileDialog.getSaveFileName(
             self, "Save Log", "", "log Files (*.log);;All Files (*)"
         )
 
         if logFile:
-            print(f"path: {logFile}")
             self.lineEditLogfile.setText(logFile[0])
+            self.config_data.logging.logfile = logFile[0]
 
     def write_yaml(self):
 
@@ -120,6 +139,12 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
 
             # cors
             self.config_data.server.cors = self.checkBoxCors.isChecked()
+
+            # templates
+            self.config_data.server.templates.path = self.lineEditTemplatesPath.text()
+            self.config_data.server.templates.static = (
+                self.lineEditTemplatesStatic.text()
+            )
 
             # map
             self.config_data.server.map.url = self.lineEditMapUrl.text()
@@ -237,6 +262,10 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
 
         # cors
         self.checkBoxCors.setChecked(self.config_data.server.cors)
+
+        # templates
+        self.lineEditTemplatesPath.setText(self.config_data.server.templates.path)
+        self.lineEditTemplatesStatic.setText(self.config_data.server.templates.static)
 
         # map
         self.lineEditMapUrl.setText(self.config_data.server.map.url)
