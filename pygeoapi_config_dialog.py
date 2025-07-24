@@ -58,14 +58,6 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
     config_data = ConfigData()
     cur_col_name = ""
 
-    # make sure InlineList is represented as a YAML sequence (e.g. for 'bbox')
-    yaml.add_representer(
-        InlineList,
-        lambda dumper, data: dumper.represent_sequence(
-            "tag:yaml.org,2002:seq", data, flow_style=True
-        ),
-    )
-
     def __init__(self, parent=None):
         """Constructor."""
         super(PygeoapiConfigDialog, self).__init__(parent)
@@ -75,6 +67,16 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
         # http://qt-project.org/doc/qt-4.8/designer-using-a-ui-file.html
         # #widgets-and-dialogs-with-auto-connect
         self.setupUi(self)
+
+        # make sure InlineList is represented as a YAML sequence (e.g. for 'bbox')
+        yaml.add_representer(
+            InlineList,
+            lambda dumper, data: dumper.represent_sequence(
+                "tag:yaml.org,2002:seq", data, flow_style=True
+            ),
+        )
+        # add default values to the UI
+        self.set_ui_from_config_data()
 
     def on_button_clicked(self, button):
 

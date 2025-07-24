@@ -67,7 +67,9 @@ class ConfigData:
         # add dynamic property, so that it is not included in asdict()
         # ideally, we should overwrite the __init__ method, but it is not so important property
         if len(defaults) > 0:
-            self._display_message = f"Default values used for fields: {defaults}"
+            self._display_message = (
+                f"Default values used for missing YAML fields: {defaults}"
+            )
         else:
             self._display_message = ""
 
