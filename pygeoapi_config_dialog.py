@@ -95,50 +95,44 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
         try:
 
             # bind
-            self.config_data.server["bind"]["host"] = self.lineEditHost.text()
-            self.config_data.server["bind"]["port"] = self.spinBoxPort.value()
+            self.config_data.server.bind.host = self.lineEditHost.text()
+            self.config_data.server.bind.port = self.spinBoxPort.value()
 
             # gzip
-            self.config_data.server["gzip"] = self.checkBoxGzip.isChecked()
+            self.config_data.server.gzip = self.checkBoxGzip.isChecked()
 
             # pretty print
-            self.config_data.server["pretty_print"] = self.checkBoxPretty.isChecked()
+            self.config_data.server.pretty_print = self.checkBoxPretty.isChecked()
 
             # admin
-            self.config_data.server["admin"] = self.checkBoxAdmin.isChecked()
+            self.config_data.server.admin = self.checkBoxAdmin.isChecked()
 
             # cors
-            self.config_data.server["cors"] = self.checkBoxCors.isChecked()
+            self.config_data.server.cors = self.checkBoxCors.isChecked()
 
             # map
-            self.config_data.server["map"]["url"] = self.lineEditMapUrl.text()
-            self.config_data.server["map"][
-                "attribution"
-            ] = self.lineEditAttribution.text()
+            self.config_data.server.map.url = self.lineEditMapUrl.text()
+            self.config_data.server.map.attribution = self.lineEditAttribution.text()
 
             # url
-            self.config_data.server["url"] = self.lineEditUrl.text()
+            self.config_data.server.url = self.lineEditUrl.text()
 
             # language
-            self.config_data.server["languages"] = []
+            self.config_data.server.languages = []
             for i in range(self.listWidgetLang.count()):
                 item = self.listWidgetLang.item(i)
                 if item.isSelected():
-                    self.config_data.server["languages"].append(item.text())
+                    self.config_data.server.languages.append(item.text())
 
             # limits
-            self.config_data.server["limits"][
-                "default_items"
-            ] = self.spinBoxDefault.value()
-            self.yaml_st.server["limits"]["max_items"] = self.spinBoxMax.value()
+            self.config_data.server.limits.default_items = self.spinBoxDefault.value()
+            self.config_data.server.limits.max_items = self.spinBoxMax.value()
 
-            self.config_data.server["limits"][
-                "on_exceed"
-            ] = self.comboBoxExceed.currentText()
+            self.config_data.server.limits.on_exceed = self.comboBoxExceed.currentText()
 
             # logging
-            self.config_data.logging["level"] = self.comboBoxLog.currentText()
-            self.config_data.logging["logfile"] = self.lineEditLogfile.text()
+            self.config_data.logging.level = self.comboBoxLog.currentText()
+            self.config_data.logging.logfile = self.lineEditLogfile.text()
 
         except Exception as e:
             QgsMessageLog.logMessage(f"Error deserializing: {e}")
@@ -154,7 +148,7 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
             try:
                 with open(file_path, "w", encoding="utf-8") as file:
                     self.write_yaml()
-                    yaml.dump(self.config_data, file)
+                    yaml.dump(asdict(self.config_data), file)
                 QgsMessageLog.logMessage(f"File saved to: {file_path}")
             except Exception as e:
                 QgsMessageLog.logMessage(f"Error saving file: {e}")
