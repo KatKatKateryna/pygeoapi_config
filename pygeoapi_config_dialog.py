@@ -55,7 +55,7 @@ FORM_CLASS, _ = uic.loadUiType(
 class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
 
     config_data = ConfigData()
-    cur_col_index = None
+    cur_col_name = ""
 
     def __init__(self, parent=None):
         """Constructor."""
@@ -239,7 +239,7 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
 
         # collections
         self.model = QStringListModel()
-        self.model.setStringList([x.instance_name for x in self.config_data.resources])
+        self.model.setStringList([k for k, _ in self.config_data.resources.items()])
 
         self.proxy = QSortFilterProxyModel()
         self.proxy.setSourceModel(self.model)
@@ -250,24 +250,24 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
         self.proxy.setFilterFixedString(filter)
 
     def loadCollection(self, index: "QModelIndex"):
-        self.cur_col_index = index.row()
+        self.cur_col_name = index.data()
 
         # If title is a dictionary, use the first (default) value
-        title = self.config_data.resources[self.cur_col_index].title
+        title = self.config_data.resources[self.cur_col_name].title
         if isinstance(title, dict):
             title = next(iter(title.values()), "")
         self.lineEditTitle.setText(title)
 
         # If description is a dictionary, use the first (default) value
-        description = self.config_data.resources[self.cur_col_index].description
+        description = self.config_data.resources[self.cur_col_name].description
         if isinstance(description, dict):
             description = next(iter(description.values()), "")
         self.lineEditDescription.setText(description)
 
     def editCollectionTitle(self, value):
-        QgsMessageLog.logMessage(f"Current collection - title: {self.cur_col_index}")
-        self.config_data.resources[self.cur_col_index].title = value
+        QgsMessageLog.logMessage(f"Current collection - title: {self.cur_col_name}")
+        self.config_data.resources[self.cur_col_name].title = value
 
     def editCollectionDescription(self, value):
-        QgsMessageLog.logMessage(f"Current collection - desc: {self.cur_col_index}")
-        self.config_data.resources[self.cur_col_index].description = value
+        QgsMessageLog.logMessage(f"Current collection - desc: {self.cur_col_name}")
+        self.config_data.resources[self.cur_col_name].description = value

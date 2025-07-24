@@ -19,7 +19,7 @@ class ConfigData:
     server: ServerConfig = field(default_factory=lambda: ServerConfig())
     logging: LoggingConfig = field(default_factory=lambda: LoggingConfig())
     metadata: MetadataConfig = field(default_factory=lambda: MetadataConfig())
-    resources: list[ResourceConfigTemplate] = field(default_factory=lambda: [])
+    resources: dict[str, ResourceConfigTemplate] = field(default_factory=lambda: {})
 
     def set_data_from_yaml(self, dict_content: dict):
         """Parse YAML file content and overwride .config_data properties where available."""
@@ -28,7 +28,7 @@ class ConfigData:
         server_config = dict_content.get("server", {})
         logging_config = dict_content.get("logging", {})
         metadata_config = dict_content.get("metadata", {})
-        resources_config = dict_content.get("resources", [])
+        resources_config = dict_content.get("resources", {})
         resources_dict_list = [{k: v} for k, v in resources_config.items()]
 
         # Update the dataclass properties with the new values
@@ -36,7 +36,7 @@ class ConfigData:
         update_dataclass_from_dict(self.logging, logging_config)
         update_dataclass_from_dict(self.metadata, metadata_config)
 
-        self.resources.clear()
+        self.resources = {}
         for res_config in resources_dict_list:
             if isinstance(res_config, dict):
                 resource_instance_name = next(iter(res_config))
@@ -47,6 +47,6 @@ class ConfigData:
                     instance_name=resource_instance_name
                 )
                 update_dataclass_from_dict(new_resource_item, resource_data)
-                self.resources.append(new_resource_item)
+                self.resources[resource_instance_name] = new_resource_item
             else:
                 print(f"Skipping invalid resource entry: {res_config}")
