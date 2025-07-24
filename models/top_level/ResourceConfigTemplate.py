@@ -49,12 +49,14 @@ class ExtentsConfig:
 
 
 class ResourceTypes(Enum):
+    # Not currently used
     COLLECTION = "collection"
     PROCESS = "process"
     STAC = "stac-collection"
 
 
 class ProviderTypes(Enum):
+    # Not currently used
     FEATURE = "feature"
     COVERAGE = "coverage"
     TILE = "tile"

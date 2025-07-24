@@ -207,6 +207,18 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
         # gzip
         self.checkBoxGzip.setChecked(self.config_data.server.gzip)
 
+        # mimetype
+        self._set_combo_box_value_from_data(
+            combo_box=self.comboBoxMime,
+            value=self.config_data.server.mimetype,
+        )
+
+        # encoding
+        self._set_combo_box_value_from_data(
+            combo_box=self.comboBoxEncoding,
+            value=self.config_data.server.encoding,
+        )
+
         # pretty print
         self.checkBoxPretty.setChecked(self.config_data.server.pretty_print)
 
@@ -234,20 +246,16 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
         self.spinBoxDefault.setValue(self.config_data.server.limits.default_items)
         self.spinBoxMax.setValue(self.config_data.server.limits.max_items)
 
-        for i in range(self.comboBoxExceed.count()):
-            if (
-                self.comboBoxExceed.itemText(i)
-                == self.config_data.server.limits.on_exceed
-            ):
-                self.comboBoxExceed.setCurrentText(
-                    self.config_data.server.limits.on_exceed
-                )
-                break
+        self._set_combo_box_value_from_data(
+            combo_box=self.comboBoxExceed,
+            value=self.config_data.server.limits.on_exceeds,
+        )
 
         # logging
-        for i in range(self.comboBoxLog.count()):
-            if self.comboBoxLog.itemText(i) in self.config_data.logging.level:
-                self.comboBoxLog.setCurrentText(self.comboBoxLog.itemText(i))
+        self._set_combo_box_value_from_data(
+            combo_box=self.comboBoxLog,
+            value=self.config_data.logging.level,
+        )
 
         self.lineEditLogfile.setText(self.config_data.logging.logfile)
 
@@ -258,6 +266,20 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
         self.proxy = QSortFilterProxyModel()
         self.proxy.setSourceModel(self.model)
         self.listViewCollection.setModel(self.proxy)
+
+    def _set_combo_box_value_from_data(self, *, combo_box, value):
+        """Set the combo box value based on the available choice and provided value."""
+
+        for i in range(combo_box.count()):
+            if combo_box.itemText(i) == value:
+                combo_box.setCurrentIndex(i)
+                return
+
+        # If the value is not found, set to the first item or clear it
+        if combo_box.count() > 0:
+            combo_box.setCurrentIndex(0)
+        else:
+            combo_box.clear()
 
     def filterResources(self, filter):
         self.proxy.setDynamicSortFilter(True)
