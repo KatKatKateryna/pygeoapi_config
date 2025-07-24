@@ -34,7 +34,7 @@ Modify the user interface by opening pygeoapiconfig_dialog_base.ui in [Qt Creato
 
 3. After editing the .ts files, run the following command to compile .dm files for each locale:
 
-`lrelease pygeoapi_config_en_EN.ts`
+`lrelease pygeoapi_config_pt.ts`
 
 ## License
 

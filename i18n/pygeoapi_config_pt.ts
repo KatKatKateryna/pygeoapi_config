@@ -6,7 +6,7 @@
     <message>
         <location filename="../pygeoapi_config.py" line="177"/>
         <source>&amp;pygeoapi configurator</source>
-        <translation type="unfinished"></translation>
+        <translation>pygeoapi configurador</translation>
     </message>
     <message>
         <location filename="../pygeoapi_config.py" line="164"/>
@@ -19,7 +19,7 @@
     <message>
         <location filename="../pygeoapi_config_dialog_base.ui" line="14"/>
         <source>pygeoapi configurator</source>
-        <translation type="unfinished"></translation>
+        <translation>pygeoapi configurador</translation>
     </message>
     <message>
         <location filename="../pygeoapi_config_dialog_base.ui" line="36"/>
@@ -29,7 +29,7 @@
     <message>
         <location filename="../pygeoapi_config_dialog_base.ui" line="50"/>
         <source>Server</source>
-        <translation type="unfinished"></translation>
+        <translation>Servidor</translation>
     </message>
     <message>
         <location filename="../pygeoapi_config_dialog_base.ui" line="56"/>
@@ -234,7 +234,7 @@
     <message>
         <location filename="../pygeoapi_config_dialog_base.ui" line="565"/>
         <source>Metadata</source>
-        <translation type="unfinished"></translation>
+        <translation>Metadados</translation>
     </message>
     <message>
         <location filename="../pygeoapi_config_dialog_base.ui" line="573"/>
@@ -364,7 +364,7 @@
     <message>
         <location filename="../pygeoapi_config_dialog_base.ui" line="957"/>
         <source>Resources</source>
-        <translation type="unfinished"></translation>
+        <translation>Recursos</translation>
     </message>
     <message>
         <location filename="../pygeoapi_config_dialog_base.ui" line="963"/>
