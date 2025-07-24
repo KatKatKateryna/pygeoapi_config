@@ -1,6 +1,7 @@
 from dataclasses import dataclass, field
 
 
+# data classes
 @dataclass(kw_only=True)
 class IdentificationConfig:
     title: str | dict = field(default_factory=lambda: "")

@@ -1,4 +1,6 @@
 from dataclasses import is_dataclass, fields
+from enum import Enum
+from types import UnionType
 from typing import get_origin, get_args, Union, get_type_hints
 
 from .top_level.utils import InlineList
@@ -46,7 +48,7 @@ def _is_instance_of_type(value, expected_type) -> bool:
     args = get_args(expected_type)
 
     # Handle Union (including Optional, str | dict, etc.)
-    if origin is Union:
+    if origin is Union or type(expected_type) is UnionType:
         # Recursively check each allowed type in the union
         return any(_is_instance_of_type(value, arg) for arg in args)
 
@@ -54,6 +56,8 @@ def _is_instance_of_type(value, expected_type) -> bool:
     if origin in (list, tuple, set):
         if not isinstance(value, origin):
             return False
+
+        # ignore type check for the inner type - YAML content won't be automatically casted to the custom classes
         # if args:
         #    inner_type = args[0]
         #    return all(_is_instance_of_type(item, inner_type) for item in value)
@@ -70,13 +74,17 @@ def _is_instance_of_type(value, expected_type) -> bool:
             )
         return True
 
-    # Exception for InlineList
+    # Exception for InlineList: just check if the value is a list
     if expected_type is InlineList:
         if isinstance(value, list):
             return True
         return False
 
-    # TODO: Exceptions for Records(Enums)
+    # Exception for Records (Enums): check if value is a member of the Enum
+    if issubclass(expected_type, Enum):
+        if value in [member.value for member in expected_type]:
+            return True
+        return False
 
     # Fallback for normal types
     return isinstance(value, expected_type)

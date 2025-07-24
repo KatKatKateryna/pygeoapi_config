@@ -189,6 +189,9 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
                 QMessageBox.information(
                     self, "Message", f"{self.config_data.display_message}"
                 )
+                print(
+                    self.config_data.display_message
+                )  # printed, so it can be accessed later
 
         except Exception as e:
             QMessageBox.warning(self, "Error", f"Cannot open file:\n{str(e)}")

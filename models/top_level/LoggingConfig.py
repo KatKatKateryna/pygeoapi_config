@@ -2,6 +2,15 @@ from dataclasses import dataclass, field
 from enum import Enum
 
 
+# records
+class LoggingLevel(Enum):
+    DEBUG = "DEBUG"
+    INFO = "INFO"
+    ERROR = "ERROR"
+    WARNING = "WARNING"
+
+
+# data classes
 @dataclass(kw_only=True)
 class RotationConfig:
     # Not currently used
@@ -12,20 +21,12 @@ class RotationConfig:
     backup_count: int | None = None
 
 
-class LoggingLevel(Enum):
-    # Not currently used
-    DEBUG = "DEBUG"
-    INFO = "INFO"
-    ERROR = "ERROR"
-    WARNING = "WARNING"
-
-
 @dataclass(kw_only=True)
 class LoggingConfig:
     """Placeholder class for Logging configuration data."""
 
     # fields with default values:
-    level: str = field(default="ERROR")
+    level: LoggingLevel = field(default_factory=lambda: LoggingLevel.ERROR)
     logfile: str = field(default="")
 
     # optional fields:

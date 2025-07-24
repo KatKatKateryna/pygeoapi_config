@@ -4,11 +4,25 @@ from enum import Enum
 from .utils import InlineList
 
 
+# records
+class ResourceTypes(Enum):
+    COLLECTION = "collection"
+    PROCESS = "process"
+    STAC = "stac-collection"
+
+
+class ProviderTypes(Enum):
+    FEATURE = "feature"
+    COVERAGE = "coverage"
+    TILE = "tile"
+
+
+# data classes
 @dataclass(kw_only=True)
 class ProviderTemplate:
     """Class to represent a Provider configuration template."""
 
-    type: str
+    type: ProviderTypes
     name: str
     data: str
 
@@ -48,26 +62,12 @@ class ExtentsConfig:
     temporal: dict | None = None
 
 
-class ResourceTypes(Enum):
-    # Not currently used
-    COLLECTION = "collection"
-    PROCESS = "process"
-    STAC = "stac-collection"
-
-
-class ProviderTypes(Enum):
-    # Not currently used
-    FEATURE = "feature"
-    COVERAGE = "coverage"
-    TILE = "tile"
-
-
 @dataclass(kw_only=True)
 class ResourceConfigTemplate:
     """Class to represent a Resource configuration template."""
 
     # fields with default values:
-    type: str = field(default="collection")
+    type: ResourceTypes = field(default_factory=lambda: ResourceTypes.COLLECTION)
     title: str | dict = field(default="")
     description: str | dict = field(default="")
     keywords: list | dict = field(default_factory=lambda: [])

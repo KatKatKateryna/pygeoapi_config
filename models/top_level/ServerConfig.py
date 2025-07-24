@@ -2,23 +2,24 @@ from dataclasses import dataclass, field
 from enum import Enum
 
 
+# records
+class OnExceed(Enum):
+    THROTTLE = "throttle"
+    ERROR = "error"
+
+
+# data classes
 @dataclass(kw_only=True)
 class BindConfig:
     host: str = field(default="0.0.0.0")
     port: int = field(default=5000)
 
 
-class OnExceed(Enum):
-    # Not currently used
-    THROTTLE = "throttle"
-    ERROR = "error"
-
-
 @dataclass(kw_only=True)
 class LimitsConfig:
     default_items: int = field(default=20)
     max_items: int = field(default=50)
-    on_exceed: str = field(default="throttle")
+    on_exceed: OnExceed = field(default_factory=lambda: OnExceed.THROTTLE)
 
 
 @dataclass(kw_only=True)
