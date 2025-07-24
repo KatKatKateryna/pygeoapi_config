@@ -142,6 +142,8 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
             # logging
             self.config_data.logging.level = self.comboBoxLog.currentText()
             self.config_data.logging.logfile = self.lineEditLogfile.text()
+            self.config_data.logging.logformat = self.lineEditLogformat.text()
+            self.config_data.logging.dateformat = self.lineEditDateformat.text()
 
         except Exception as e:
             QgsMessageLog.logMessage(f"Error deserializing: {e}")
@@ -264,6 +266,8 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
         )
 
         self.lineEditLogfile.setText(self.config_data.logging.logfile)
+        self.lineEditLogformat.setText(self.config_data.logging.logformat)
+        self.lineEditDateformat.setText(self.config_data.logging.dateformat)
 
         # collections
         self.model = QStringListModel()

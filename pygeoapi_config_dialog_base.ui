@@ -423,6 +423,37 @@
             </item>
            </layout>
           </item>
+          
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_12">
+            <item>
+             <widget class="QLabel" name="label_15">
+              <property name="text">
+               <string>logformat</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="lineEditLogformat"/>
+            </item>
+           </layout>
+          </item>
+          
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_13">
+            <item>
+             <widget class="QLabel" name="label_16">
+              <property name="text">
+               <string>dateformat</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="lineEditDateformat"/>
+            </item>
+           </layout>
+          </item>
+
          </layout>
         </widget>
        </item>

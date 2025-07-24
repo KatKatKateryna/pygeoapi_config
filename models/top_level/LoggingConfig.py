@@ -13,7 +13,7 @@ class LoggingLevel(Enum):
 # data classes
 @dataclass(kw_only=True)
 class RotationConfig:
-    # Not currently used
+    # Not currently used in the UI
     mode: str | None = None
     when: str | None = None
     interval: int | None = None
@@ -30,7 +30,7 @@ class LoggingConfig:
     logfile: str = field(default="")
 
     # optional fields:
-    # Not currently used
     logformat: str | None = None
     dateformat: str | None = None
+    # TODO: Not currently used in the UI
     rotation: RotationConfig | None = None
