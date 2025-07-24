@@ -607,8 +607,48 @@
            </widget>
           </item>
           <item row="2" column="1">
-           <widget class="QLineEdit" name="lineEditMetadataIdKeywords">
-           </widget>
+            <layout class="QHBoxLayout">
+
+              <item>
+              <layout class="QVBoxLayout">
+
+                <item>
+                  <layout class="QVBoxLayout">
+                  <item>
+                    <widget class="QLineEdit" name="addMetadataKeywordLineEdit">
+                    <property name="placeholderText">
+                      <string>Enter keyword to add</string>
+                    </property>
+                    </widget>
+                  </item>
+                  <item>
+                    <widget class="QPushButton" name="addMetadataKeywordButton">
+                    <property name="text">
+                      <string>Add</string>
+                    </property>
+                    </widget>
+                  </item>
+                  </layout>
+                </item>
+              </layout>
+
+              </item>
+              <item>
+                <layout class="QVBoxLayout">
+                  <item>
+                    <widget class="QListWidget" name="listWidgetMetadataIdKeywords"/>
+                  </item>
+                  <item>
+                    <widget class="QPushButton" name="deleteMetadataKeywordButton">
+                    <property name="text">
+                      <string>Delete Selected</string>
+                    </property>
+                    </widget>
+                  </item>
+                </layout>
+                
+              </item>
+            </layout>
           </item>
 
           <item row="3" column="0">
@@ -1031,6 +1071,41 @@
    <signal>clicked()</signal>
    <receiver>PygeoapiConfigDialogBase</receiver>
    <slot>open_templates_path_dialog()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>822</x>
+     <y>406</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>434</x>
+     <y>244</y>
+    </hint>
+   </hints>
+  </connection>
+
+  
+  <connection>
+   <sender>addMetadataKeywordButton</sender>
+   <signal>clicked()</signal>
+   <receiver>PygeoapiConfigDialogBase</receiver>
+   <slot>add_metadata_keyword()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>822</x>
+     <y>406</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>434</x>
+     <y>244</y>
+    </hint>
+   </hints>
+  </connection>
+  
+  <connection>
+   <sender>deleteMetadataKeywordButton</sender>
+   <signal>clicked()</signal>
+   <receiver>PygeoapiConfigDialogBase</receiver>
+   <slot>delete_metadata_keyword()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>822</x>

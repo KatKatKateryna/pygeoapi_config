@@ -117,6 +117,21 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
         if logFile:
             self.lineEditLogfile.setText(logFile[0])
 
+    def add_metadata_keyword(self):
+        """Add keyword to metadata, called from .ui file."""
+
+        text = self.addMetadataKeywordLineEdit.text().strip()
+        if text:
+            self.listWidgetMetadataIdKeywords.addItem(text)
+            self.addMetadataKeywordLineEdit.clear()
+
+    def delete_metadata_keyword(self):
+        """Delete keyword from metadata, called from .ui file."""
+
+        selected_item = self.listWidgetMetadataIdKeywords.currentRow()
+        if selected_item >= 0:
+            self.listWidgetMetadataIdKeywords.takeItem(selected_item)
+
     def write_yaml(self):
 
         try:
@@ -176,9 +191,11 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
             self.config_data.metadata.identification.description = (
                 self.lineEditMetadataIdDescription.text()
             )
-            self.config_data.metadata.identification.keywords = (
-                self.lineEditMetadataIdKeywords.text()
-            )
+            self.config_data.metadata.identification.keywords = [
+                self.listWidgetMetadataIdKeywords.item(i).text()
+                for i in range(self.listWidgetMetadataIdKeywords.count())
+            ]
+
             self.config_data.metadata.identification.keywords_type = (
                 self.lineEditMetadataIdKeywordsType.text()
             )
@@ -379,14 +396,18 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
 
         # metadata identification
         self.lineEditMetadataIdTitle.setText(
-            self.config_data.metadata.identification.title
+            str(self.config_data.metadata.identification.title)
         )
         self.lineEditMetadataIdDescription.setText(
-            self.config_data.metadata.identification.description
+            str(self.config_data.metadata.identification.description)
         )
-        self.lineEditMetadataIdKeywords.setText(
-            str(self.config_data.metadata.identification.keywords)
-        )
+        self.listWidgetMetadataIdKeywords.clear()
+        for key in self.config_data.metadata.identification.keywords:
+            value = key
+            if isinstance(self.config_data.metadata.identification.keywords, dict):
+                value = {key: self.config_data.metadata.identification.keywords[key]}
+            self.listWidgetMetadataIdKeywords.addItem(str(value))
+
         self.lineEditMetadataIdKeywordsType.setText(
             self.config_data.metadata.identification.keywords_type
         )
