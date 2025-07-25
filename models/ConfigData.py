@@ -382,6 +382,13 @@ class ConfigData:
 
     def _pack_locales_data_into_list(self, data, list_widget):
         list_widget.clear()
+
+        # data can be string, list or dict (for properties like title, description, keywords)
+        if isinstance(data, str):
+            value = f"en: {data}"
+            list_widget.addItem(value)
+            return
+
         for key in data:
             if isinstance(data, dict):
                 local_key_content = data[key]
@@ -392,6 +399,6 @@ class ConfigData:
                     for local_key in local_key_content:
                         value = f"{key}: {local_key}"
                         list_widget.addItem(value)
-            else:  # list of strings
+            elif isinstance(data, list):  # list of strings
                 value = f"en: {key}"
                 list_widget.addItem(value)
