@@ -244,32 +244,33 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
                 self.config_data.set_data_from_yaml(yaml.safe_load(file_content))
                 self.config_data.set_ui_from_data(self)
 
-                # show messages about missing or mistyped values during deserialization
-
-                QMessageBox.warning(
-                    self, "Warning", f"{self.config_data.error_message}"
+                # log messages about missing or mistyped values during deserialization
+                QgsMessageLog.logMessage(
+                    f"Errors during deserialization: {self.config_data.error_message}"
                 )
-                print(
-                    self.config_data.error_message
-                )  # printed, so it can be accessed later
-
-                QMessageBox.information(
-                    self, "Message", f"{self.config_data.display_message}"
+                QgsMessageLog.logMessage(
+                    f"Default values used for missing YAML fields: {self.config_data.defaults_message}"
                 )
-                print(
-                    self.config_data.display_message
-                )  # printed, so it can be accessed later
+
+                # summarize all properties missing/overwitten with defaults
+                # TODO: opportunity to match against the list of absolutely crucial properties
+                # atm, warning with the full list of properties
+                all_missing_props = self.config_data.all_missing_props
+                QgsMessageLog.logMessage(
+                    f"All missing or replaced properties: {self.config_data.all_missing_props}"
+                )
+
+                if len(all_missing_props) > 0:
+                    QMessageBox.warning(
+                        self,
+                        "Warning",
+                        f"All missing or replaced properties (check logs for more details): {self.config_data.all_missing_props}",
+                    )
 
         except Exception as e:
             QMessageBox.warning(self, "Error", f"Cannot open file:\n{str(e)}")
         finally:
             QApplication.restoreOverrideCursor()
-
-    def select_items_by_text(list_widget, texts_to_select):
-        for i in range(list_widget.count()):
-            item = list_widget.item(i)
-            if item.text() in texts_to_select:
-                item.setSelected(True)
 
     def filterResources(self, filter):
         self.proxy.setDynamicSortFilter(True)

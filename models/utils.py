@@ -8,10 +8,11 @@ from .top_level.utils import InlineList
 
 def update_dataclass_from_dict(
     instance, new_dict, prop_name: str = ""
-) -> tuple[list, list]:
+) -> tuple[list, list, list]:
     hints = get_type_hints(type(instance))
     missing_fields = []
     wrong_types = []
+    all_missing_props = []
 
     # loop through the instance properties
     for fld in fields(instance):
@@ -25,11 +26,14 @@ def update_dataclass_from_dict(
 
             # If field is a dataclass and new_value is a dict, recurse
             if is_dataclass(current_value) and isinstance(new_value, dict):
-                new_missing_fields, new_wrong_types = update_dataclass_from_dict(
-                    current_value, new_value, f"{prop_name}: {field_name}"
+                new_missing_fields, new_wrong_types, new_missing_props = (
+                    update_dataclass_from_dict(
+                        current_value, new_value, f"{prop_name}.{field_name}"
+                    )
                 )
                 missing_fields.extend(new_missing_fields)
                 wrong_types.extend(new_wrong_types)
+                all_missing_props.extend(new_missing_props)
             else:
                 if _is_instance_of_type(new_value, expected_type):
 
@@ -40,14 +44,14 @@ def update_dataclass_from_dict(
                     setattr(instance, field_name, new_value)
                 else:
                     wrong_types.append(
-                        f"Skipped {field_name}: expected {expected_type}, got {type(new_value)}"
+                        f"Skipped '{prop_name}.{field_name}': expected {expected_type}, got {type(new_value)}"
                     )
-                    print(
-                        f"Skipped {field_name}: expected {expected_type}, got {type(new_value)}"
-                    )
+                    all_missing_props.append(f"{prop_name}.{field_name}")
         else:
-            missing_fields.append(f"{prop_name}: {field_name}")
-    return missing_fields, wrong_types
+            missing_fields.append(f"{prop_name}.{field_name}")
+            all_missing_props.append(f"{prop_name}.{field_name}")
+
+    return missing_fields, wrong_types, all_missing_props
 
 
 def _is_instance_of_type(value, expected_type) -> bool:

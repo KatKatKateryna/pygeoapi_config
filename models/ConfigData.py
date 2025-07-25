@@ -35,17 +35,18 @@ class ConfigData:
         # keep track of missing values of wrong types (replaced with defaults)
         default_fields = []
         wrong_types = []
+        all_missing_props = []
 
-        defaults_server, wrong_types_server = update_dataclass_from_dict(
-            self.server, server_config, "server"
+        defaults_server, wrong_types_server, all_missing_props_server = (
+            update_dataclass_from_dict(self.server, server_config, "server")
         )
 
-        defaults_logging, wrong_types_logging = update_dataclass_from_dict(
-            self.logging, logging_config, "logging"
+        defaults_logging, wrong_types_logging, all_missing_props_logging = (
+            update_dataclass_from_dict(self.logging, logging_config, "logging")
         )
 
-        defaults_metadata, wrong_types_metadata = update_dataclass_from_dict(
-            self.metadata, metadata_config, "metadata"
+        defaults_metadata, wrong_types_metadata, all_missing_props_metadata = (
+            update_dataclass_from_dict(self.metadata, metadata_config, "metadata")
         )
 
         default_fields.extend(defaults_server)
@@ -54,6 +55,9 @@ class ConfigData:
         wrong_types.extend(wrong_types_server)
         wrong_types.extend(wrong_types_logging)
         wrong_types.extend(wrong_types_metadata)
+        all_missing_props.extend(all_missing_props_server)
+        all_missing_props.extend(all_missing_props_logging)
+        all_missing_props.extend(all_missing_props_metadata)
 
         self.resources = {}
         for res_config in resources_dict_list:
@@ -65,43 +69,51 @@ class ConfigData:
                 new_resource_item = ResourceConfigTemplate(
                     instance_name=resource_instance_name
                 )
-                defaults_resource, wrong_types_resource = update_dataclass_from_dict(
-                    new_resource_item,
-                    resource_data,
-                    f"resources: {resource_instance_name}",
+                defaults_resource, wrong_types_resource, all_missing_props_resource = (
+                    update_dataclass_from_dict(
+                        new_resource_item,
+                        resource_data,
+                        f"resources.{resource_instance_name}",
+                    )
                 )
                 default_fields.extend(defaults_resource)
                 wrong_types.extend(wrong_types_resource)
+                all_missing_props.extend(all_missing_props_resource)
 
                 self.resources[resource_instance_name] = new_resource_item
 
             else:
-                print(f"Skipping invalid resource entry: {res_config}")
+                wrong_types.append(
+                    [f"Skipping invalid resource entry: {str(res_config)[:40]}"]
+                )
+                all_missing_props.append(str(res_config)[:40])
 
         # add dynamic property, so that it is not included in asdict()
         # ideally, we should overwrite the __init__ method, but it is not so important property
-        if len(default_fields) > 0:
-            self._display_message = (
-                f"Default values used for missing YAML fields: {default_fields}"
-            )
-            self._wrong_types = f"Errors during deserialization: {wrong_types}"
-        else:
-            self._display_message = ""
-            self._wrong_types = ""
+        self._defaults_used = default_fields
+        self._wrong_types = wrong_types
+        self._all_missing_props = all_missing_props
 
     @property
-    def display_message(self):
+    def defaults_message(self):
         # taking precaution here because the property was not explicitly defined in the __init__ method
-        if hasattr(self, "_display_message"):
-            return self._display_message
-        return ""
+        if hasattr(self, "_defaults_used"):
+            return self._defaults_used
+        return []
 
     @property
     def error_message(self):
         # taking precaution here because the property was not explicitly defined in the __init__ method
         if hasattr(self, "_wrong_types"):
             return self._wrong_types
-        return ""
+        return []
+
+    @property
+    def all_missing_props(self):
+        # taking precaution here because the property was not explicitly defined in the __init__ method
+        if hasattr(self, "_all_missing_props"):
+            return self._all_missing_props
+        return []
 
     def set_data_from_ui(self, dialog):
 
@@ -243,12 +255,9 @@ class ConfigData:
         dialog.lineEditUrl.setText(self.server.url)
 
         # language
-        for i in range(dialog.listWidgetLang.count()):
-            item = dialog.listWidgetLang.item(i)
-            if item.text() in self.server.languages:
-                item.setSelected(True)
-            else:
-                item.setSelected(False)
+        self._select_list_widget_items_by_texts(
+            list_widget=dialog.listWidgetLang, texts_to_select=self.server.languages
+        )
 
         # limits
         dialog.spinBoxDefault.setValue(self.server.limits.default_items)
@@ -333,6 +342,14 @@ class ConfigData:
 
         dialog.proxy.setSourceModel(dialog.model)
         dialog.listViewCollection.setModel(dialog.proxy)
+
+    def _select_list_widget_items_by_texts(self, *, list_widget, texts_to_select):
+        for i in range(list_widget.count()):
+            item = list_widget.item(i)
+            if item.text() in texts_to_select:
+                item.setSelected(True)
+            else:
+                item.setSelected(False)
 
     def _set_combo_box_value_from_data(self, *, combo_box, value):
         """Set the combo box value based on the available choice and provided value."""
