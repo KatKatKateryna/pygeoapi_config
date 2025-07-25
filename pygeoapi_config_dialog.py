@@ -243,6 +243,16 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
                 self.config_data = ConfigData()
                 self.config_data.set_data_from_yaml(yaml.safe_load(file_content))
                 self.config_data.set_ui_from_data(self)
+
+                # show messages about missing or mistyped values during deserialization
+
+                QMessageBox.warning(
+                    self, "Warning", f"{self.config_data.error_message}"
+                )
+                print(
+                    self.config_data.error_message
+                )  # printed, so it can be accessed later
+
                 QMessageBox.information(
                     self, "Message", f"{self.config_data.display_message}"
                 )

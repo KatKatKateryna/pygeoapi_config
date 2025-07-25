@@ -32,16 +32,28 @@ class ConfigData:
         resources_dict_list = [{k: v} for k, v in resources_config.items()]
 
         # Update the dataclass properties with the new values
-        defaults = []
-        defaults.extend(
-            update_dataclass_from_dict(self.server, server_config, "server")
+        # keep track of missing values of wrong types (replaced with defaults)
+        default_fields = []
+        wrong_types = []
+
+        defaults_server, wrong_types_server = update_dataclass_from_dict(
+            self.server, server_config, "server"
         )
-        defaults.extend(
-            update_dataclass_from_dict(self.logging, logging_config, "logging")
+
+        defaults_logging, wrong_types_logging = update_dataclass_from_dict(
+            self.logging, logging_config, "logging"
         )
-        defaults.extend(
-            update_dataclass_from_dict(self.metadata, metadata_config, "metadata")
+
+        defaults_metadata, wrong_types_metadata = update_dataclass_from_dict(
+            self.metadata, metadata_config, "metadata"
         )
+
+        default_fields.extend(defaults_server)
+        default_fields.extend(defaults_logging)
+        default_fields.extend(defaults_metadata)
+        wrong_types.extend(wrong_types_server)
+        wrong_types.extend(wrong_types_logging)
+        wrong_types.extend(wrong_types_metadata)
 
         self.resources = {}
         for res_config in resources_dict_list:
@@ -53,31 +65,42 @@ class ConfigData:
                 new_resource_item = ResourceConfigTemplate(
                     instance_name=resource_instance_name
                 )
-                defaults.extend(
-                    update_dataclass_from_dict(
-                        new_resource_item,
-                        resource_data,
-                        f"resources: {resource_instance_name}",
-                    )
+                defaults_resource, wrong_types_resource = update_dataclass_from_dict(
+                    new_resource_item,
+                    resource_data,
+                    f"resources: {resource_instance_name}",
                 )
+                default_fields.extend(defaults_resource)
+                wrong_types.extend(wrong_types_resource)
+
                 self.resources[resource_instance_name] = new_resource_item
+
             else:
                 print(f"Skipping invalid resource entry: {res_config}")
 
         # add dynamic property, so that it is not included in asdict()
         # ideally, we should overwrite the __init__ method, but it is not so important property
-        if len(defaults) > 0:
+        if len(default_fields) > 0:
             self._display_message = (
-                f"Default values used for missing YAML fields: {defaults}"
+                f"Default values used for missing YAML fields: {default_fields}"
             )
+            self._wrong_types = f"Errors during deserialization: {wrong_types}"
         else:
             self._display_message = ""
+            self._wrong_types = ""
 
     @property
     def display_message(self):
         # taking precaution here because the property was not explicitly defined in the __init__ method
         if hasattr(self, "_display_message"):
             return self._display_message
+        return ""
+
+    @property
+    def error_message(self):
+        # taking precaution here because the property was not explicitly defined in the __init__ method
+        if hasattr(self, "_wrong_types"):
+            return self._wrong_types
         return ""
 
     def set_data_from_ui(self, dialog):
