@@ -24,6 +24,18 @@ Modify the user interface by opening pygeoapiconfig_dialog_base.ui in [Qt Creato
 
 ![screenshot](/screenshot.png)
 
+## Translate
+
+1. Create or modify 'i18n\pygeoapi_config.pro' file to specify the .ui and .py files that contain translatable strings.
+
+2. Run the following command from OSGeo4W Shell to generate .ts files specified in 'pygeoapi_config.pro':
+
+`pylupdate5 i18n\pygeoapi_config.pro`
+
+3. After editing the .ts files, run the following command to compile .dm files for each locale:
+
+`lrelease pygeoapi_config_pt.ts`
+
 ## License
 
 This project is released under an [MIT License](./LICENSE)
