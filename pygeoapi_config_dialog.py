@@ -218,6 +218,7 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
                         file,
                         default_flow_style=False,
                         sort_keys=False,
+                        allow_unicode=True,
                     )
                 QgsMessageLog.logMessage(f"File saved to: {file_path}")
             except Exception as e:
