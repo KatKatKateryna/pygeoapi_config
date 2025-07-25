@@ -125,10 +125,15 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
     def add_metadata_keyword(self):
         """Add keyword to metadata, called from .ui file."""
 
+        locale = self.comboBoxKeywordsLocale.currentText()
         text = self.addMetadataKeywordLineEdit.text().strip()
         if text:
-            self.listWidgetMetadataIdKeywords.addItem(text)
+            self.listWidgetMetadataIdKeywords.addItem(f"{locale}: {text}")
             self.addMetadataKeywordLineEdit.clear()
+            # self.comboBoxKeywordsLocale.setCurrentIndex(0)
+
+        # sort the content
+        self.listWidgetMetadataIdKeywords.model().sort(0)
 
     def delete_metadata_keyword(self):
         """Delete keyword from metadata, called from .ui file."""

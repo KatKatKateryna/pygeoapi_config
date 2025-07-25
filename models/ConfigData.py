@@ -133,10 +133,10 @@ class ConfigData:
         self.metadata.identification.description = (
             dialog.lineEditMetadataIdDescription.text()
         )
-        self.metadata.identification.keywords = [
-            dialog.listWidgetMetadataIdKeywords.item(i).text()
-            for i in range(dialog.listWidgetMetadataIdKeywords.count())
-        ]
+
+        self.metadata.identification.keywords = self._unpack_locales_values_list(
+            dialog.listWidgetMetadataIdKeywords
+        )
 
         self.metadata.identification.keywords_type = (
             dialog.lineEditMetadataIdKeywordsType.text()
@@ -246,12 +246,18 @@ class ConfigData:
         dialog.lineEditMetadataIdDescription.setText(
             str(self.metadata.identification.description)
         )
+        # possible list of strings or dictionary
+        # limitation: even if YAML had just a list of keywords, it will be interpreted here as "en" locale by default
         dialog.listWidgetMetadataIdKeywords.clear()
         for key in self.metadata.identification.keywords:
-            value = key
             if isinstance(self.metadata.identification.keywords, dict):
-                value = {key: self.metadata.identification.keywords[key]}
-            dialog.listWidgetMetadataIdKeywords.addItem(str(value))
+                local_key_list = self.metadata.identification.keywords[key]
+                for local_key in local_key_list:
+                    value = f"{key}: {local_key}"
+                    dialog.listWidgetMetadataIdKeywords.addItem(value)
+            else:  # list of strings
+                value = f"en: {key}"
+                dialog.listWidgetMetadataIdKeywords.addItem(value)
 
         dialog.lineEditMetadataIdKeywordsType.setText(
             self.metadata.identification.keywords_type
@@ -308,3 +314,18 @@ class ConfigData:
             combo_box.setCurrentIndex(0)
         else:
             combo_box.clear()
+
+    def _unpack_locales_values_list(self, list_widget):
+        # unpack string values with locales
+
+        all_locales_dict = {}
+        for i in range(list_widget.count()):
+            full_line_text = list_widget.item(i).text()
+            locale = full_line_text.split(": ")[0]
+            value = full_line_text.split(": ")[1]
+
+            if locale not in all_locales_dict:
+                all_locales_dict[locale] = []
+            all_locales_dict[locale].append(value)
+
+        return all_locales_dict

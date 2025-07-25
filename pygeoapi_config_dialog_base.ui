@@ -615,11 +615,40 @@
                 <item>
                   <layout class="QVBoxLayout">
                   <item>
+
+                  
+                  <layout class="QHBoxLayout">
+                  
+                    <item>
+                    <widget class="QComboBox" name="comboBoxKeywordsLocale">
+                      <item>
+                      <property name="text">
+                        <string>en</string>
+                      </property>
+                      </item>
+                      <item>
+                      <property name="text">
+                        <string>pt</string>
+                      </property>
+                      </item>
+                      <item>
+                      <property name="text">
+                        <string>fr</string>
+                      </property>
+                      </item>
+                    </widget>
+                    </item>
+
+                  <item>
                     <widget class="QLineEdit" name="addMetadataKeywordLineEdit">
                     <property name="placeholderText">
                       <string>Enter keyword to add</string>
                     </property>
                     </widget>
+                    
+                  </item>
+                  </layout>
+
                   </item>
                   <item>
                     <widget class="QPushButton" name="addMetadataKeywordButton">
