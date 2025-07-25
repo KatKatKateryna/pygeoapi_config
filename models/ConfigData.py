@@ -129,13 +129,18 @@ class ConfigData:
         self.logging.dateformat = dialog.lineEditDateformat.text()
 
         # metadata identification
-        self.metadata.identification.title = dialog.lineEditMetadataIdTitle.text()
-        self.metadata.identification.description = (
-            dialog.lineEditMetadataIdDescription.text()
+        self.metadata.identification.title = self._unpack_locales_values_list_to_dict(
+            dialog.listWidgetMetadataIdTitle
         )
-
-        self.metadata.identification.keywords = self._unpack_locales_values_list(
-            dialog.listWidgetMetadataIdKeywords
+        self.metadata.identification.description = (
+            self._unpack_locales_values_list_to_dict(
+                dialog.listWidgetMetadataIdDescription
+            )
+        )
+        self.metadata.identification.keywords = (
+            self._unpack_locales_values_list_to_dict(
+                dialog.listWidgetMetadataIdKeywords
+            )
         )
 
         self.metadata.identification.keywords_type = (
@@ -242,22 +247,27 @@ class ConfigData:
         dialog.lineEditDateformat.setText(self.logging.dateformat)
 
         # metadata identification
-        dialog.lineEditMetadataIdTitle.setText(str(self.metadata.identification.title))
-        dialog.lineEditMetadataIdDescription.setText(
-            str(self.metadata.identification.description)
+
+        # DATA WITH LOCALES
+        # incoming type: possible list of strings or dictionary
+        # limitation: even if YAML had just a list of strings, it will be interpreted here as "en" locale by default
+
+        # title
+        self._pack_locales_data_into_list(
+            self.metadata.identification.title,
+            dialog.listWidgetMetadataIdTitle,
         )
-        # possible list of strings or dictionary
-        # limitation: even if YAML had just a list of keywords, it will be interpreted here as "en" locale by default
-        dialog.listWidgetMetadataIdKeywords.clear()
-        for key in self.metadata.identification.keywords:
-            if isinstance(self.metadata.identification.keywords, dict):
-                local_key_list = self.metadata.identification.keywords[key]
-                for local_key in local_key_list:
-                    value = f"{key}: {local_key}"
-                    dialog.listWidgetMetadataIdKeywords.addItem(value)
-            else:  # list of strings
-                value = f"en: {key}"
-                dialog.listWidgetMetadataIdKeywords.addItem(value)
+
+        # description
+        self._pack_locales_data_into_list(
+            self.metadata.identification.description,
+            dialog.listWidgetMetadataIdDescription,
+        )
+
+        # keywords
+        self._pack_locales_data_into_list(
+            self.metadata.identification.keywords, dialog.listWidgetMetadataIdKeywords
+        )
 
         dialog.lineEditMetadataIdKeywordsType.setText(
             self.metadata.identification.keywords_type
@@ -315,7 +325,7 @@ class ConfigData:
         else:
             combo_box.clear()
 
-    def _unpack_locales_values_list(self, list_widget):
+    def _unpack_locales_values_list_to_dict(self, list_widget):
         # unpack string values with locales
 
         all_locales_dict = {}
@@ -329,3 +339,19 @@ class ConfigData:
             all_locales_dict[locale].append(value)
 
         return all_locales_dict
+
+    def _pack_locales_data_into_list(self, data, list_widget):
+        list_widget.clear()
+        for key in data:
+            if isinstance(data, dict):
+                local_key_content = data[key]
+                if isinstance(local_key_content, str):
+                    value = f"{key}: {local_key_content}"
+                    list_widget.addItem(value)
+                else:  # list
+                    for local_key in local_key_content:
+                        value = f"{key}: {local_key}"
+                        list_widget.addItem(value)
+            else:  # list of strings
+                value = f"en: {key}"
+                list_widget.addItem(value)

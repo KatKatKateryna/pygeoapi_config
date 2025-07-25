@@ -122,12 +122,26 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
         if logFile:
             self.lineEditLogfile.setText(logFile[0])
 
+    def _throw_if_language_entry_exists_in_list_widget(self, list_widget, locale):
+        for i in range(list_widget.count()):
+            print(list_widget.item(i).text())
+            print(f"{locale}: ")
+            if list_widget.item(i).text().startswith(f"{locale}: "):
+                QMessageBox.warning(
+                    self,
+                    "Message",
+                    f"Data entry in selected language already exists: {locale}",
+                )
+
     def add_metadata_id_title(self):
         """Add title to metadata, called from .ui file."""
 
         locale = self.comboBoxIdTitleLocale.currentText()
         text = self.addMetadataIdTitleLineEdit.text().strip()
         if text:
+            self._throw_if_language_entry_exists_in_list_widget(
+                self.listWidgetMetadataIdTitle, locale
+            )
             self.listWidgetMetadataIdTitle.addItem(f"{locale}: {text}")
             self.addMetadataIdTitleLineEdit.clear()
 
@@ -140,6 +154,9 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
         locale = self.comboBoxIdDescriptionLocale.currentText()
         text = self.addMetadataIdDescriptionLineEdit.text().strip()
         if text:
+            self._throw_if_language_entry_exists_in_list_widget(
+                self.listWidgetMetadataIdDescription, locale
+            )
             self.listWidgetMetadataIdDescription.addItem(f"{locale}: {text}")
             self.addMetadataIdDescriptionLineEdit.clear()
 
