@@ -54,3 +54,16 @@ class MetadataConfig:
     license: LicenseConfig = field(default_factory=lambda: LicenseConfig())
     provider: ProviderConfig = field(default_factory=lambda: ProviderConfig())
     contact: ContactConfig = field(default_factory=lambda: ContactConfig())
+
+    def get_invalid_properties(self):
+        """Checks the values of mandatory fields: identification (title, description, keywords)."""
+        all_invalid_fields = []
+
+        if len(self.identification.title) == 0:
+            all_invalid_fields.append("metadata.identification.title")
+        if len(self.identification.description) == 0:
+            all_invalid_fields.append("metadata.identification.description")
+        if len(self.identification.keywords) == 0:
+            all_invalid_fields.append("metadata.identification.keywords")
+
+        return all_invalid_fields

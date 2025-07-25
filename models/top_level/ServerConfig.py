@@ -65,3 +65,16 @@ class ServerConfig:
     # optional fields:
     # TODO: Not currently used in the UI
     # api_rules: ApiRulesConfig | None = None
+
+    def get_invalid_properties(self):
+        """Checks the values of mandatory fields: bind (host), url, languages."""
+        all_invalid_fields = []
+
+        if len(self.bind.host) < 7:
+            all_invalid_fields.append("server.bind.host")
+        if len(self.url) < 7:
+            all_invalid_fields.append("server.url")
+        if len(self.languages) == 0:
+            all_invalid_fields.append("server.languages")
+
+        return all_invalid_fields
