@@ -122,6 +122,30 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
         if logFile:
             self.lineEditLogfile.setText(logFile[0])
 
+    def add_metadata_id_title(self):
+        """Add title to metadata, called from .ui file."""
+
+        locale = self.comboBoxIdTitleLocale.currentText()
+        text = self.addMetadataIdTitleLineEdit.text().strip()
+        if text:
+            self.listWidgetMetadataIdTitle.addItem(f"{locale}: {text}")
+            self.addMetadataIdTitleLineEdit.clear()
+
+        # sort the content
+        self.listWidgetMetadataIdTitle.model().sort(0)
+
+    def add_metadata_id_description(self):
+        """Add description to metadata, called from .ui file."""
+
+        locale = self.comboBoxIdDescriptionLocale.currentText()
+        text = self.addMetadataIdDescriptionLineEdit.text().strip()
+        if text:
+            self.listWidgetMetadataIdDescription.addItem(f"{locale}: {text}")
+            self.addMetadataIdDescriptionLineEdit.clear()
+
+        # sort the content
+        self.listWidgetMetadataIdDescription.model().sort(0)
+
     def add_metadata_keyword(self):
         """Add keyword to metadata, called from .ui file."""
 
@@ -134,6 +158,20 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
 
         # sort the content
         self.listWidgetMetadataIdKeywords.model().sort(0)
+
+    def delete_metadata_id_title(self):
+        """Delete keyword from metadata, called from .ui file."""
+
+        selected_item = self.listWidgetMetadataIdTitle.currentRow()
+        if selected_item >= 0:
+            self.listWidgetMetadataIdTitle.takeItem(selected_item)
+
+    def delete_metadata_id_description(self):
+        """Delete keyword from metadata, called from .ui file."""
+
+        selected_item = self.listWidgetMetadataIdDescription.currentRow()
+        if selected_item >= 0:
+            self.listWidgetMetadataIdDescription.takeItem(selected_item)
 
     def delete_metadata_keyword(self):
         """Delete keyword from metadata, called from .ui file."""
