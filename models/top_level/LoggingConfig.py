@@ -33,4 +33,4 @@ class LoggingConfig:
     logformat: str | None = None
     dateformat: str | None = None
     # TODO: Not currently used in the UI
-    rotation: RotationConfig | None = None
+    # rotation: RotationConfig | None = None

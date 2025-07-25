@@ -64,4 +64,4 @@ class ServerConfig:
 
     # optional fields:
     # TODO: Not currently used in the UI
-    api_rules: ApiRulesConfig | None = None
+    # api_rules: ApiRulesConfig | None = None
