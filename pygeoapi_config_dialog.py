@@ -75,8 +75,13 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
                 "tag:yaml.org,2002:seq", data, flow_style=True
             ),
         )
+
+        # custom assignments
+        self.model = QStringListModel()
+        self.proxy = QSortFilterProxyModel()
+
         # add default values to the UI
-        self.set_ui_from_config_data()
+        self.config_data.set_ui_from_data(self)
 
     def on_button_clicked(self, button):
 
@@ -132,143 +137,6 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
         if selected_item >= 0:
             self.listWidgetMetadataIdKeywords.takeItem(selected_item)
 
-    def write_yaml(self):
-
-        try:
-
-            # bind
-            self.config_data.server.bind.host = self.lineEditHost.text()
-            self.config_data.server.bind.port = self.spinBoxPort.value()
-
-            # gzip
-            self.config_data.server.gzip = self.checkBoxGzip.isChecked()
-
-            # pretty print
-            self.config_data.server.pretty_print = self.checkBoxPretty.isChecked()
-
-            # admin
-            self.config_data.server.admin = self.checkBoxAdmin.isChecked()
-
-            # cors
-            self.config_data.server.cors = self.checkBoxCors.isChecked()
-
-            # templates
-            self.config_data.server.templates.path = self.lineEditTemplatesPath.text()
-            self.config_data.server.templates.static = (
-                self.lineEditTemplatesStatic.text()
-            )
-
-            # map
-            self.config_data.server.map.url = self.lineEditMapUrl.text()
-            self.config_data.server.map.attribution = self.lineEditAttribution.text()
-
-            # url
-            self.config_data.server.url = self.lineEditUrl.text()
-
-            # language
-            self.config_data.server.languages = []
-            for i in range(self.listWidgetLang.count()):
-                item = self.listWidgetLang.item(i)
-                if item.isSelected():
-                    self.config_data.server.languages.append(item.text())
-
-            # limits
-            self.config_data.server.limits.default_items = self.spinBoxDefault.value()
-            self.config_data.server.limits.max_items = self.spinBoxMax.value()
-
-            self.config_data.server.limits.on_exceed = self.comboBoxExceed.currentText()
-
-            # logging
-            self.config_data.logging.level = self.comboBoxLog.currentText()
-            self.config_data.logging.logfile = self.lineEditLogfile.text()
-            self.config_data.logging.logformat = self.lineEditLogformat.text()
-            self.config_data.logging.dateformat = self.lineEditDateformat.text()
-
-            # metadata identification
-            self.config_data.metadata.identification.title = (
-                self.lineEditMetadataIdTitle.text()
-            )
-            self.config_data.metadata.identification.description = (
-                self.lineEditMetadataIdDescription.text()
-            )
-            self.config_data.metadata.identification.keywords = [
-                self.listWidgetMetadataIdKeywords.item(i).text()
-                for i in range(self.listWidgetMetadataIdKeywords.count())
-            ]
-
-            self.config_data.metadata.identification.keywords_type = (
-                self.lineEditMetadataIdKeywordsType.text()
-            )
-            self.config_data.metadata.identification.terms_of_service = (
-                self.lineEditMetadataIdTerms.text()
-            )
-            self.config_data.metadata.identification.url = (
-                self.lineEditMetadataIdUrl.text()
-            )
-
-            # metadata license
-            self.config_data.metadata.license.name = (
-                self.lineEditMetadataLicenseName.text()
-            )
-            self.config_data.metadata.license.url = (
-                self.lineEditMetadataLicenseUrl.text()
-            )
-
-            # metadata provider
-            self.config_data.metadata.provider.name = (
-                self.lineEditMetadataProviderName.text()
-            )
-            self.config_data.metadata.provider.url = (
-                self.lineEditMetadataProviderUrl.text()
-            )
-
-            # metadata contact
-            self.config_data.metadata.contact.name = (
-                self.lineEditMetadataContactName.text()
-            )
-            self.config_data.metadata.contact.position = (
-                self.lineEditMetadataContactPosition.text()
-            )
-            self.config_data.metadata.contact.address = (
-                self.lineEditMetadataContactAddress.text()
-            )
-            self.config_data.metadata.contact.city = (
-                self.lineEditMetadataContactCity.text()
-            )
-            self.config_data.metadata.contact.stateorprovince = (
-                self.lineEditMetadataContactState.text()
-            )
-            self.config_data.metadata.contact.postalcode = (
-                self.lineEditMetadataContactPostal.text()
-            )
-            self.config_data.metadata.contact.country = (
-                self.lineEditMetadataContactCountry.text()
-            )
-            self.config_data.metadata.contact.phone = (
-                self.lineEditMetadataContactPhone.text()
-            )
-            self.config_data.metadata.contact.fax = (
-                self.lineEditMetadataContactFax.text()
-            )
-            self.config_data.metadata.contact.email = (
-                self.lineEditMetadataContactEmail.text()
-            )
-            self.config_data.metadata.contact.url = (
-                self.lineEditMetadataContactUrl.text()
-            )
-            self.config_data.metadata.contact.hours = (
-                self.lineEditMetadataContactHours.text()
-            )
-            self.config_data.metadata.contact.instructions = (
-                self.lineEditMetadataContactInstructions.text()
-            )
-            self.config_data.metadata.contact.role = (
-                self.lineEditMetadataContactRole.text()
-            )
-
-        except Exception as e:
-            QgsMessageLog.logMessage(f"Error deserializing: {e}")
-
     def save_to_file(self):
 
         file_path, _ = QFileDialog.getSaveFileName(
@@ -279,7 +147,12 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
             QApplication.setOverrideCursor(Qt.WaitCursor)
             try:
                 with open(file_path, "w", encoding="utf-8") as file:
-                    self.write_yaml()
+
+                    try:
+                        self.config_data.set_data_from_ui(self)
+                    except Exception as e:
+                        QgsMessageLog.logMessage(f"Error deserializing: {e}")
+
                     yaml.dump(
                         asdict(self.config_data),
                         file,
@@ -308,7 +181,7 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
                 # reset data
                 self.config_data = ConfigData()
                 self.config_data.set_data_from_yaml(yaml.safe_load(file_content))
-                self.set_ui_from_config_data()
+                self.config_data.set_ui_from_data(self)
                 QMessageBox.information(
                     self, "Message", f"{self.config_data.display_message}"
                 )
@@ -326,161 +199,6 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
             item = list_widget.item(i)
             if item.text() in texts_to_select:
                 item.setSelected(True)
-
-    def set_ui_from_config_data(self):
-
-        # bind
-        self.lineEditHost.setText(self.config_data.server.bind.host)
-        self.spinBoxPort.setValue(self.config_data.server.bind.port)
-
-        # gzip
-        self.checkBoxGzip.setChecked(self.config_data.server.gzip)
-
-        # mimetype
-        self._set_combo_box_value_from_data(
-            combo_box=self.comboBoxMime,
-            value=self.config_data.server.mimetype,
-        )
-
-        # encoding
-        self._set_combo_box_value_from_data(
-            combo_box=self.comboBoxEncoding,
-            value=self.config_data.server.encoding,
-        )
-
-        # pretty print
-        self.checkBoxPretty.setChecked(self.config_data.server.pretty_print)
-
-        # admin
-        self.checkBoxAdmin.setChecked(self.config_data.server.admin)
-
-        # cors
-        self.checkBoxCors.setChecked(self.config_data.server.cors)
-
-        # templates
-        self.lineEditTemplatesPath.setText(self.config_data.server.templates.path)
-        self.lineEditTemplatesStatic.setText(self.config_data.server.templates.static)
-
-        # map
-        self.lineEditMapUrl.setText(self.config_data.server.map.url)
-        self.lineEditAttribution.setText(self.config_data.server.map.attribution)
-
-        self.lineEditUrl.setText(self.config_data.server.url)
-
-        # language
-        for i in range(self.listWidgetLang.count()):
-            item = self.listWidgetLang.item(i)
-            if item.text() in self.config_data.server.languages:
-                item.setSelected(True)
-            else:
-                item.setSelected(False)
-
-        # limits
-        self.spinBoxDefault.setValue(self.config_data.server.limits.default_items)
-        self.spinBoxMax.setValue(self.config_data.server.limits.max_items)
-
-        self._set_combo_box_value_from_data(
-            combo_box=self.comboBoxExceed,
-            value=self.config_data.server.limits.on_exceed,
-        )
-
-        # logging
-        self._set_combo_box_value_from_data(
-            combo_box=self.comboBoxLog,
-            value=self.config_data.logging.level,
-        )
-
-        self.lineEditLogfile.setText(self.config_data.logging.logfile)
-        self.lineEditLogformat.setText(self.config_data.logging.logformat)
-        self.lineEditDateformat.setText(self.config_data.logging.dateformat)
-
-        # metadata identification
-        self.lineEditMetadataIdTitle.setText(
-            str(self.config_data.metadata.identification.title)
-        )
-        self.lineEditMetadataIdDescription.setText(
-            str(self.config_data.metadata.identification.description)
-        )
-        self.listWidgetMetadataIdKeywords.clear()
-        for key in self.config_data.metadata.identification.keywords:
-            value = key
-            if isinstance(self.config_data.metadata.identification.keywords, dict):
-                value = {key: self.config_data.metadata.identification.keywords[key]}
-            self.listWidgetMetadataIdKeywords.addItem(str(value))
-
-        self.lineEditMetadataIdKeywordsType.setText(
-            self.config_data.metadata.identification.keywords_type
-        )
-        self.lineEditMetadataIdTerms.setText(
-            self.config_data.metadata.identification.terms_of_service
-        )
-        self.lineEditMetadataIdUrl.setText(self.config_data.metadata.identification.url)
-
-        # metadata license
-        self.lineEditMetadataLicenseName.setText(self.config_data.metadata.license.name)
-        self.lineEditMetadataLicenseUrl.setText(self.config_data.metadata.license.url)
-
-        # metadata provider
-        self.lineEditMetadataProviderName.setText(
-            self.config_data.metadata.provider.name
-        )
-        self.lineEditMetadataProviderUrl.setText(self.config_data.metadata.provider.url)
-
-        # metadata contact
-        self.lineEditMetadataContactName.setText(self.config_data.metadata.contact.name)
-        self.lineEditMetadataContactPosition.setText(
-            self.config_data.metadata.contact.position
-        )
-        self.lineEditMetadataContactAddress.setText(
-            self.config_data.metadata.contact.address
-        )
-        self.lineEditMetadataContactCity.setText(self.config_data.metadata.contact.city)
-        self.lineEditMetadataContactState.setText(
-            self.config_data.metadata.contact.stateorprovince
-        )
-        self.lineEditMetadataContactPostal.setText(
-            self.config_data.metadata.contact.postalcode
-        )
-        self.lineEditMetadataContactCountry.setText(
-            self.config_data.metadata.contact.country
-        )
-        self.lineEditMetadataContactPhone.setText(
-            self.config_data.metadata.contact.phone
-        )
-        self.lineEditMetadataContactFax.setText(self.config_data.metadata.contact.fax)
-        self.lineEditMetadataContactEmail.setText(
-            self.config_data.metadata.contact.email
-        )
-        self.lineEditMetadataContactUrl.setText(self.config_data.metadata.contact.url)
-        self.lineEditMetadataContactHours.setText(
-            self.config_data.metadata.contact.hours
-        )
-        self.lineEditMetadataContactInstructions.setText(
-            self.config_data.metadata.contact.instructions
-        )
-        self.lineEditMetadataContactRole.setText(self.config_data.metadata.contact.role)
-
-        # collections
-        self.model = QStringListModel()
-        self.model.setStringList([k for k, _ in self.config_data.resources.items()])
-
-        self.proxy = QSortFilterProxyModel()
-        self.proxy.setSourceModel(self.model)
-        self.listViewCollection.setModel(self.proxy)
-
-    def _set_combo_box_value_from_data(self, *, combo_box, value):
-        """Set the combo box value based on the available choice and provided value."""
-
-        for i in range(combo_box.count()):
-            if combo_box.itemText(i) == value:
-                combo_box.setCurrentIndex(i)
-                return
-
-        # If the value is not found, set to the first item or clear it
-        if combo_box.count() > 0:
-            combo_box.setCurrentIndex(0)
-        else:
-            combo_box.clear()
 
     def filterResources(self, filter):
         self.proxy.setDynamicSortFilter(True)
