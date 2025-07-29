@@ -4,10 +4,12 @@ from enum import Enum
 
 # records
 class LoggingLevel(Enum):
-    DEBUG = "DEBUG"
-    INFO = "INFO"
+    CRITICAL = "CRITICAL"
     ERROR = "ERROR"
     WARNING = "WARNING"
+    INFO = "INFO"
+    DEBUG = "DEBUG"
+    NOTSET = "NOTSET"
 
 
 # data classes

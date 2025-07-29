@@ -32,8 +32,8 @@ class MapConfig:
 
 @dataclass(kw_only=True)
 class TemplatesConfig:
-    path: str = field(default="/path/to/jinja2/templates/folder")
-    static: str = field(default="/path/to/static/folder")
+    path: str = field(default="")
+    static: str = field(default="")
 
 
 @dataclass(kw_only=True)
@@ -55,8 +55,8 @@ class ServerConfig:
     encoding: str = field(default="utf-8")
     gzip: bool = field(default=False)
     languages: list = field(default_factory=lambda: ["en-US"])  # to format with " - "
-    cors: bool = field(default=True)
-    pretty_print: bool = field(default=True)
+    cors: bool = field(default=False)
+    pretty_print: bool = field(default=False)
     limits: LimitsConfig = field(default_factory=lambda: LimitsConfig())
     map: MapConfig = field(default_factory=lambda: MapConfig())
     admin: bool = field(default=False)

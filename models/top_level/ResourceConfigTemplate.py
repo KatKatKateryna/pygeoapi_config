@@ -7,13 +7,12 @@ from .utils import InlineList
 # records
 class ResourceTypes(Enum):
     COLLECTION = "collection"
-    PROCESS = "process"
     STAC = "stac-collection"
 
 
 class ProviderTypes(Enum):
     FEATURE = "feature"
-    COVERAGE = "coverage"
+    MAP = "map"
     TILE = "tile"
 
 

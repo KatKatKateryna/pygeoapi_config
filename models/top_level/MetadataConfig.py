@@ -1,4 +1,37 @@
 from dataclasses import dataclass, field
+from urllib.parse import urlparse
+
+
+# records
+class KeywordType(Enum):
+    DISCIPLINE = "discipline"
+    TEMPORAL = "temporal"
+    PLACE = "place"
+    THEME = "theme"
+    STRATUM = "stratum"
+
+
+class Role(Enum):
+    AUTHOR = "author"
+    COAUTHOR = "coAuthor"
+    COLLABORATOR = "collaborator"
+    CONTRIBUTOR = "contributor"
+    CUSTODIAN = "custodian"
+    DISTRIBUTOR = "distributor"
+    EDITOR = "editor"
+    FUNDER = "funder"
+    MEDIATOR = "mediator"
+    ORIGINATOR = "originator"
+    OWNER = "owner"
+    POINTOFCONTACT = "pointOfContact"
+    PRINCIPALINVESTIGATOR = "principalInvestigator"
+    PROCESSOR = "processor"
+    PUBLISHER = "publisher"
+    RESOURCEPROVIDER = "resourceProvider"
+    RIGHTSHOLDER = "rightsHolder"
+    SPONSOR = "sponsor"
+    STAKEHOLDER = "stakeholder"
+    USER = "user"
 
 
 # data classes
@@ -7,7 +40,7 @@ class IdentificationConfig:
     title: str | dict = field(default_factory=lambda: "")
     description: str | dict = field(default_factory=lambda: "")
     keywords: list | dict = field(default_factory=lambda: [])
-    keywords_type: str = field(default="theme")
+    keywords_type: KeywordType = field(default_factory=lambda: KeywordType.THEME)
     terms_of_service: str = field(
         default="https://creativecommons.org/licenses/by/4.0/"
     )
@@ -41,7 +74,7 @@ class ContactConfig:
     url: str = field(default="Contact URL")
     hours: str = field(default="Mo-Fr 08:00-17:00")
     instructions: str = field(default="During hours of service. Off on weekends.")
-    role: str = field(default="pointOfContact")
+    role: Role = field(default_factory=lambda: Role.pointOfContact)
 
 
 @dataclass(kw_only=True)
@@ -65,5 +98,15 @@ class MetadataConfig:
             all_invalid_fields.append("metadata.identification.description")
         if len(self.identification.keywords) == 0:
             all_invalid_fields.append("metadata.identification.keywords")
+        if len(self.identification.license.name) == 0:
+            all_invalid_fields.append("metadata.identification.license.name")
+        if len(self.identification.provider.name) == 0:
+            all_invalid_fields.append("metadata.identification.provider.name")
+        if len(self.identification.contact.name) == 0:
+            all_invalid_fields.append("metadata.identification.contact.name")
+
+        parsed_url = urlparse(self.identification.url)
+        if not all([parsed_url.scheme, parsed_url.netloc]):
+            all_invalid_fields.append("metadata.identification.url")
 
         return all_invalid_fields
