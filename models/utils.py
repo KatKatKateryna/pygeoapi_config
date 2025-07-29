@@ -100,3 +100,8 @@ def _is_instance_of_type(value, expected_type) -> bool:
 
     # Fallback for normal types
     return isinstance(value, expected_type)
+
+def is_valid_string(text):
+    if len(str(text)) >=1:
+        return True
+    return False

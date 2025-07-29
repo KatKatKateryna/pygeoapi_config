@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from enum import Enum
 
-from .utils import update_dataclass_from_dict
+from .utils import update_dataclass_from_dict, is_valid_string
 from .top_level import (
     ServerConfig,
     LoggingConfig,
@@ -391,24 +391,29 @@ class ConfigData:
         return all_locales_dict
 
     def _pack_locales_data_into_list(self, data, list_widget):
+        """Use ConfigData (list of strings, dict with strings, or a single string) to fill the UI widget list."""
         list_widget.clear()
 
         # data can be string, list or dict (for properties like title, description, keywords)
         if isinstance(data, str):
-            value = f"en: {data}"
-            list_widget.addItem(value)
-            return
+            if is_valid_string(data):
+                value = f"en: {data}"
+                list_widget.addItem(value)
+                return
 
         for key in data:
             if isinstance(data, dict):
                 local_key_content = data[key]
                 if isinstance(local_key_content, str):
-                    value = f"{key}: {local_key_content}"
-                    list_widget.addItem(value)
+                    if is_valid_string(local_key_content):
+                        value = f"{key}: {local_key_content}"
+                        list_widget.addItem(value)
                 else:  # list
                     for local_key in local_key_content:
-                        value = f"{key}: {local_key}"
-                        list_widget.addItem(value)
+                        if is_valid_string(local_key):
+                            value = f"{key}: {local_key}"
+                            list_widget.addItem(value)
             elif isinstance(data, list):  # list of strings
-                value = f"en: {key}"
-                list_widget.addItem(value)
+                if is_valid_string(key):
+                    value = f"en: {key}"
+                    list_widget.addItem(value)
