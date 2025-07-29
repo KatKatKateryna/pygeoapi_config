@@ -212,6 +212,36 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
 
     def save_to_file(self):
 
+        # Set and validate data from UI
+        try:
+            self.config_data.set_data_from_ui(self)
+
+            # validate mandatory fields before saving to file
+            invalid_props = []
+            invalid_props.extend(
+                self.config_data.server.get_invalid_properties()
+            )
+            invalid_props.extend(
+                self.config_data.metadata.get_invalid_properties()
+            )
+
+            if len(invalid_props) > 0:
+                QgsMessageLog.logMessage(
+                    f"Properties are missing or have invalid values: {invalid_props}"
+                )
+                QMessageBox.warning(
+                    self,
+                    "Warning",
+                    f"Properties are missing or have invalid values: {invalid_props}",
+                )
+                return
+
+        except Exception as e:
+            QgsMessageLog.logMessage(f"Error deserializing: {e}")
+            QMessageBox.warning(f"Error deserializing: {e}")
+            return
+
+        # Open dialog to set file path
         file_path, _ = QFileDialog.getSaveFileName(
             self, "Save File", "", "YAML Files (*.yml);;All Files (*)"
         )
@@ -220,33 +250,6 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
             QApplication.setOverrideCursor(Qt.WaitCursor)
             try:
                 with open(file_path, "w", encoding="utf-8") as file:
-
-                    try:
-                        self.config_data.set_data_from_ui(self)
-
-                        # validate mandatory fields before saving to file
-                        invalid_props = []
-                        invalid_props.extend(
-                            self.config_data.server.get_invalid_properties()
-                        )
-                        invalid_props.extend(
-                            self.config_data.metadata.get_invalid_properties()
-                        )
-
-                        if len(invalid_props) > 0:
-                            QgsMessageLog.logMessage(
-                                f"Properties are missing or have invalid values: {invalid_props}"
-                            )
-                            QMessageBox.warning(
-                                self,
-                                "Warning",
-                                f"Properties are missing or have invalid values: {invalid_props}",
-                            )
-                            return
-
-                    except Exception as e:
-                        QgsMessageLog.logMessage(f"Error deserializing: {e}")
-
                     yaml.dump(
                         asdict(self.config_data),
                         file,

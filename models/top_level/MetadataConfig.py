@@ -99,12 +99,12 @@ class MetadataConfig:
             all_invalid_fields.append("metadata.identification.description")
         if len(self.identification.keywords) == 0:
             all_invalid_fields.append("metadata.identification.keywords")
-        if len(self.identification.license.name) == 0:
-            all_invalid_fields.append("metadata.identification.license.name")
-        if len(self.identification.provider.name) == 0:
-            all_invalid_fields.append("metadata.identification.provider.name")
-        if len(self.identification.contact.name) == 0:
-            all_invalid_fields.append("metadata.identification.contact.name")
+        if len(self.license.name) == 0:
+            all_invalid_fields.append("metadata.license.name")
+        if len(self.provider.name) == 0:
+            all_invalid_fields.append("metadata.provider.name")
+        if len(self.contact.name) == 0:
+            all_invalid_fields.append("metadata.contact.name")
 
         parsed_url = urlparse(self.identification.url)
         if not all([parsed_url.scheme, parsed_url.netloc]):
