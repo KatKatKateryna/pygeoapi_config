@@ -371,8 +371,8 @@ class ConfigData:
         all_locales_dict = {}
         for i in range(list_widget.count()):
             full_line_text = list_widget.item(i).text()
-            locale = full_line_text.split(": ")[0]
-            value = full_line_text.split(": ")[1]
+            locale = full_line_text.split(": ", 1)[0]
+            value = full_line_text.split(": ", 1)[1]
 
             if locale not in all_locales_dict:
                 all_locales_dict[locale] = []
