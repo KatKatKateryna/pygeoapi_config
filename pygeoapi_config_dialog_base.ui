@@ -236,16 +236,6 @@
             </item>
             <item>
              <widget class="QComboBox" name="comboBoxExceed">
-              <item>
-               <property name="text">
-                <string>throttle</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>error</string>
-               </property>
-              </item>
              </widget>
             </item>
            </layout>
@@ -453,26 +443,6 @@
             </item>
             <item>
              <widget class="QComboBox" name="comboBoxLog">
-              <item>
-               <property name="text">
-                <string>DEBUG</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>INFO</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>ERROR</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>WARNING</string>
-               </property>
-              </item>
              </widget>
             </item>
            </layout>
