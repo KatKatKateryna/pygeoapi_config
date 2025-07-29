@@ -81,7 +81,20 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
         self.proxy = QSortFilterProxyModel()
 
         # add default values to the UI
+        self.fill_combo_box(self.comboBoxExceed, self.config_data.server.limits.on_exceed)
+        self.fill_combo_box(self.comboBoxLog, self.config_data.logging.level)
+        self.fill_combo_box(self.comboBoxMetadataIdKeywordsType, self.config_data.metadata.identification.keywords_type)
+        self.fill_combo_box(self.comboBoxMetadataContactRole, self.config_data.metadata.contact.role)
+
         self.config_data.set_ui_from_data(self)
+
+    def fill_combo_box(self, combo_box, enum_class):
+        """Set values to dropdown ComboBox, based on the values expected by the corresponding class."""
+
+        combo_box.clear()
+        for item in type(enum_class):
+            combo_box.addItem(item.value)
+
 
     def on_button_clicked(self, button):
 

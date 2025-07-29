@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+from enum import Enum
 
 from .utils import update_dataclass_from_dict
 from .top_level import (
@@ -179,7 +180,7 @@ class ConfigData:
         )
 
         self.metadata.identification.keywords_type = (
-            dialog.lineEditMetadataIdKeywordsType.text()
+            dialog.comboBoxMetadataIdKeywordsType.currentText()
         )
         self.metadata.identification.terms_of_service = (
             dialog.lineEditMetadataIdTerms.text()
@@ -212,7 +213,7 @@ class ConfigData:
         self.metadata.contact.instructions = (
             dialog.lineEditMetadataContactInstructions.text()
         )
-        self.metadata.contact.role = dialog.lineEditMetadataContactRole.text()
+        self.metadata.contact.role = dialog.comboBoxMetadataContactRole.currentText()
 
     def set_ui_from_data(self, dialog):
 
@@ -300,9 +301,9 @@ class ConfigData:
         self._pack_locales_data_into_list(
             self.metadata.identification.keywords, dialog.listWidgetMetadataIdKeywords
         )
-
-        dialog.lineEditMetadataIdKeywordsType.setText(
-            self.metadata.identification.keywords_type
+        self._set_combo_box_value_from_data(
+            combo_box=dialog.comboBoxMetadataIdKeywordsType,
+            value=self.metadata.identification.keywords_type,
         )
         dialog.lineEditMetadataIdTerms.setText(
             self.metadata.identification.terms_of_service
@@ -335,7 +336,10 @@ class ConfigData:
         dialog.lineEditMetadataContactInstructions.setText(
             self.metadata.contact.instructions
         )
-        dialog.lineEditMetadataContactRole.setText(self.metadata.contact.role)
+        self._set_combo_box_value_from_data(
+            combo_box=dialog.comboBoxMetadataContactRole,
+            value=self.metadata.contact.role,
+        )
 
         # collections
         dialog.model.setStringList([k for k, _ in self.resources.items()])
@@ -355,9 +359,15 @@ class ConfigData:
         """Set the combo box value based on the available choice and provided value."""
 
         for i in range(combo_box.count()):
-            if combo_box.itemText(i) == value:
-                combo_box.setCurrentIndex(i)
-                return
+            if isinstance(value, str):
+                if combo_box.itemText(i) == value:
+                    combo_box.setCurrentIndex(i)
+                    return
+
+            if isinstance(value, Enum):
+                if combo_box.itemText(i) == value.value:
+                    combo_box.setCurrentIndex(i)
+                    return
 
         # If the value is not found, set to the first item or clear it
         if combo_box.count() > 0:

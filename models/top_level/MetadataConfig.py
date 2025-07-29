@@ -75,7 +75,7 @@ class ContactConfig:
     url: str = field(default="Contact URL")
     hours: str = field(default="Mo-Fr 08:00-17:00")
     instructions: str = field(default="During hours of service. Off on weekends.")
-    role: Role = field(default_factory=lambda: Role.pointOfContact)
+    role: Role = field(default_factory=lambda: Role.POINTOFCONTACT)
 
 
 @dataclass(kw_only=True)
