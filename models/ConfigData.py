@@ -1,13 +1,14 @@
 from dataclasses import dataclass, field
 from enum import Enum
 
-from .utils import update_dataclass_from_dict, is_valid_string
+from .utils import update_dataclass_from_dict
 from .top_level import (
     ServerConfig,
     LoggingConfig,
     MetadataConfig,
     ResourceConfigTemplate,
 )
+from .top_level.utils import is_valid_string
 
 
 @dataclass(kw_only=True)

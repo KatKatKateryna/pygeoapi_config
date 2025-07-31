@@ -1,5 +1,8 @@
 from dataclasses import dataclass, field
 from enum import Enum
+from urllib.parse import urlparse
+
+from .utils import is_valid_string
 
 
 # records
@@ -70,11 +73,13 @@ class ServerConfig:
         """Checks the values of mandatory fields: bind (host), url, languages."""
         all_invalid_fields = []
 
-        if len(self.bind.host) < 7:
+        if not is_valid_string(self.bind.host):
             all_invalid_fields.append("server.bind.host")
-        if len(self.url) < 7:
-            all_invalid_fields.append("server.url")
         if len(self.languages) == 0:
             all_invalid_fields.append("server.languages")
+            
+        parsed_url = urlparse(self.url)
+        if not all([parsed_url.scheme, parsed_url.netloc]):
+            all_invalid_fields.append("server.url")
 
         return all_invalid_fields

@@ -3,3 +3,9 @@ class InlineList(list):
     Used for 'bbox' property."""
 
     pass
+
+
+def is_valid_string(text):
+    if len(str(text)) >=1:
+        return True
+    return False
