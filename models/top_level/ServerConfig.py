@@ -77,7 +77,7 @@ class ServerConfig:
             all_invalid_fields.append("server.bind.host")
         if not is_valid_string(self.url):
             all_invalid_fields.append("server.url")
-        if not is_valid_string(self.languages):
+        if len(self.languages) == 0:
             all_invalid_fields.append("server.languages")
 
         return all_invalid_fields
