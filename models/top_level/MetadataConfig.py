@@ -2,6 +2,8 @@ from dataclasses import dataclass, field
 from enum import Enum
 from urllib.parse import urlparse
 
+from .utils import is_valid_string
+
 
 # records
 class KeywordType(Enum):
@@ -93,17 +95,17 @@ class MetadataConfig:
         """Checks the values of mandatory fields: identification (title, description, keywords)."""
         all_invalid_fields = []
 
-        if len(self.identification.title) == 0:
+        if not is_valid_string(self.identification.title):
             all_invalid_fields.append("metadata.identification.title")
-        if len(self.identification.description) == 0:
+        if not is_valid_string(self.identification.description):
             all_invalid_fields.append("metadata.identification.description")
-        if len(self.identification.keywords) == 0:
+        if not is_valid_string(self.identification.keywords):
             all_invalid_fields.append("metadata.identification.keywords")
-        if len(self.license.name) == 0:
+        if not is_valid_string(self.license.name):
             all_invalid_fields.append("metadata.license.name")
-        if len(self.provider.name) == 0:
+        if not is_valid_string(self.provider.name):
             all_invalid_fields.append("metadata.provider.name")
-        if len(self.contact.name) == 0:
+        if not is_valid_string(self.contact.name):
             all_invalid_fields.append("metadata.contact.name")
 
         parsed_url = urlparse(self.identification.url)

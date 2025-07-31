@@ -75,11 +75,9 @@ class ServerConfig:
 
         if not is_valid_string(self.bind.host):
             all_invalid_fields.append("server.bind.host")
-        if len(self.languages) == 0:
-            all_invalid_fields.append("server.languages")
-            
-        parsed_url = urlparse(self.url)
-        if not all([parsed_url.scheme, parsed_url.netloc]):
+        if not is_valid_string(self.url):
             all_invalid_fields.append("server.url")
+        if not is_valid_string(self.languages):
+            all_invalid_fields.append("server.languages")
 
         return all_invalid_fields
