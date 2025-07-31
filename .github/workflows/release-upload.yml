@@ -1,21 +1,6 @@
 name: Build and Attach Plugin ZIP to Release (Windows)
 
 on:
-  workflow_dispatch:
-      inputs:
-      tag_name:
-        description: 'workflow-dispatch'
-        required: true
-
-  push:
-    branches: [ "master" ]
-    tags:
-      - 'v*'
-  pull_request:
-    branches: [ "master" ]
-    tags:
-      - 'v*'  # Only runs on tags like v1.0.0
-      
   release:
     types: [published]
 
