@@ -1,6 +1,11 @@
 name: Build and Attach Plugin ZIP to Release (Windows)
 
 on:
+  workflow_dispatch:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
   release:
     types: [published]
 
