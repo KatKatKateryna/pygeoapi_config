@@ -1,0 +1,38 @@
+name: Build and Attach Plugin ZIP to Release (Windows)
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  package-and-upload:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install pb_tool
+        run: |
+          pip install pb_tool==3.1.0
+
+      - name: Run pb_tool zip
+        run: |
+          pb_tool zip
+
+      - name: Copy zip file to staging directory
+        run: |
+          New-Item -ItemType Directory -Path build -Force
+          Copy-Item zip_build\*.zip build\
+
+      - name: Upload ZIP to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: build/*.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
