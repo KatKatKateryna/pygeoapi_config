@@ -55,7 +55,7 @@ class ExtentsConfig:
     """Class to represent Extents configuration template."""
 
     # fields with default values:
-    spatial: dict = field(default_factory=lambda: SpatialConfig())
+    spatial: SpatialConfig | dict = field(default_factory=lambda: SpatialConfig())
 
     # optional fields:
     temporal: dict | None = None

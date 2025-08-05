@@ -28,7 +28,17 @@ import yaml
 from dataclasses import asdict
 from .models.top_level import InlineList
 
-from qgis.core import QgsMessageLog, QgsRasterLayer, QgsVectorLayer
+from qgis.core import (
+    QgsMessageLog,
+    QgsRasterLayer,
+    QgsVectorLayer,
+    QgsFeature,
+    QgsGeometry,
+    QgsRectangle,
+    QgsProject,
+    QgsCoordinateReferenceSystem,
+    QgsFillSymbol,
+)
 from qgis.gui import QgsMapCanvas
 from qgis.PyQt import QtWidgets, uic
 from PyQt5.QtWidgets import (
@@ -110,6 +120,8 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
 
         # Create QgsMapCanvas with OSM layer
         self.bbox_map_canvas = QgsMapCanvas()
+        crs = QgsCoordinateReferenceSystem("EPSG:4326")
+        self.bbox_map_canvas.setDestinationCrs(crs)
         self.bbox_map_canvas.setCanvasColor(Qt.white)
         self.bbox_map_canvas.setLayers([self.bbox_base_layer])
         self.bbox_map_canvas.zoomToFullExtent()
@@ -354,6 +366,16 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
             description = next(iter(description.values()), "")
         self.lineEditDescription.setText(description)
 
+        # load bbox
+        bbox = self.config_data.resources[self.cur_col_name].extents.spatial.bbox
+
+        self.bbox_extents_layer = self.create_rect_layer_from_bbox(bbox)
+        self.bbox_map_canvas.setLayers([self.bbox_extents_layer, self.bbox_base_layer])
+        # self.bbox_map_canvas.zoomToFullExtent()
+        self.bbox_map_canvas.setExtent(self.bbox_extents_layer.extent(), True)
+        # self.canvas.refreshAllLayers()
+        print(self.bbox_map_canvas.mapSettings().destinationCrs().authid())
+
     def editCollectionTitle(self, value):
         QgsMessageLog.logMessage(f"Current collection - title: {self.cur_col_name}")
         self.config_data.resources[self.cur_col_name].title = value
@@ -361,3 +383,42 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
     def editCollectionDescription(self, value):
         QgsMessageLog.logMessage(f"Current collection - desc: {self.cur_col_name}")
         self.config_data.resources[self.cur_col_name].description = value
+
+    def create_rect_layer_from_bbox(self, bbox: list[float], layer_name="Rectangle"):
+
+        xmin, ymin, xmax, ymax = bbox
+        # Create memory vector layer with polygon geometry
+        layer = QgsVectorLayer("Polygon?crs=EPSG:4326", layer_name, "memory")
+        provider = layer.dataProvider()
+        crs = QgsCoordinateReferenceSystem("EPSG:4326")
+        layer.setCrs(crs)
+
+        # Create rectangular geometry from bbox
+        rect = QgsRectangle(xmin, ymin, xmax, ymax)
+        geom = QgsGeometry.fromRect(rect)
+
+        # Create feature and assign geometry
+        feature = QgsFeature()
+        feature.setGeometry(geom)
+        provider.addFeatures([feature])
+
+        # Update layer
+        layer.updateExtents()
+        self.apply_red_transparent_style(layer)
+
+        # QgsProject.instance().addMapLayer(layer)
+        return layer
+
+    def apply_red_transparent_style(self, layer):
+        # Create a fill symbol with red color and 50% transparency
+        symbol = QgsFillSymbol.createSimple(
+            {
+                "color": "255,0,0,80",  # Red fill with 128/255 alpha (50% transparent)
+                "outline_color": "255,0,0, 128",  # Red outline
+                "outline_width": "0.5",  # Outline width in mm
+            }
+        )
+
+        # Apply symbol to layer renderer
+        layer.renderer().setSymbol(symbol)
+        layer.triggerRepaint()
