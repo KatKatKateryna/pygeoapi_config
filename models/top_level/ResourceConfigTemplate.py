@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from enum import Enum
 
-from .providers import ProviderTemplate
+from .providers import ProviderPostgresql, ProviderMvtProxy, ProviderWmsFacade
 from .utils import InlineList
 
 
@@ -70,7 +70,10 @@ class ResourceConfigTemplate:
     keywords: list | dict = field(default_factory=lambda: [])
     links: list[LinkTemplate] = field(default_factory=lambda: [])
     extents: ExtentsConfig = field(default_factory=lambda: ExtentsConfig())
-    providers: list[ProviderTemplate] = field(default_factory=lambda: [])
+    # for providers, the types have to be explicitly listed so they are picked up on deserialization
+    providers: list[ProviderPostgresql | ProviderMvtProxy | ProviderWmsFacade] = field(
+        default_factory=lambda: []
+    )
 
     # optional
     visibility: VisibilityTypes | None = None
@@ -88,7 +91,9 @@ class ResourceConfigTemplate:
         keywords: dict = None,
         links: list[LinkTemplate] = None,
         extents: ExtentsConfig = None,
-        providers: list[ProviderTemplate] = None,
+        providers: list[
+            ProviderPostgresql | ProviderMvtProxy | ProviderWmsFacade
+        ] = None,
         visibility: VisibilityTypes | None = None
     ):
         self._instance_name = instance_name
