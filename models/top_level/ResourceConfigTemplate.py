@@ -1,6 +1,7 @@
 from dataclasses import dataclass, field
 from enum import Enum
 
+from .providers import ProviderTemplate
 from .utils import InlineList
 
 
@@ -15,29 +16,7 @@ class VisibilityTypes(Enum):
     HIDDEN = "hidden"
 
 
-class ProviderTypes(Enum):
-    FEATURE = "feature"
-    MAP = "map"
-    TILE = "tile"
-
-
 # data classes
-@dataclass(kw_only=True)
-class ProviderTemplate:
-    """Class to represent a Provider configuration template."""
-
-    type: ProviderTypes
-    name: str
-    data: str
-
-    # optional
-    id_field: str | None = None
-    title_field: str | None = None
-    geometry: dict | None = None
-    options: dict | None = None
-    format: dict | None = None
-
-
 @dataclass(kw_only=True)
 class LinkTemplate:
     """Class to represent a Link configuration template."""
