@@ -81,10 +81,17 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
         self.proxy = QSortFilterProxyModel()
 
         # add default values to the UI
-        self.fill_combo_box(self.comboBoxExceed, self.config_data.server.limits.on_exceed)
+        self.fill_combo_box(
+            self.comboBoxExceed, self.config_data.server.limits.on_exceed
+        )
         self.fill_combo_box(self.comboBoxLog, self.config_data.logging.level)
-        self.fill_combo_box(self.comboBoxMetadataIdKeywordsType, self.config_data.metadata.identification.keywords_type)
-        self.fill_combo_box(self.comboBoxMetadataContactRole, self.config_data.metadata.contact.role)
+        self.fill_combo_box(
+            self.comboBoxMetadataIdKeywordsType,
+            self.config_data.metadata.identification.keywords_type,
+        )
+        self.fill_combo_box(
+            self.comboBoxMetadataContactRole, self.config_data.metadata.contact.role
+        )
 
         self.config_data.set_ui_from_data(self)
 
@@ -94,7 +101,6 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
         combo_box.clear()
         for item in type(enum_class):
             combo_box.addItem(item.value)
-
 
     def on_button_clicked(self, button):
 
@@ -218,12 +224,8 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
 
             # validate mandatory fields before saving to file
             invalid_props = []
-            invalid_props.extend(
-                self.config_data.server.get_invalid_properties()
-            )
-            invalid_props.extend(
-                self.config_data.metadata.get_invalid_properties()
-            )
+            invalid_props.extend(self.config_data.server.get_invalid_properties())
+            invalid_props.extend(self.config_data.metadata.get_invalid_properties())
 
             if len(invalid_props) > 0:
                 QgsMessageLog.logMessage(
