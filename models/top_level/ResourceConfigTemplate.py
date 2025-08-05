@@ -10,6 +10,11 @@ class ResourceTypes(Enum):
     STAC = "stac-collection"
 
 
+class VisibilityTypes(Enum):
+    DEFAULT = "default"
+    HIDDEN = "hidden"
+
+
 class ProviderTypes(Enum):
     FEATURE = "feature"
     MAP = "map"
@@ -25,7 +30,7 @@ class ProviderTemplate:
     name: str
     data: str
 
-    # optional fields:
+    # optional
     id_field: str | None = None
     title_field: str | None = None
     geometry: dict | None = None
@@ -39,15 +44,29 @@ class LinkTemplate:
 
     type: str
     rel: str
-    title: str
     href: str
-    hreflang: str
+
+    # optional
+    title: str | None
+    hreflang: str | None
+    length: int | None
 
 
 @dataclass(kw_only=True)
 class SpatialConfig:
     bbox: InlineList = field(default_factory=lambda: InlineList([-180, -90, 180, 90]))
+
+    # optional, but with assumed default value:
     crs: str = field(default="http://www.opengis.net/def/crs/OGC/1.3/CRS84")
+
+
+@dataclass(kw_only=True)
+class TemporalConfig:
+
+    # optional
+    begin: str | None
+    end: str | None
+    trs: str | None  # default: 'http://www.opengis.net/def/uom/ISO-8601/0/Gregorian'
 
 
 @dataclass(kw_only=True)
@@ -57,8 +76,8 @@ class ExtentsConfig:
     # fields with default values:
     spatial: SpatialConfig | dict = field(default_factory=lambda: SpatialConfig())
 
-    # optional fields:
-    temporal: dict | None = None
+    # optional
+    temporal: TemporalConfig | None = None
 
 
 @dataclass(kw_only=True)
@@ -74,19 +93,24 @@ class ResourceConfigTemplate:
     extents: ExtentsConfig = field(default_factory=lambda: ExtentsConfig())
     providers: list[ProviderTemplate] = field(default_factory=lambda: [])
 
+    # optional
+    visibility: VisibilityTypes | None = None
+    # limits, linked-data: ignored for now
+
     # Overwriding __init__ method to pass 'instance_name' as an input but not make it an instance property
     # This will allow to have a clean 'asdict(class)' output without 'instance_name' in it
     def __init__(
         self,
         *,
         instance_name: str,
-        type: str = "collection",
+        type: ResourceTypes = ResourceTypes.COLLECTION,
         title: str = "",
         description: str = "",
         keywords: dict = None,
         links: list[LinkTemplate] = None,
         extents: ExtentsConfig = None,
-        providers: list[ProviderTemplate] = None
+        providers: list[ProviderTemplate] = None,
+        visibility: VisibilityTypes | None = None
     ):
         self._instance_name = instance_name
         self.type = type
@@ -115,6 +139,7 @@ class ResourceConfigTemplate:
         self.links = links
         self.extents = extents
         self.providers = providers
+        self.visibility = visibility
 
     @property
     def instance_name(self):
