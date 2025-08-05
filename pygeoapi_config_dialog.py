@@ -28,7 +28,7 @@ import yaml
 from dataclasses import asdict
 from .models.top_level import InlineList
 
-from qgis.core import QgsMessageLog, QgsProject, QgsRasterLayer
+from qgis.core import QgsMessageLog, QgsRasterLayer, QgsVectorLayer
 from qgis.gui import QgsMapCanvas
 from qgis.PyQt import QtWidgets, uic
 from PyQt5.QtWidgets import (
@@ -57,7 +57,11 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
 
     config_data = ConfigData()
     cur_col_name = ""
+
+    # these need to be class properties, otherwise, without constant reference, they are not displayed in a widget
+    bbox_map_canvas: QgsMapCanvas
     bbox_base_layer: QgsRasterLayer
+    bbox_extents_layer: QgsVectorLayer
 
     def __init__(self, parent=None):
         """Constructor."""
@@ -105,15 +109,15 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
         self.bbox_base_layer = QgsRasterLayer(urlWithParams, "OpenStreetMap", "wms")
 
         # Create QgsMapCanvas with OSM layer
-        self.canvas = QgsMapCanvas()
-        self.canvas.setCanvasColor(Qt.white)
-        self.canvas.setLayers([self.bbox_base_layer])
-        self.canvas.zoomToFullExtent()
+        self.bbox_map_canvas = QgsMapCanvas()
+        self.bbox_map_canvas.setCanvasColor(Qt.white)
+        self.bbox_map_canvas.setLayers([self.bbox_base_layer])
+        self.bbox_map_canvas.zoomToFullExtent()
         # self.canvas.setExtent(layer.extent(), True)
         # self.canvas.refreshAllLayers()
 
         # Add QgsMapCanvas as a widget to the Resource Tab
-        self.bboxMapPlaceholder.addWidget(self.canvas)
+        self.bboxMapPlaceholder.addWidget(self.bbox_map_canvas)
 
     def fill_combo_box(self, combo_box, enum_class):
         """Set values to dropdown ComboBox, based on the values expected by the corresponding class."""
