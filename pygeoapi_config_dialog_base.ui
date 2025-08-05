@@ -1164,7 +1164,11 @@
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_3">
           <item>
-           <widget class="QLineEdit" name="lineEditCollection"/>
+           <widget class="QLineEdit" name="lineEditCollection">
+            <property name="placeholderText">
+              <string>Search by name</string>
+            </property>
+            </widget>
           </item>
           <item>
            <widget class="QListView" name="listViewCollection"/>
@@ -1186,7 +1190,7 @@
          </layout>
         </widget>
        </item>
-       <item row="1" column="0">
+       <item row="0" column="1">
         <widget class="QGroupBox" name="groupBoxCollection">
          <property name="title">
           <string>collection details</string>
@@ -1199,18 +1203,25 @@
             </property>
            </widget>
           </item>
-          <item row="0" column="1" colspan="2">
-           <widget class="QLineEdit" name="lineEditTitle"/>
+          <item row="0" column="1">
+           <widget class="QLineEdit" name="lineEditTitle">
+            <property name="readOnly">
+              <bool>true</bool>
+            </property>
+            </widget>
           </item>
-          <item row="1" column="0" colspan="2">
+          <item row="1" column="0">
            <widget class="QLabel" name="label_16">
             <property name="text">
              <string>description</string>
             </property>
            </widget>
           </item>
-          <item row="1" column="2">
+          <item row="1" column="1">
            <widget class="QLineEdit" name="lineEditDescription">
+            <property name="readOnly">
+              <bool>true</bool>
+            </property>
             <property name="sizePolicy">
              <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
               <horstretch>0</horstretch>
