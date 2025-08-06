@@ -34,4 +34,4 @@ class ProviderMvtProxy(ProviderTemplate):
 
     # provider-specific attributes
     options: MvtProxyOptions = field(default_factory=lambda: MvtProxyOptions())
-    options: MvtProxyFormat = field(default_factory=lambda: MvtProxyFormat())
+    format: MvtProxyFormat = field(default_factory=lambda: MvtProxyFormat())

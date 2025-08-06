@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+from datetime import datetime
 from enum import Enum
 
 from .providers import ProviderPostgresql, ProviderMvtProxy, ProviderWmsFacade
@@ -21,14 +22,14 @@ class VisibilityTypes(Enum):
 class LinkTemplate:
     """Class to represent a Link configuration template."""
 
-    type: str
-    rel: str
-    href: str
+    type: str = ""
+    rel: str = ""
+    href: str = ""
 
     # optional
-    title: str | None
-    hreflang: str | None
-    length: int | None
+    title: str | None = None
+    hreflang: str | None = None
+    length: int | None = None
 
 
 @dataclass(kw_only=True)
@@ -43,9 +44,11 @@ class SpatialConfig:
 class TemporalConfig:
 
     # optional
-    begin: str | None
-    end: str | None
-    trs: str | None  # default: 'http://www.opengis.net/def/uom/ISO-8601/0/Gregorian'
+    begin: str | datetime | None = None
+    end: str | datetime | None = None
+    trs: str | None = (
+        None  # default: 'http://www.opengis.net/def/uom/ISO-8601/0/Gregorian'
+    )
 
 
 @dataclass(kw_only=True)
@@ -53,7 +56,7 @@ class ExtentsConfig:
     """Class to represent Extents configuration template."""
 
     # fields with default values:
-    spatial: SpatialConfig | dict = field(default_factory=lambda: SpatialConfig())
+    spatial: SpatialConfig = field(default_factory=lambda: SpatialConfig())
 
     # optional
     temporal: TemporalConfig | None = None
