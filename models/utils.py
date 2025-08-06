@@ -1,4 +1,4 @@
-from dataclasses import is_dataclass, fields
+from dataclasses import is_dataclass, fields, MISSING
 from enum import Enum
 from types import UnionType
 from typing import get_origin, get_args, Union, get_type_hints
@@ -36,6 +36,7 @@ def update_dataclass_from_dict(
                 all_missing_props.extend(new_missing_props)
             else:
                 if _is_instance_of_type(new_value, expected_type):
+                    # TODO: exception with expected type e.g list[ProviderPostgres]
 
                     # exception: remap list to internally used InlineList (needed later for YAML formatting)
                     if expected_type is InlineList:
@@ -47,9 +48,15 @@ def update_dataclass_from_dict(
                         f"Skipped '{prop_name}.{field_name}': expected {expected_type}, got {type(new_value)}"
                     )
                     all_missing_props.append(f"{prop_name}.{field_name}")
-        else:
-            missing_fields.append(f"{prop_name}.{field_name}")
-            all_missing_props.append(f"{prop_name}.{field_name}")
+        else:  # field is missing from the object
+
+            # don't report optional fields as missing
+            # for optional fields, 'default' is explicitly set to 'None'
+            if fld.default is not MISSING and fld.default is None:
+                print(f"MISSING: {prop_name}.{field_name}")
+            else:
+                missing_fields.append(f"{prop_name}.{field_name}")
+                all_missing_props.append(f"{prop_name}.{field_name}")
 
     return missing_fields, wrong_types, all_missing_props
 
@@ -69,10 +76,21 @@ def _is_instance_of_type(value, expected_type) -> bool:
         if not isinstance(value, origin):
             return False
 
-        # ignore type check for the inner type - YAML content won't be automatically casted to the custom classes
-        # if args:
-        #    inner_type = args[0]
-        #    return all(_is_instance_of_type(item, inner_type) for item in value)
+        # check for the inner arguments types
+        if args and len(value) > 0:
+            for val in value:
+
+                value_matched = False
+                for inner_type in args:
+                    if _is_instance_of_type(val, inner_type):
+                        value_matched = True
+                        continue
+                if not value_matched:
+                    return False
+
+            # if loop successfully ended and all values matched expected types
+            return True
+
         return True
 
     if origin is dict:
@@ -98,5 +116,36 @@ def _is_instance_of_type(value, expected_type) -> bool:
             return True
         return False
 
+    # Exception for when 'expected_type' is a custom dataclass and 'value' is dict
+    if isinstance(value, dict) and is_dataclass(expected_type):
+        return can_cast_to_dataclass(value, expected_type)
+
     # Fallback for normal types
     return isinstance(value, expected_type)
+
+
+def can_cast_to_dataclass(data: dict, cls: type) -> bool:
+
+    type_hints = get_type_hints(cls)
+    for field in fields(cls):
+        field_name = field.name
+        field_type = type_hints.get(field_name)
+
+        if field_name not in data:
+            if (
+                field.default is not MISSING and field.default is None
+            ):  # field has default None
+                continue  # field is ok, go to next
+            if field.default is not field.default_factory:  # field has default
+                continue  # field is ok, go to next
+            if field.default_factory is not None:  # field has default factory
+                continue  # field is ok, go to next
+            return False  # field and defaults are missing
+
+        value = data[field_name]
+
+        # Check type
+        if not _is_instance_of_type(value, field_type):
+            return False
+
+    return True
