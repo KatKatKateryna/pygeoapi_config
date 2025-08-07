@@ -113,147 +113,7 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
 
         self.config_data.set_ui_from_data(self)
 
-        self.setup_map_widget()
-
-    def setup_map_widget(self):
-
-        # Define base tile layer (OSM)
-        urlWithParams = "type=xyz&url=https://tile.openstreetmap.org/{z}/{x}/{y}.png"
-        self.bbox_base_layer = QgsRasterLayer(urlWithParams, "OpenStreetMap", "wms")
-
-        # Create QgsMapCanvas with OSM layer
-        self.bbox_map_canvas = QgsMapCanvas()
-        crs = QgsCoordinateReferenceSystem("EPSG:4326")
-        self.bbox_map_canvas.setDestinationCrs(crs)
-        self.bbox_map_canvas.setCanvasColor(Qt.white)
-        self.bbox_map_canvas.setLayers([self.bbox_base_layer])
-        self.bbox_map_canvas.zoomToFullExtent()
-        # self.canvas.setExtent(layer.extent(), True)
-        # self.canvas.refreshAllLayers()
-
-        # Add QgsMapCanvas as a widget to the Resource Tab
-        self.bboxMapPlaceholder.addWidget(self.bbox_map_canvas)
-
-    def fill_combo_box(self, combo_box, enum_class):
-        """Set values to dropdown ComboBox, based on the values expected by the corresponding class."""
-
-        combo_box.clear()
-        for item in type(enum_class):
-            combo_box.addItem(item.value)
-
-    def on_button_clicked(self, button):
-
-        role = self.buttonBox.buttonRole(button)
-        print(f"Button clicked: {button.text()}, Role: {role}")
-
-        # You can also check the standard button type
-        if button == self.buttonBox.button(QDialogButtonBox.Save):
-            self.save_to_file()
-        elif button == self.buttonBox.button(QDialogButtonBox.Open):
-            self.open_file()
-        elif button == self.buttonBox.button(QDialogButtonBox.Close):
-            self.reject()
-
-    def open_templates_path_dialog(self):
-        """Defining Server.templates.path path, called from .ui file."""
-
-        folder_path = QFileDialog.getExistingDirectory(None, "Select Folder")
-
-        if folder_path:
-            self.lineEditTemplatesPath.setText(folder_path)
-
-    def open_templates_static_dialog(self):
-        """Defining Server.templates.static path, called from .ui file."""
-
-        folder_path = QFileDialog.getExistingDirectory(None, "Select Folder")
-
-        if folder_path:
-            self.lineEditTemplatesStatic.setText(folder_path)
-
-    def open_logfile_dialog(self):
-        """Defining Logging.logfile path, called from .ui file."""
-
-        logFile = QFileDialog.getSaveFileName(
-            self, "Save Log", "", "log Files (*.log);;All Files (*)"
-        )
-
-        if logFile:
-            self.lineEditLogfile.setText(logFile[0])
-
-    def _throw_if_language_entry_exists_in_list_widget(self, list_widget, locale):
-        for i in range(list_widget.count()):
-            print(list_widget.item(i).text())
-            print(f"{locale}: ")
-            if list_widget.item(i).text().startswith(f"{locale}: "):
-                QMessageBox.warning(
-                    self,
-                    "Message",
-                    f"Data entry in selected language already exists: {locale}",
-                )
-
-    def add_metadata_id_title(self):
-        """Add title to metadata, called from .ui file."""
-
-        locale = self.comboBoxIdTitleLocale.currentText()
-        text = self.addMetadataIdTitleLineEdit.text().strip()
-        if text:
-            self._throw_if_language_entry_exists_in_list_widget(
-                self.listWidgetMetadataIdTitle, locale
-            )
-            self.listWidgetMetadataIdTitle.addItem(f"{locale}: {text}")
-            self.addMetadataIdTitleLineEdit.clear()
-
-        # sort the content
-        self.listWidgetMetadataIdTitle.model().sort(0)
-
-    def add_metadata_id_description(self):
-        """Add description to metadata, called from .ui file."""
-
-        locale = self.comboBoxIdDescriptionLocale.currentText()
-        text = self.addMetadataIdDescriptionLineEdit.text().strip()
-        if text:
-            self._throw_if_language_entry_exists_in_list_widget(
-                self.listWidgetMetadataIdDescription, locale
-            )
-            self.listWidgetMetadataIdDescription.addItem(f"{locale}: {text}")
-            self.addMetadataIdDescriptionLineEdit.clear()
-
-        # sort the content
-        self.listWidgetMetadataIdDescription.model().sort(0)
-
-    def add_metadata_keyword(self):
-        """Add keyword to metadata, called from .ui file."""
-
-        locale = self.comboBoxKeywordsLocale.currentText()
-        text = self.addMetadataKeywordLineEdit.text().strip()
-        if text:
-            self.listWidgetMetadataIdKeywords.addItem(f"{locale}: {text}")
-            self.addMetadataKeywordLineEdit.clear()
-            # self.comboBoxKeywordsLocale.setCurrentIndex(0)
-
-        # sort the content
-        self.listWidgetMetadataIdKeywords.model().sort(0)
-
-    def delete_metadata_id_title(self):
-        """Delete keyword from metadata, called from .ui file."""
-
-        selected_item = self.listWidgetMetadataIdTitle.currentRow()
-        if selected_item >= 0:
-            self.listWidgetMetadataIdTitle.takeItem(selected_item)
-
-    def delete_metadata_id_description(self):
-        """Delete keyword from metadata, called from .ui file."""
-
-        selected_item = self.listWidgetMetadataIdDescription.currentRow()
-        if selected_item >= 0:
-            self.listWidgetMetadataIdDescription.takeItem(selected_item)
-
-    def delete_metadata_keyword(self):
-        """Delete keyword from metadata, called from .ui file."""
-
-        selected_item = self.listWidgetMetadataIdKeywords.currentRow()
-        if selected_item >= 0:
-            self.listWidgetMetadataIdKeywords.takeItem(selected_item)
+        self._setup_map_widget()
 
     def save_to_file(self):
 
@@ -350,44 +210,7 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
         finally:
             QApplication.restoreOverrideCursor()
 
-    def filterResources(self, filter):
-        self.proxy.setDynamicSortFilter(True)
-        self.proxy.setFilterFixedString(filter)
-
-    def previewCollection(self, model_index: "QModelIndex"):
-        # if current resource already selected, do nothing
-        new_res_name = model_index.data()
-        if self.current_res_name == new_res_name:
-            return
-
-        # hide detailed collection UI, show preview
-        self.groupBoxCollectionLoaded.hide()
-        self.groupBoxCollectionPreview.show()
-
-        self.current_res_name = new_res_name
-
-        # If title is a dictionary, use the first (default) value
-        title = self.config_data.resources[self.current_res_name].title
-        if isinstance(title, dict):
-            title = next(iter(title.values()), "")
-        self.lineEditTitle.setText(title)
-
-        # If description is a dictionary, use the first (default) value
-        description = self.config_data.resources[self.current_res_name].description
-        if isinstance(description, dict):
-            description = next(iter(description.values()), "")
-        self.lineEditDescription.setText(description)
-
-        # load bbox
-        bbox = self.config_data.resources[self.current_res_name].extents.spatial.bbox
-
-        self.bbox_extents_layer = self.create_rect_layer_from_bbox(bbox)
-        self.bbox_map_canvas.setLayers([self.bbox_extents_layer, self.bbox_base_layer])
-        # self.bbox_map_canvas.zoomToFullExtent()
-        self.bbox_map_canvas.setExtent(self.bbox_extents_layer.extent(), True)
-        # self.canvas.refreshAllLayers()
-
-    def select_listcollection_item_by_text(self, target_text: str):
+    def _select_listcollection_item_by_text(self, target_text: str):
         model = self.listViewCollection.model()
         for row in range(model.rowCount()):
             index = model.index(row, 0)
@@ -395,32 +218,7 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
                 self.listViewCollection.setCurrentIndex(index)
                 break
 
-    def newCollection(self):
-        # add resource and reload UI
-        new_name = self.config_data.add_new_resource()
-        self.config_data.refresh_resources_list_ui(self)
-
-        # select new resource
-        self.select_listcollection_item_by_text(new_name)
-
-        # set new resource as current and load details
-        self.current_res_name = new_name
-        self.loadCollection()
-
-    def loadCollection(self):
-
-        # if no resource selected, do nothing
-        if self.current_res_name == "":
-            return
-
-        # hide preview collection UI, show detailed UI
-        self.groupBoxCollectionPreview.hide()
-        self.groupBoxCollectionLoaded.show()
-
-        res_data = self.config_data.resources[self.current_res_name]
-        self.setup_resouce_loaded_ui(res_data)
-
-    def setup_resouce_loaded_ui(self, res_data: ResourceConfigTemplate):
+    def _setup_resouce_loaded_ui(self, res_data: ResourceConfigTemplate):
 
         self.lineEditResAlias.setText(self.current_res_name)
         self.fill_combo_box(
@@ -437,13 +235,113 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
             ProviderTypes.FEATURE,  # mock value if we don't yet have an object to get the value from
         )
 
-    def editCollectionTitle(self, value):
-        QgsMessageLog.logMessage(f"Current collection - title: {self.current_res_name}")
-        self.config_data.resources[self.current_res_name].title = value
+    def _setup_map_widget(self):
 
-    def editCollectionDescription(self, value):
-        QgsMessageLog.logMessage(f"Current collection - desc: {self.current_res_name}")
-        self.config_data.resources[self.current_res_name].description = value
+        # Define base tile layer (OSM)
+        urlWithParams = "type=xyz&url=https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+        self.bbox_base_layer = QgsRasterLayer(urlWithParams, "OpenStreetMap", "wms")
+
+        # Create QgsMapCanvas with OSM layer
+        self.bbox_map_canvas = QgsMapCanvas()
+        crs = QgsCoordinateReferenceSystem("EPSG:4326")
+        self.bbox_map_canvas.setDestinationCrs(crs)
+        self.bbox_map_canvas.setCanvasColor(Qt.white)
+        self.bbox_map_canvas.setLayers([self.bbox_base_layer])
+        self.bbox_map_canvas.zoomToFullExtent()
+        # self.canvas.setExtent(layer.extent(), True)
+        # self.canvas.refreshAllLayers()
+
+        # Add QgsMapCanvas as a widget to the Resource Tab
+        self.bboxMapPlaceholder.addWidget(self.bbox_map_canvas)
+
+    def fill_combo_box(self, combo_box, enum_class):
+        """Set values to dropdown ComboBox, based on the values expected by the corresponding class."""
+
+        combo_box.clear()
+        for item in type(enum_class):
+            combo_box.addItem(item.value)
+
+    def on_button_clicked(self, button):
+
+        role = self.buttonBox.buttonRole(button)
+        print(f"Button clicked: {button.text()}, Role: {role}")
+
+        # You can also check the standard button type
+        if button == self.buttonBox.button(QDialogButtonBox.Save):
+            self.save_to_file()
+        elif button == self.buttonBox.button(QDialogButtonBox.Open):
+            self.open_file()
+        elif button == self.buttonBox.button(QDialogButtonBox.Close):
+            self.reject()
+
+    def open_templates_path_dialog(self):
+        """Defining Server.templates.path path, called from .ui file."""
+
+        folder_path = QFileDialog.getExistingDirectory(None, "Select Folder")
+
+        if folder_path:
+            self.lineEditTemplatesPath.setText(folder_path)
+
+    def open_templates_static_dialog(self):
+        """Defining Server.templates.static path, called from .ui file."""
+
+        folder_path = QFileDialog.getExistingDirectory(None, "Select Folder")
+
+        if folder_path:
+            self.lineEditTemplatesStatic.setText(folder_path)
+
+    def open_logfile_dialog(self):
+        """Defining Logging.logfile path, called from .ui file."""
+
+        logFile = QFileDialog.getSaveFileName(
+            self, "Save Log", "", "log Files (*.log);;All Files (*)"
+        )
+
+        if logFile:
+            self.lineEditLogfile.setText(logFile[0])
+
+    def _throw_if_language_entry_exists_in_list_widget(self, list_widget, locale):
+        for i in range(list_widget.count()):
+            if list_widget.item(i).text().startswith(f"{locale}: "):
+                QMessageBox.warning(
+                    self,
+                    "Message",
+                    f"Data entry in selected language already exists: {locale}",
+                )
+
+    def add_listwidget_element_from_lineedit(
+        self,
+        *,
+        line_edit_widget,
+        list_widget,
+        locale_combobox=None,
+        allow_repeated_locale=True,
+    ):
+        """Take the content of LineEdit and add it as a new List entry."""
+
+        text = line_edit_widget.text().strip()
+        if text:
+
+            text_to_print = text
+            if locale_combobox:
+                locale = locale_combobox.currentText()
+                text_to_print = f"{locale}: {text}"
+
+                if not allow_repeated_locale:
+                    self._throw_if_language_entry_exists_in_list_widget(
+                        list_widget, locale
+                    )
+            list_widget.addItem(text_to_print)
+            line_edit_widget.clear()
+
+            # sort the content
+            list_widget.model().sort(0)
+
+    def delete_list_widget_selected_item(self, list_widget):
+        """Delete selected List item from widget."""
+        selected_item = list_widget.currentRow()
+        if selected_item >= 0:
+            list_widget.takeItem(selected_item)
 
     def create_rect_layer_from_bbox(self, bbox: list[float], layer_name="Rectangle"):
 
@@ -483,3 +381,118 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
         # Apply symbol to layer renderer
         layer.renderer().setSymbol(symbol)
         layer.triggerRepaint()
+
+    #################################################################
+    ################## the methods called from .ui file
+    #################################################################
+
+    def add_metadata_id_title(self):
+        """Add title to metadata, called from .ui file."""
+        self.add_listwidget_element_from_lineedit(
+            line_edit_widget=self.addMetadataIdTitleLineEdit,
+            list_widget=self.listWidgetMetadataIdTitle,
+            locale_combobox=self.comboBoxIdTitleLocale,
+            allow_repeated_locale=False,
+        )
+
+    def add_metadata_id_description(self):
+        """Add description to metadata, called from .ui file."""
+        self.add_listwidget_element_from_lineedit(
+            line_edit_widget=self.addMetadataIdDescriptionLineEdit,
+            list_widget=self.listWidgetMetadataIdDescription,
+            locale_combobox=self.comboBoxIdDescriptionLocale,
+            allow_repeated_locale=False,
+        )
+
+    def add_metadata_keyword(self):
+        """Add keyword to metadata, called from .ui file."""
+        self.add_listwidget_element_from_lineedit(
+            line_edit_widget=self.addMetadataKeywordLineEdit,
+            list_widget=self.listWidgetMetadataIdKeywords,
+            locale_combobox=self.comboBoxKeywordsLocale,
+            allow_repeated_locale=True,
+        )
+
+    def delete_metadata_id_title(self):
+        """Delete keyword from metadata, called from .ui file."""
+        self.delete_list_widget_selected_item(self.listWidgetMetadataIdTitle)
+
+    def delete_metadata_id_description(self):
+        """Delete keyword from metadata, called from .ui file."""
+        self.delete_list_widget_selected_item(self.listWidgetMetadataIdDescription)
+
+    def delete_metadata_keyword(self):
+        """Delete keyword from metadata, called from .ui file."""
+        self.delete_list_widget_selected_item(self.listWidgetMetadataIdKeywords)
+
+    def filterResources(self, filter):
+        """Called from .ui."""
+        self.proxy.setDynamicSortFilter(True)
+        self.proxy.setFilterFixedString(filter)
+
+    def previewCollection(self, model_index: "QModelIndex"):
+        """Display basic Resource info, called from .ui."""
+        # if current resource already selected, do nothing
+        new_res_name = model_index.data()
+        if self.current_res_name == new_res_name:
+            return
+
+        # hide detailed collection UI, show preview
+        self.groupBoxCollectionLoaded.hide()
+        self.groupBoxCollectionPreview.show()
+
+        self.current_res_name = new_res_name
+
+        # If title is a dictionary, use the first (default) value
+        title = self.config_data.resources[self.current_res_name].title
+        if isinstance(title, dict):
+            title = next(iter(title.values()), "")
+        self.lineEditTitle.setText(title)
+
+        # If description is a dictionary, use the first (default) value
+        description = self.config_data.resources[self.current_res_name].description
+        if isinstance(description, dict):
+            description = next(iter(description.values()), "")
+        self.lineEditDescription.setText(description)
+
+        # load bbox
+        bbox = self.config_data.resources[self.current_res_name].extents.spatial.bbox
+
+        self.bbox_extents_layer = self.create_rect_layer_from_bbox(bbox)
+        self.bbox_map_canvas.setLayers([self.bbox_extents_layer, self.bbox_base_layer])
+        # self.bbox_map_canvas.zoomToFullExtent()
+        self.bbox_map_canvas.setExtent(self.bbox_extents_layer.extent(), True)
+        # self.canvas.refreshAllLayers()
+
+    def newCollection(self):
+        # add resource and reload UI
+        new_name = self.config_data.add_new_resource()
+        self.config_data.refresh_resources_list_ui(self)
+
+        # select new resource
+        self._select_listcollection_item_by_text(new_name)
+
+        # set new resource as current and load details
+        self.current_res_name = new_name
+        self.loadCollection()
+
+    def loadCollection(self):
+
+        # if no resource selected, do nothing
+        if self.current_res_name == "":
+            return
+
+        # hide preview collection UI, show detailed UI
+        self.groupBoxCollectionPreview.hide()
+        self.groupBoxCollectionLoaded.show()
+
+        res_data = self.config_data.resources[self.current_res_name]
+        self._setup_resouce_loaded_ui(res_data)
+
+    def editCollectionTitle(self, value):
+        QgsMessageLog.logMessage(f"Current collection - title: {self.current_res_name}")
+        self.config_data.resources[self.current_res_name].title = value
+
+    def editCollectionDescription(self, value):
+        QgsMessageLog.logMessage(f"Current collection - desc: {self.current_res_name}")
+        self.config_data.resources[self.current_res_name].description = value
