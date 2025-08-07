@@ -484,7 +484,19 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
         self.proxy.setDynamicSortFilter(True)
         self.proxy.setFilterFixedString(filter)
 
-    def previewCollection(self, model_index: "QModelIndex"):
+    def exit_resource_edit(self):
+        """Switch widgets to Preview, reset selected resource. Called from .ui."""
+        # hide detailed collection UI, show preview
+        self.groupBoxCollectionLoaded.hide()
+        self.groupBoxCollectionPreview.show()
+
+    def save_resource_edit_and_preview(self):
+        """Save current changes to the resource data, reset widgets to Preview. Called from .ui."""
+
+        self.config_data.set_resource_ui_from_data(self)
+        self.exit_resource_edit()
+
+    def preview_resource(self, model_index: "QModelIndex"):
         """Display basic Resource info, called from .ui."""
         # if current resource already selected, do nothing
         new_res_name = model_index.data()
@@ -542,6 +554,9 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
 
         res_data = self.config_data.resources[self.current_res_name]
         self._setup_resouce_loaded_ui(res_data)
+
+        # set the values to UI widgets
+        self.config_data.set_resource_ui_from_data(self)
 
     def editCollectionTitle(self, value):
         QgsMessageLog.logMessage(f"Current collection - title: {self.current_res_name}")

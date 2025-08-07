@@ -1755,6 +1755,25 @@
             </widget>
             </item>
 
+            <item row="9" column="1">
+              <layout class="QHBoxLayout" name="horizontalLayout">
+                <item>
+                  <widget class="QPushButton" name="pushSaveAndPreviewResource">
+                    <property name="text">
+                    <string>Save changes</string>
+                    </property>
+                  </widget>
+                </item>
+                <item>
+                  <widget class="QPushButton" name="pushExitResourceEdit">
+                    <property name="text">
+                    <string>Cancel changes</string>
+                    </property>
+                  </widget>
+                </item>
+              </layout>
+            </item>
+
 
             </layout>
           </widget>
@@ -2064,7 +2083,7 @@
    <sender>listViewCollection</sender>
    <signal>clicked(QModelIndex)</signal>
    <receiver>PygeoapiConfigDialogBase</receiver>
-   <slot>previewCollection(QModelIndex)</slot>
+   <slot>preview_resource(QModelIndex)</slot>
    <hints>
     <hint type="sourcelabel">
      <x>434</x>
@@ -2108,6 +2127,40 @@
     </hint>
    </hints>
   </connection>
+  
+  <connection>
+   <sender>pushSaveAndPreviewResource</sender>
+   <signal>clicked()</signal>
+   <receiver>PygeoapiConfigDialogBase</receiver>
+   <slot>save_resource_edit_and_preview()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>434</x>
+     <y>160</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>434</x>
+     <y>244</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pushExitResourceEdit</sender>
+   <signal>clicked()</signal>
+   <receiver>PygeoapiConfigDialogBase</receiver>
+   <slot>exit_resource_edit()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>434</x>
+     <y>160</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>434</x>
+     <y>244</y>
+    </hint>
+   </hints>
+  </connection>
+
   <connection>
    <sender>lineEditTitle</sender>
    <signal>textEdited(QString)</signal>
