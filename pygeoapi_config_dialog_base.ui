@@ -805,7 +805,7 @@
                   <item>
                     <widget class="QLineEdit" name="addMetadataKeywordLineEdit">
                     <property name="placeholderText">
-                      <string>Enter keyword to add</string>
+                      <string>Enter keyword</string>
                     </property>
                     </widget>
                     
@@ -1171,7 +1171,11 @@
             </widget>
           </item>
           <item>
-           <widget class="QListView" name="listViewCollection"/>
+           <widget class="QListView" name="listViewCollection">
+           <property name="editTriggers">
+              <set>QAbstractItemView::NoEditTriggers</set>
+            </property>
+           </widget>
           </item>
           <item>
            <widget class="QPushButton" name="pushLoadCollection">
@@ -1250,7 +1254,324 @@
             <layout class="QGridLayout" name="gridLayoutCollectionLoaded">
             
               
+            <item row="0" column="0">
+            <widget class="QLabel">
+              <property name="text">
+              <string>alias</string>
+              </property>
+            </widget>
+            </item>
+            <item row="0" column="1">
+              <widget class="QLineEdit" name="lineEditResAlias">
+            </widget>
+            </item>
             
+            <item row="1" column="0">
+            <widget class="QLabel">
+              <property name="text">
+              <string>type</string>
+              </property>
+            </widget>
+            </item>
+            <item row="1" column="1">
+            <widget class="QComboBox" name="comboBoxResType">
+            </widget>
+            </item>
+
+
+
+            <item row="2" column="0">
+            <widget class="QLabel">
+              <property name="text">
+              <string>title</string>
+              </property>
+            </widget>
+            </item>
+            <item row="2" column="1">
+              <layout class="QHBoxLayout">
+                <item>
+                <layout class="QVBoxLayout">
+                  <item>            
+                  <spacer name="verticalSpacer">
+                  <property name="orientation">
+                    <enum>Qt::Vertical</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                    <size>
+                    <width>20</width>
+                    <height>40</height>
+                    </size>
+                  </property>
+                  </spacer>
+                  </item>
+
+                  <item>
+                    <layout class="QVBoxLayout">
+                    <item>
+                    <layout class="QHBoxLayout">
+                      <item>
+                      <widget class="QComboBox" name="comboBoxResTitleLocale">
+                        <item>
+                        <property name="text">
+                          <string>en</string>
+                        </property>
+                        </item>
+                        <item>
+                        <property name="text">
+                          <string>pt</string>
+                        </property>
+                        </item>
+                        <item>
+                        <property name="text">
+                          <string>fr</string>
+                        </property>
+                        </item>
+                      </widget>
+                      </item>
+
+                    <item>
+                      <widget class="QLineEdit" name="addResTitleLineEdit">
+                      <property name="placeholderText">
+                        <string>Enter title</string>
+                      </property>
+                      </widget>
+                    </item>
+                    </layout>
+
+                    </item>
+                    <item>
+                      <widget class="QPushButton" name="addResTitleButton">
+                      <property name="text">
+                        <string>Add</string>
+                      </property>
+                      </widget>
+                    </item>
+                    </layout>
+                  </item>
+                </layout>
+
+                </item>
+                <item>
+                  <layout class="QVBoxLayout">
+                    <item>
+                      <widget class="QListWidget" name="listWidgetResTitle">
+                      <property name="maximumSize">
+                        <size>
+                        <width>1000</width>
+                        <height>80</height>
+                        </size>
+                      </property>
+                      </widget>
+                    </item>
+                    <item>
+                      <widget class="QPushButton" name="deleteResTitleButton">
+                      <property name="text">
+                        <string>Delete Selected</string>
+                      </property>
+                      </widget>
+                    </item>
+                  </layout>
+                </item>
+              </layout>
+            </item>
+
+
+          
+            <item row="3" column="0">
+            <widget class="QLabel">
+              <property name="text">
+              <string>description</string>
+              </property>
+            </widget>
+            </item>
+            <item row="3" column="1">
+              <layout class="QHBoxLayout">
+                <item>
+                <layout class="QVBoxLayout">
+                  <item>            
+                  <spacer name="verticalSpacer">
+                  <property name="orientation">
+                    <enum>Qt::Vertical</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                    <size>
+                    <width>20</width>
+                    <height>40</height>
+                    </size>
+                  </property>
+                  </spacer>
+                  </item>
+
+                  <item>
+                    <layout class="QVBoxLayout">
+                    <item>
+                    <layout class="QHBoxLayout">
+                      <item>
+                      <widget class="QComboBox" name="comboBoxResDescriptionLocale">
+                        <item>
+                        <property name="text">
+                          <string>en</string>
+                        </property>
+                        </item>
+                        <item>
+                        <property name="text">
+                          <string>pt</string>
+                        </property>
+                        </item>
+                        <item>
+                        <property name="text">
+                          <string>fr</string>
+                        </property>
+                        </item>
+                      </widget>
+                      </item>
+
+                    <item>
+                      <widget class="QLineEdit" name="addResDescriptionLineEdit">
+                      <property name="placeholderText">
+                        <string>Enter description</string>
+                      </property>
+                      </widget>
+                    </item>
+                    </layout>
+
+                    </item>
+                    <item>
+                      <widget class="QPushButton" name="addResDescriptionButton">
+                      <property name="text">
+                        <string>Add</string>
+                      </property>
+                      </widget>
+                    </item>
+                    </layout>
+                  </item>
+                </layout>
+
+                </item>
+                <item>
+                  <layout class="QVBoxLayout">
+                    <item>
+                      <widget class="QListWidget" name="listWidgetResDescription">
+                      <property name="maximumSize">
+                        <size>
+                        <width>1000</width>
+                        <height>80</height>
+                        </size>
+                      </property>
+                      </widget>
+                    </item>
+                    <item>
+                      <widget class="QPushButton" name="deleteResDescriptionButton">
+                      <property name="text">
+                        <string>Delete Selected</string>
+                      </property>
+                      </widget>
+                    </item>
+                  </layout>
+                </item>
+              </layout>
+            </item>
+
+
+
+            <item row="4" column="0">
+            <widget class="QLabel">
+              <property name="text">
+              <string>description</string>
+              </property>
+            </widget>
+            </item>
+            <item row="4" column="1">
+              <layout class="QHBoxLayout">
+                <item>
+                <layout class="QVBoxLayout">
+                  <item>            
+                  <spacer name="verticalSpacer">
+                  <property name="orientation">
+                    <enum>Qt::Vertical</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                    <size>
+                    <width>20</width>
+                    <height>40</height>
+                    </size>
+                  </property>
+                  </spacer>
+                  </item>
+
+                  <item>
+                    <layout class="QVBoxLayout">
+                    <item>
+                    <layout class="QHBoxLayout">
+                      <item>
+                      <widget class="QComboBox" name="comboBoxResKeywordsLocale">
+                        <item>
+                        <property name="text">
+                          <string>en</string>
+                        </property>
+                        </item>
+                        <item>
+                        <property name="text">
+                          <string>pt</string>
+                        </property>
+                        </item>
+                        <item>
+                        <property name="text">
+                          <string>fr</string>
+                        </property>
+                        </item>
+                      </widget>
+                      </item>
+
+                    <item>
+                      <widget class="QLineEdit" name="addResKeywordsLineEdit">
+                      <property name="placeholderText">
+                        <string>Enter description</string>
+                      </property>
+                      </widget>
+                    </item>
+                    </layout>
+
+                    </item>
+                    <item>
+                      <widget class="QPushButton" name="addResKeywordsButton">
+                      <property name="text">
+                        <string>Add</string>
+                      </property>
+                      </widget>
+                    </item>
+                    </layout>
+                  </item>
+                </layout>
+
+                </item>
+                <item>
+                  <layout class="QVBoxLayout">
+                    <item>
+                      <widget class="QListWidget" name="listWidgetResKeywords">
+                      <property name="maximumSize">
+                        <size>
+                        <width>1000</width>
+                        <height>80</height>
+                        </size>
+                      </property>
+                      </widget>
+                    </item>
+                    <item>
+                      <widget class="QPushButton" name="deleteResKeywordsButton">
+                      <property name="text">
+                        <string>Delete Selected</string>
+                      </property>
+                      </widget>
+                    </item>
+                  </layout>
+                </item>
+              </layout>
+            </item>
+
+            
+
+
             </layout>
           </widget>
         </item>

@@ -350,10 +350,6 @@ class ConfigData:
         dialog.proxy.setSourceModel(dialog.model)
         dialog.listViewCollection.setModel(dialog.proxy)
 
-    def fill_resource_details_ui(self, dialog):
-        layout = dialog.gridLayoutCollectionLoaded
-        return
-
     def add_new_resource(self) -> str:
         new_name = "new_resource"
         self.resources[new_name] = ResourceConfigTemplate(instance_name=new_name)

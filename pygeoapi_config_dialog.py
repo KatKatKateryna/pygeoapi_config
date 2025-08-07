@@ -56,6 +56,7 @@ from PyQt5.QtCore import (
 )  # Not strictly needed, can use Python file API instead
 
 from .models.ConfigData import ConfigData
+from .models.top_level import ResourceConfigTemplate
 
 # This loads your .ui file so that PyQt can populate your plugin with the elements from Qt Designer
 FORM_CLASS, _ = uic.loadUiType(
@@ -352,11 +353,16 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
         self.proxy.setFilterFixedString(filter)
 
     def previewCollection(self, model_index: "QModelIndex"):
+        # if current resource already selected, do nothing
+        new_res_name = model_index.data()
+        if self.current_res_name == new_res_name:
+            return
+
         # hide detailed collection UI, show preview
         self.groupBoxCollectionLoaded.hide()
         self.groupBoxCollectionPreview.show()
 
-        self.current_res_name = model_index.data()
+        self.current_res_name = new_res_name
 
         # If title is a dictionary, use the first (default) value
         title = self.config_data.resources[self.current_res_name].title
@@ -379,14 +385,21 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
         self.bbox_map_canvas.setExtent(self.bbox_extents_layer.extent(), True)
         # self.canvas.refreshAllLayers()
 
-    def newCollection(self):
-        # hide preview collection UI, show detailed UI
-        self.groupBoxCollectionPreview.hide()
-        self.groupBoxCollectionLoaded.show()
+    def select_listcollection_item_by_text(self, target_text: str):
+        model = self.listViewCollection.model()
+        for row in range(model.rowCount()):
+            index = model.index(row, 0)
+            if model.data(index) == target_text:
+                self.listViewCollection.setCurrentIndex(index)
+                break
 
+    def newCollection(self):
         # add resource and reload UI
         new_name = self.config_data.add_new_resource()
         self.config_data.refresh_resources_list_ui(self)
+
+        # select new resource
+        self.select_listcollection_item_by_text(new_name)
 
         # set new resource as current and load details
         self.current_res_name = new_name
@@ -403,6 +416,15 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
         self.groupBoxCollectionLoaded.show()
 
         res_data = self.config_data.resources[self.current_res_name]
+        self.setup_resouce_loaded_ui(res_data)
+
+    def setup_resouce_loaded_ui(self, res_data: ResourceConfigTemplate):
+
+        self.lineEditResAlias.setText(self.current_res_name)
+        self.fill_combo_box(
+            self.comboBoxResType,
+            res_data.type,
+        )
 
     def editCollectionTitle(self, value):
         QgsMessageLog.logMessage(f"Current collection - title: {self.current_res_name}")
