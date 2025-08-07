@@ -300,7 +300,7 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
         if logFile:
             self.lineEditLogfile.setText(logFile[0])
 
-    def _throw_if_language_entry_exists_in_list_widget(self, list_widget, locale):
+    def _lang_entry_exists_in_list_widget(self, list_widget, locale) -> bool:
         for i in range(list_widget.count()):
             if list_widget.item(i).text().startswith(f"{locale}: "):
                 QMessageBox.warning(
@@ -308,6 +308,8 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
                     "Message",
                     f"Data entry in selected language already exists: {locale}",
                 )
+                return True
+        return False
 
     def add_listwidget_element_from_lineedit(
         self,
@@ -316,6 +318,7 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
         list_widget,
         locale_combobox=None,
         allow_repeated_locale=True,
+        sort=True,
     ):
         """Take the content of LineEdit and add it as a new List entry."""
 
@@ -324,18 +327,24 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
 
             text_to_print = text
             if locale_combobox:
+                # get text with locale
                 locale = locale_combobox.currentText()
                 text_to_print = f"{locale}: {text}"
 
-                if not allow_repeated_locale:
-                    self._throw_if_language_entry_exists_in_list_widget(
-                        list_widget, locale
-                    )
-            list_widget.addItem(text_to_print)
-            line_edit_widget.clear()
+                # check if repeated language entries are allowed
+                if allow_repeated_locale or not self._lang_entry_exists_in_list_widget(
+                    list_widget, locale
+                ):
+                    list_widget.addItem(text_to_print)
+                    line_edit_widget.clear()
+
+            else:
+                list_widget.addItem(text_to_print)
+                line_edit_widget.clear()
 
             # sort the content
-            list_widget.model().sort(0)
+            if sort:
+                list_widget.model().sort(0)
 
     def delete_list_widget_selected_item(self, list_widget):
         """Delete selected List item from widget."""
@@ -393,6 +402,7 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
             list_widget=self.listWidgetMetadataIdTitle,
             locale_combobox=self.comboBoxIdTitleLocale,
             allow_repeated_locale=False,
+            sort=True,
         )
 
     def add_metadata_id_description(self):
@@ -402,6 +412,7 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
             list_widget=self.listWidgetMetadataIdDescription,
             locale_combobox=self.comboBoxIdDescriptionLocale,
             allow_repeated_locale=False,
+            sort=True,
         )
 
     def add_metadata_keyword(self):
@@ -411,6 +422,37 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
             list_widget=self.listWidgetMetadataIdKeywords,
             locale_combobox=self.comboBoxKeywordsLocale,
             allow_repeated_locale=True,
+            sort=True,
+        )
+
+    def add_res_title(self):
+        """Called from .ui file."""
+        self.add_listwidget_element_from_lineedit(
+            line_edit_widget=self.addResTitleLineEdit,
+            list_widget=self.listWidgetResTitle,
+            locale_combobox=self.comboBoxResTitleLocale,
+            allow_repeated_locale=False,
+            sort=True,
+        )
+
+    def add_res_description(self):
+        """Called from .ui file."""
+        self.add_listwidget_element_from_lineedit(
+            line_edit_widget=self.addResDescriptionLineEdit,
+            list_widget=self.listWidgetResDescription,
+            locale_combobox=self.comboBoxResDescriptionLocale,
+            allow_repeated_locale=False,
+            sort=True,
+        )
+
+    def add_res_keyword(self):
+        """Called from .ui file."""
+        self.add_listwidget_element_from_lineedit(
+            line_edit_widget=self.addResKeywordsLineEdit,
+            list_widget=self.listWidgetResKeywords,
+            locale_combobox=self.comboBoxResKeywordsLocale,
+            allow_repeated_locale=True,
+            sort=True,
         )
 
     def delete_metadata_id_title(self):
@@ -424,6 +466,18 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
     def delete_metadata_keyword(self):
         """Delete keyword from metadata, called from .ui file."""
         self.delete_list_widget_selected_item(self.listWidgetMetadataIdKeywords)
+
+    def delete_res_title(self):
+        """Called from .ui file."""
+        self.delete_list_widget_selected_item(self.listWidgetResTitle)
+
+    def delete_res_description(self):
+        """Called from .ui file."""
+        self.delete_list_widget_selected_item(self.listWidgetResDescription)
+
+    def delete_res_keyword(self):
+        """Called from .ui file."""
+        self.delete_list_widget_selected_item(self.listWidgetResKeywords)
 
     def filterResources(self, filter):
         """Called from .ui."""
