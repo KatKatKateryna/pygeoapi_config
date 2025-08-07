@@ -26,6 +26,8 @@ import os
 import yaml
 
 from dataclasses import asdict
+
+from .models.top_level.providers.records import ProviderTypes
 from .models.top_level import InlineList
 
 from qgis.core import (
@@ -56,7 +58,7 @@ from PyQt5.QtCore import (
 )  # Not strictly needed, can use Python file API instead
 
 from .models.ConfigData import ConfigData
-from .models.top_level import ResourceConfigTemplate
+from .models.top_level import ResourceConfigTemplate, VisibilityTypes
 
 # This loads your .ui file so that PyQt can populate your plugin with the elements from Qt Designer
 FORM_CLASS, _ = uic.loadUiType(
@@ -424,6 +426,15 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
         self.fill_combo_box(
             self.comboBoxResType,
             res_data.type,
+        )
+        self.fill_combo_box(
+            self.comboBoxResVisibility,
+            res_data.visibility
+            or VisibilityTypes.DEFAULT,  # mock value, as default is None
+        )
+        self.fill_combo_box(
+            self.comboBoxResProviderType,
+            ProviderTypes.FEATURE,  # mock value if we don't yet have an object to get the value from
         )
 
     def editCollectionTitle(self, value):

@@ -43,6 +43,15 @@ def update_dataclass_from_dict(
                     if expected_type is InlineList:
                         new_value = InlineList(new_value)
 
+                    # Exception: remap str to Enum
+                    elif isinstance(expected_type, type) and issubclass(
+                        expected_type, Enum
+                    ):
+                        for member in expected_type:
+                            if new_value == member.value:
+                                new_value = member
+                                break
+
                     # Exception with 'expected_type' 'list[some dataclass]'
                     # In this case, 'current_value' will be a 'default'=None (for optional fields) or 'default_factory'=[] (for mandatory fields)
                     # We need to cast every element in the list to the correct class before assigning

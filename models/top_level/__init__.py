@@ -1,7 +1,7 @@
 from .ServerConfig import ServerConfig
 from .LoggingConfig import LoggingConfig
 from .MetadataConfig import MetadataConfig
-from .ResourceConfigTemplate import ResourceConfigTemplate
+from .ResourceConfigTemplate import ResourceConfigTemplate, VisibilityTypes
 from .utils import InlineList
 
 __all__ = [
@@ -10,4 +10,5 @@ __all__ = [
     "MetadataConfig",
     "ResourceConfigTemplate",
     "InlineList",
+    "VisibilityTypes",
 ]

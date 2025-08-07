@@ -1237,6 +1237,12 @@
             </property>
            </widget>
           </item>
+
+          
+          <item row="2" column="1" columnspan="2">
+            <layout class="QHBoxLayout" name="bboxMapPlaceholder">
+            </layout>
+          </item>
           
 
           </layout>
@@ -1477,7 +1483,7 @@
             <item row="4" column="0">
             <widget class="QLabel">
               <property name="text">
-              <string>description</string>
+              <string>keywords</string>
               </property>
             </widget>
             </item>
@@ -1526,7 +1532,7 @@
                     <item>
                       <widget class="QLineEdit" name="addResKeywordsLineEdit">
                       <property name="placeholderText">
-                        <string>Enter description</string>
+                        <string>Enter keyword</string>
                       </property>
                       </widget>
                     </item>
@@ -1569,17 +1575,191 @@
               </layout>
             </item>
 
+
+
+            <item row="5" column="0">
+            <widget class="QLabel">
+              <property name="text">
+              <string>links</string>
+              </property>
+            </widget>
+            </item>
+            <item row="5" column="1">
+              <layout class="QHBoxLayout">
+                <item>
+                <layout class="QVBoxLayout">
+                  <item>            
+                  <spacer name="verticalSpacer">
+                  <property name="orientation">
+                    <enum>Qt::Vertical</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                    <size>
+                    <width>20</width>
+                    <height>40</height>
+                    </size>
+                  </property>
+                  </spacer>
+                  </item>
+
+                  <item>
+                    <layout class="QVBoxLayout">
+                    <item>
+                    <layout class="QHBoxLayout">
+                    <item>
+                      <widget class="QLineEdit" name="addResLinksLineEdit">
+                      <property name="placeholderText">
+                        <string>New link</string>
+                      </property>
+                      </widget>
+                    </item>
+                    </layout>
+
+                    </item>
+                    <item>
+                      <widget class="QPushButton" name="addResLinksButton">
+                      <property name="text">
+                        <string>Add</string>
+                      </property>
+                      </widget>
+                    </item>
+                    </layout>
+                  </item>
+                </layout>
+
+                </item>
+                <item>
+                  <layout class="QVBoxLayout">
+                    <item>
+                      <widget class="QListWidget" name="listWidgetResLinks">
+                      <property name="maximumSize">
+                        <size>
+                        <width>1000</width>
+                        <height>80</height>
+                        </size>
+                      </property>
+                      </widget>
+                    </item>
+                    <item>
+                      <widget class="QPushButton" name="deleteResLinksButton">
+                      <property name="text">
+                        <string>Delete Selected</string>
+                      </property>
+                      </widget>
+                    </item>
+                  </layout>
+                </item>
+              </layout>
+            </item>
+
+
+
+            <item row="6" column="0">
+            <widget class="QLabel">
+              <property name="text">
+              <string>extents</string>
+              </property>
+            </widget>
+            </item>
+            <item row="6" column="1">
+              <widget class="QLineEdit" name="lineEditResExtents">
+            </widget>
+            </item>
             
+            
+            
+
+            <item row="7" column="0">
+            <widget class="QLabel">
+              <property name="text">
+              <string>providers</string>
+              </property>
+            </widget>
+            </item>
+            <item row="7" column="1">
+              <layout class="QHBoxLayout">
+                <item>
+                <layout class="QVBoxLayout">
+                  <item>            
+                  <spacer name="verticalSpacer">
+                  <property name="orientation">
+                    <enum>Qt::Vertical</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                    <size>
+                    <width>20</width>
+                    <height>40</height>
+                    </size>
+                  </property>
+                  </spacer>
+                  </item>
+
+                  <item>
+                    <layout class="QVBoxLayout">
+                    <item>
+                    <layout class="QHBoxLayout">
+                      <item>
+                      <widget class="QComboBox" name="comboBoxResProviderType">
+                      </widget>
+                      </item>
+                    </layout>
+
+                    </item>
+                    <item>
+                      <widget class="QPushButton" name="addResProviderButton">
+                      <property name="text">
+                        <string>Add</string>
+                      </property>
+                      </widget>
+                    </item>
+                    </layout>
+                  </item>
+                </layout>
+
+                </item>
+                <item>
+                  <layout class="QVBoxLayout">
+                    <item>
+                      <widget class="QListWidget" name="listWidgetResProvider">
+                      <property name="maximumSize">
+                        <size>
+                        <width>1000</width>
+                        <height>80</height>
+                        </size>
+                      </property>
+                      </widget>
+                    </item>
+                    <item>
+                      <widget class="QPushButton" name="deleteResProviderButton">
+                      <property name="text">
+                        <string>Delete Selected</string>
+                      </property>
+                      </widget>
+                    </item>
+                  </layout>
+                </item>
+              </layout>
+            </item>
+
+
+
+            <item row="8" column="0">
+            <widget class="QLabel">
+              <property name="text">
+              <string>visibility</string>
+              </property>
+            </widget>
+            </item>
+            <item row="8" column="1">
+            <widget class="QComboBox" name="comboBoxResVisibility">
+            </widget>
+            </item>
 
 
             </layout>
           </widget>
         </item>
        
-        <item row="1" column="1" rowspan="1">
-          <layout class="QHBoxLayout" name="bboxMapPlaceholder">
-          </layout>
-        </item>
 
       </layout>
      </widget>
