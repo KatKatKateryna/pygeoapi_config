@@ -292,7 +292,7 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
             try:
                 with open(file_path, "w", encoding="utf-8") as file:
                     yaml.dump(
-                        asdict(self.config_data),
+                        self.config_data.asdict_enum_safe(self.config_data),
                         file,
                         default_flow_style=False,
                         sort_keys=False,

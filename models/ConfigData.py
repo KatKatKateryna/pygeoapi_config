@@ -1,11 +1,15 @@
-from dataclasses import dataclass, field
+from dataclasses import asdict, dataclass, field, fields, is_dataclass
 from enum import Enum
 
-from .utils import update_dataclass_from_dict
+from .utils import update_dataclass_from_dict, get_enum_value_from_string
 from .top_level import (
     ServerConfig,
+    OnExceed,
     LoggingConfig,
+    LoggingLevel,
     MetadataConfig,
+    KeywordType,
+    Role,
     ResourceConfigTemplate,
 )
 from .top_level.utils import is_valid_string
@@ -157,10 +161,14 @@ class ConfigData:
         self.server.limits.default_items = dialog.spinBoxDefault.value()
         self.server.limits.max_items = dialog.spinBoxMax.value()
 
-        self.server.limits.on_exceed = dialog.comboBoxExceed.currentText()
+        self.server.limits.on_exceed = get_enum_value_from_string(
+            OnExceed, dialog.comboBoxExceed.currentText()
+        )
 
         # logging
-        self.logging.level = dialog.comboBoxLog.currentText()
+        self.logging.level = get_enum_value_from_string(
+            LoggingLevel, dialog.comboBoxLog.currentText()
+        )
         self.logging.logfile = dialog.lineEditLogfile.text()
         self.logging.logformat = dialog.lineEditLogformat.text()
         self.logging.dateformat = dialog.lineEditDateformat.text()
@@ -180,8 +188,8 @@ class ConfigData:
             )
         )
 
-        self.metadata.identification.keywords_type = (
-            dialog.comboBoxMetadataIdKeywordsType.currentText()
+        self.metadata.identification.keywords_type = get_enum_value_from_string(
+            KeywordType, dialog.comboBoxMetadataIdKeywordsType.currentText()
         )
         self.metadata.identification.terms_of_service = (
             dialog.lineEditMetadataIdTerms.text()
@@ -214,7 +222,9 @@ class ConfigData:
         self.metadata.contact.instructions = (
             dialog.lineEditMetadataContactInstructions.text()
         )
-        self.metadata.contact.role = dialog.comboBoxMetadataContactRole.currentText()
+        self.metadata.contact.role = get_enum_value_from_string(
+            Role, dialog.comboBoxMetadataContactRole.currentText()
+        )
 
     def set_ui_from_data(self, dialog):
 
@@ -354,6 +364,26 @@ class ConfigData:
         new_name = "new_resource"
         self.resources[new_name] = ResourceConfigTemplate(instance_name=new_name)
         return new_name
+
+    def asdict_enum_safe(self, obj):
+        """Overwriting dataclass 'asdict' fuction to replace Enums with strings."""
+        if is_dataclass(obj):
+            result = {}
+            for f in fields(obj):
+                value = getattr(obj, f.name)
+                result[f.name] = self.asdict_enum_safe(value)
+            return result
+        elif isinstance(obj, Enum):
+            return obj.value
+        elif isinstance(obj, list):
+            return [self.asdict_enum_safe(v) for v in obj]
+        elif isinstance(obj, dict):
+            return {
+                self.asdict_enum_safe(k): self.asdict_enum_safe(v)
+                for k, v in obj.items()
+            }
+        else:
+            return obj
 
     def _select_list_widget_items_by_texts(self, *, list_widget, texts_to_select):
         for i in range(list_widget.count()):

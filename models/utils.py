@@ -47,10 +47,7 @@ def update_dataclass_from_dict(
                     elif isinstance(expected_type, type) and issubclass(
                         expected_type, Enum
                     ):
-                        for member in expected_type:
-                            if new_value == member.value:
-                                new_value = member
-                                break
+                        new_value = get_enum_value_from_string(expected_type, new_value)
 
                     # Exception with 'expected_type' 'list[some dataclass]'
                     # In this case, 'current_value' will be a 'default'=None (for optional fields) or 'default_factory'=[] (for mandatory fields)
@@ -81,6 +78,14 @@ def update_dataclass_from_dict(
                 all_missing_props.append(f"{prop_name}.{field_name}")
 
     return missing_fields, wrong_types, all_missing_props
+
+
+def get_enum_value_from_string(enum_type: Enum, text: str):
+    if isinstance(enum_type, type) and issubclass(enum_type, Enum):
+        for member in enum_type:
+            if text == member.value:
+                return member
+    raise AttributeError(f"Unexpected attribute type '{text}'", name="text")
 
 
 def _cast_element_to_type(value: Any, expected_type, prop_name: str):
