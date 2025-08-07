@@ -351,7 +351,7 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
         self.proxy.setDynamicSortFilter(True)
         self.proxy.setFilterFixedString(filter)
 
-    def loadCollection(self, index: "QModelIndex"):
+    def previewCollection(self, index: "QModelIndex"):
         self.cur_col_name = index.data()
 
         # If title is a dictionary, use the first (default) value
@@ -374,7 +374,12 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
         # self.bbox_map_canvas.zoomToFullExtent()
         self.bbox_map_canvas.setExtent(self.bbox_extents_layer.extent(), True)
         # self.canvas.refreshAllLayers()
-        print(self.bbox_map_canvas.mapSettings().destinationCrs().authid())
+
+    def newCollection(self):
+        pass
+
+    def loadCollection(self):
+        pass
 
     def editCollectionTitle(self, value):
         QgsMessageLog.logMessage(f"Current collection - title: {self.cur_col_name}")
