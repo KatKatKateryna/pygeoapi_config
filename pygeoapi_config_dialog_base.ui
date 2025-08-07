@@ -1191,7 +1191,7 @@
         </widget>
        </item>
        <item row="0" column="1" rowspan="1">
-        <widget class="QGroupBox" name="groupBoxCollection">
+        <widget class="QGroupBox" name="groupBoxCollectionPreview">
          <property name="title">
           <string>collection details</string>
          </property>
@@ -1235,14 +1235,30 @@
           </item>
           
 
-         </layout>
+          </layout>
         </widget>
-       </item>
+        </item>
+        
+        <item row="0" column="1" rowspan="1">
+          <widget class="QGroupBox" name="groupBoxCollectionLoaded">
+            <property name="visible">
+              <bool>false</bool>
+            </property>
+            <property name="title">
+              <string>collection details</string>
+            </property>
+            <layout class="QGridLayout" name="gridLayoutCollectionLoaded">
+            
+              
+            
+            </layout>
+          </widget>
+        </item>
        
-          <item row="1" column="1" rowspan="1">
-           <layout class="QHBoxLayout" name="bboxMapPlaceholder">
-           </layout>
-          </item>
+        <item row="1" column="1" rowspan="1">
+          <layout class="QHBoxLayout" name="bboxMapPlaceholder">
+          </layout>
+        </item>
 
       </layout>
      </widget>

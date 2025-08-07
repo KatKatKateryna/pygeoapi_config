@@ -343,10 +343,21 @@ class ConfigData:
         )
 
         # collections
-        dialog.model.setStringList([k for k, _ in self.resources.items()])
+        self.refresh_resources_list_ui(dialog)
 
+    def refresh_resources_list_ui(self, dialog):
+        dialog.model.setStringList([k for k, _ in self.resources.items()])
         dialog.proxy.setSourceModel(dialog.model)
         dialog.listViewCollection.setModel(dialog.proxy)
+
+    def fill_resource_details_ui(self, dialog):
+        layout = dialog.gridLayoutCollectionLoaded
+        return
+
+    def add_new_resource(self) -> str:
+        new_name = "new_resource"
+        self.resources[new_name] = ResourceConfigTemplate(instance_name=new_name)
+        return new_name
 
     def _select_list_widget_items_by_texts(self, *, list_widget, texts_to_select):
         for i in range(list_widget.count()):

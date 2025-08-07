@@ -66,7 +66,7 @@ FORM_CLASS, _ = uic.loadUiType(
 class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
 
     config_data = ConfigData()
-    cur_col_name = ""
+    current_res_name = ""
 
     # these need to be class properties, otherwise, without constant reference, they are not displayed in a widget
     bbox_map_canvas: QgsMapCanvas
@@ -351,23 +351,27 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
         self.proxy.setDynamicSortFilter(True)
         self.proxy.setFilterFixedString(filter)
 
-    def previewCollection(self, index: "QModelIndex"):
-        self.cur_col_name = index.data()
+    def previewCollection(self, model_index: "QModelIndex"):
+        # hide detailed collection UI, show preview
+        self.groupBoxCollectionLoaded.hide()
+        self.groupBoxCollectionPreview.show()
+
+        self.current_res_name = model_index.data()
 
         # If title is a dictionary, use the first (default) value
-        title = self.config_data.resources[self.cur_col_name].title
+        title = self.config_data.resources[self.current_res_name].title
         if isinstance(title, dict):
             title = next(iter(title.values()), "")
         self.lineEditTitle.setText(title)
 
         # If description is a dictionary, use the first (default) value
-        description = self.config_data.resources[self.cur_col_name].description
+        description = self.config_data.resources[self.current_res_name].description
         if isinstance(description, dict):
             description = next(iter(description.values()), "")
         self.lineEditDescription.setText(description)
 
         # load bbox
-        bbox = self.config_data.resources[self.cur_col_name].extents.spatial.bbox
+        bbox = self.config_data.resources[self.current_res_name].extents.spatial.bbox
 
         self.bbox_extents_layer = self.create_rect_layer_from_bbox(bbox)
         self.bbox_map_canvas.setLayers([self.bbox_extents_layer, self.bbox_base_layer])
@@ -376,18 +380,37 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
         # self.canvas.refreshAllLayers()
 
     def newCollection(self):
-        pass
+        # hide preview collection UI, show detailed UI
+        self.groupBoxCollectionPreview.hide()
+        self.groupBoxCollectionLoaded.show()
+
+        # add resource and reload UI
+        new_name = self.config_data.add_new_resource()
+        self.config_data.refresh_resources_list_ui(self)
+
+        # set new resource as current and load details
+        self.current_res_name = new_name
+        self.loadCollection()
 
     def loadCollection(self):
-        pass
+
+        # if no resource selected, do nothing
+        if self.current_res_name == "":
+            return
+
+        # hide preview collection UI, show detailed UI
+        self.groupBoxCollectionPreview.hide()
+        self.groupBoxCollectionLoaded.show()
+
+        res_data = self.config_data.resources[self.current_res_name]
 
     def editCollectionTitle(self, value):
-        QgsMessageLog.logMessage(f"Current collection - title: {self.cur_col_name}")
-        self.config_data.resources[self.cur_col_name].title = value
+        QgsMessageLog.logMessage(f"Current collection - title: {self.current_res_name}")
+        self.config_data.resources[self.current_res_name].title = value
 
     def editCollectionDescription(self, value):
-        QgsMessageLog.logMessage(f"Current collection - desc: {self.cur_col_name}")
-        self.config_data.resources[self.cur_col_name].description = value
+        QgsMessageLog.logMessage(f"Current collection - desc: {self.current_res_name}")
+        self.config_data.resources[self.current_res_name].description = value
 
     def create_rect_layer_from_bbox(self, bbox: list[float], layer_name="Rectangle"):
 
