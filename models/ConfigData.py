@@ -11,6 +11,8 @@ from .top_level import (
     KeywordType,
     Role,
     ResourceConfigTemplate,
+    VisibilityTypes,
+    ResourceTypes,
 )
 from .top_level.utils import is_valid_string
 
@@ -360,11 +362,64 @@ class ConfigData:
         dialog.proxy.setSourceModel(dialog.model)
         dialog.listViewCollection.setModel(dialog.proxy)
 
-    def set_resource_ui_from_data(self, dialog):
-        pass
+    def set_resource_ui_from_data(self, dialog, res_data: ResourceConfigTemplate):
+
+        # alias
+        dialog.lineEditResAlias.setText(dialog.current_res_name)
+
+        # type
+        self._set_combo_box_value_from_data(
+            combo_box=dialog.comboBoxResType,
+            value=res_data.type,
+        )
+
+        # title
+        self._pack_locales_data_into_list(
+            res_data.title,
+            dialog.listWidgetResTitle,
+        )
+
+        # description
+        self._pack_locales_data_into_list(
+            res_data.description,
+            dialog.listWidgetResDescription,
+        )
+
+        # keywords
+        self._pack_locales_data_into_list(
+            res_data.keywords, dialog.listWidgetResKeywords
+        )
+
+        # visibility
+        self._set_combo_box_value_from_data(
+            combo_box=dialog.comboBoxResVisibility,
+            value=res_data.visibility or VisibilityTypes.DEFAULT,
+        )
 
     def set_resource_data_from_ui(self, dialog):
-        pass
+        res_name = dialog.current_res_name
+
+        self.resources[res_name].type = get_enum_value_from_string(
+            ResourceTypes, dialog.comboBoxResType.currentText()
+        )
+        self.resources[res_name].title = self._unpack_locales_values_list_to_dict(
+            dialog.listWidgetResTitle
+        )
+        self.resources[res_name].description = self._unpack_locales_values_list_to_dict(
+            dialog.listWidgetResDescription
+        )
+        self.resources[res_name].keywords = self._unpack_locales_values_list_to_dict(
+            dialog.listWidgetResKeywords
+        )
+
+        self.resources[res_name].visibility = get_enum_value_from_string(
+            VisibilityTypes, dialog.comboBoxResVisibility.currentText()
+        )
+
+        # change resource key to a new alias
+        new_alias = dialog.lineEditResAlias.text()
+        if res_name in self.resources:
+            self.resources[new_alias] = self.resources.pop(res_name)
 
     def add_new_resource(self) -> str:
         new_name = "new_resource"

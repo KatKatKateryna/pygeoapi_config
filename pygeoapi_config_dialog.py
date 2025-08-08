@@ -220,7 +220,6 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
 
     def _setup_resouce_loaded_ui(self, res_data: ResourceConfigTemplate):
 
-        self.lineEditResAlias.setText(self.current_res_name)
         self.fill_combo_box(
             self.comboBoxResType,
             res_data.type,
@@ -489,11 +488,27 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
         # hide detailed collection UI, show preview
         self.groupBoxCollectionLoaded.hide()
         self.groupBoxCollectionPreview.show()
+        self.config_data.refresh_resources_list_ui(self)
 
     def save_resource_edit_and_preview(self):
         """Save current changes to the resource data, reset widgets to Preview. Called from .ui."""
 
-        self.config_data.set_resource_ui_from_data(self)
+        if self.current_res_name == "":
+            QgsMessageLog.logMessage("Resource alias is missing")
+            QMessageBox.warning(
+                self,
+                "Warning",
+                "Resource alias is missing",
+            )
+            return
+
+        self.config_data.set_resource_data_from_ui(self)
+
+        # rename resource if alias changed
+        new_alias = self.lineEditResAlias.text()
+
+        # reset the current resource name, refresh UI list
+        self.current_res_name = new_alias
         self.exit_resource_edit()
 
     def preview_resource(self, model_index: "QModelIndex"):
@@ -556,7 +571,7 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
         self._setup_resouce_loaded_ui(res_data)
 
         # set the values to UI widgets
-        self.config_data.set_resource_ui_from_data(self)
+        self.config_data.set_resource_ui_from_data(self, res_data)
 
     def editCollectionTitle(self, value):
         QgsMessageLog.logMessage(f"Current collection - title: {self.current_res_name}")
