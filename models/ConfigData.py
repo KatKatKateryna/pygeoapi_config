@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field, fields, is_dataclass
+from datetime import datetime
 from enum import Enum
 
 from .utils import update_dataclass_from_dict
@@ -13,8 +14,9 @@ from .top_level import (
     ResourceConfigTemplate,
     VisibilityTypes,
     ResourceTypes,
+    TemporalConfig,
 )
-from .top_level.utils import is_valid_string, get_enum_value_from_string
+from .top_level.utils import InlineList, is_valid_string, get_enum_value_from_string
 
 
 @dataclass(kw_only=True)
@@ -418,12 +420,12 @@ class ConfigData:
             # temporal begin
             if res_data.extents.temporal.begin:
                 dialog.lineEditResExtentsTemporalBegin.setText(
-                    res_data.extents.temporal.begin
+                    res_data.extents.temporal.begin.strftime("%Y-%m-%dT%H:%M:%SZ")
                 )
             # temporal end
             if res_data.extents.temporal.end:
                 dialog.lineEditResExtentsTemporalEnd.setText(
-                    res_data.extents.temporal.end
+                    res_data.extents.temporal.end.strftime("%Y-%m-%dT%H:%M:%SZ")
                 )
             # temporal end
             if res_data.extents.temporal.trs:
@@ -450,6 +452,56 @@ class ConfigData:
         self.resources[res_name].visibility = get_enum_value_from_string(
             VisibilityTypes, dialog.comboBoxResVisibility.currentText()
         )
+
+        # spatial bbox
+        raw_bbox_str = dialog.lineEditResExtentsSpatialBbox.text()
+        # this loop is to not add empty decimals unnecessarily
+        list_bbox_val = []
+        for part in raw_bbox_str.split(","):
+            part = part.strip()
+            if "." in part:
+                list_bbox_val.append(float(part))
+            else:
+                list_bbox_val.append(int(part))
+        self.resources[res_name].extents.spatial.bbox = InlineList(list_bbox_val)
+
+        # spatial crs
+        self.resources[res_name].extents.spatial.crs = (
+            "http://www.opengis.net/def/crs/"
+            + dialog.comboBoxResExtentsSpatialCrsType.currentText()
+            + "/"
+            + dialog.lineEditResExtentsSpatialCrs.text()
+        )
+
+        # temporal: only initialize if any of the values are present, otherwise leave as default None
+        if (
+            self.resources[res_name].extents.temporal
+            or is_valid_string(dialog.lineEditResExtentsTemporalBegin.text())
+            or is_valid_string(dialog.lineEditResExtentsTemporalEnd.text())
+            or is_valid_string(dialog.lineEditResExtentsTemporalTrs.text())
+        ):
+            self.resources[res_name].extents.temporal = TemporalConfig()
+
+        # if initialized or already existed:
+        if self.resources[res_name].extents.temporal:
+            if is_valid_string(dialog.lineEditResExtentsTemporalBegin.text()):
+                self.resources[res_name].extents.temporal.begin = datetime.strptime(
+                    dialog.lineEditResExtentsTemporalBegin.text(), "%Y-%m-%dT%H:%M:%SZ"
+                )
+            else:
+                self.resources[res_name].extents.temporal.begin = None
+            if is_valid_string(dialog.lineEditResExtentsTemporalEnd.text()):
+                self.resources[res_name].extents.temporal.end = datetime.strptime(
+                    dialog.lineEditResExtentsTemporalEnd.text(), "%Y-%m-%dT%H:%M:%SZ"
+                )
+            else:
+                self.resources[res_name].extents.temporal.end = None
+            if is_valid_string(dialog.lineEditResExtentsTemporalTrs.text()):
+                self.resources[res_name].extents.temporal.trs = (
+                    dialog.lineEditResExtentsTemporalTrs.text()
+                )
+            else:
+                self.resources[res_name].extents.temporal.trs = None
 
         # change resource key to a new alias
         new_alias = dialog.lineEditResAlias.text()

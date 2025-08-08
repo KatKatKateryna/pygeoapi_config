@@ -5,6 +5,7 @@ from .ResourceConfigTemplate import (
     ResourceConfigTemplate,
     VisibilityTypes,
     ResourceTypes,
+    TemporalConfig,
 )
 from .utils import InlineList
 
@@ -20,4 +21,5 @@ __all__ = [
     "InlineList",
     "VisibilityTypes",
     "ResourceTypes",
+    "TemporalConfig",
 ]
