@@ -13,6 +13,7 @@ class ResourceTypes(Enum):
 
 
 class VisibilityTypes(Enum):
+    NONE = ""
     DEFAULT = "default"
     HIDDEN = "hidden"
 

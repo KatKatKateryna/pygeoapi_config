@@ -395,7 +395,7 @@ class ConfigData:
         # visibility
         self._set_combo_box_value_from_data(
             combo_box=dialog.comboBoxResVisibility,
-            value=res_data.visibility or VisibilityTypes.DEFAULT,
+            value=res_data.visibility or VisibilityTypes.NONE,
         )
 
         # spatial bbox
@@ -449,9 +449,13 @@ class ConfigData:
             dialog.listWidgetResKeywords, True
         )
 
-        self.resources[res_name].visibility = get_enum_value_from_string(
-            VisibilityTypes, dialog.comboBoxResVisibility.currentText()
-        )
+        # visibility: if empty, ignore
+        if is_valid_string(dialog.comboBoxResVisibility.currentText()):
+            self.resources[res_name].visibility = get_enum_value_from_string(
+                VisibilityTypes, dialog.comboBoxResVisibility.currentText()
+            )
+        else:
+            self.resources[res_name].visibility = None
 
         # spatial bbox
         raw_bbox_str = dialog.lineEditResExtentsSpatialBbox.text()

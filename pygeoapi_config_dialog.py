@@ -237,7 +237,7 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
         self.fill_combo_box(
             self.comboBoxResVisibility,
             res_data.visibility
-            or VisibilityTypes.DEFAULT,  # mock value, as default is None
+            or VisibilityTypes.NONE,  # mock value, as default is None
         )
         self.fill_combo_box(
             self.comboBoxResExtentsSpatialCrsType,
