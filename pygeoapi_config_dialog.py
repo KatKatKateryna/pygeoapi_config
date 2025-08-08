@@ -234,6 +234,15 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
             ProviderTypes.FEATURE,  # mock value if we don't yet have an object to get the value from
         )
 
+    def clear_layout(self, layout):
+        while layout.count():
+            item = layout.takeAt(0)
+            widget = item.widget()
+            if widget is not None:
+                widget.setParent(None)
+            elif item.layout() is not None:
+                self.clear_layout(item.layout())
+
     def _setup_map_widget(self):
 
         # Define base tile layer (OSM)
@@ -251,6 +260,7 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
         # self.canvas.refreshAllLayers()
 
         # Add QgsMapCanvas as a widget to the Resource Tab
+        self.clear_layout(self.bboxMapPlaceholder)
         self.bboxMapPlaceholder.addWidget(self.bbox_map_canvas)
 
     def fill_combo_box(self, combo_box, enum_class):
@@ -525,17 +535,12 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
             self.groupBoxCollectionPreview.show()
             return
 
-        # if current resource already selected, do nothing
-        new_res_name = model_index.data()
-        if self.current_res_name == new_res_name:
-            return
-
         # hide detailed collection UI, show preview
         self.groupBoxCollectionLoaded.hide()
         self.groupBoxCollectionSelect.show()
         self.groupBoxCollectionPreview.show()
 
-        self.current_res_name = new_res_name
+        self.current_res_name = model_index.data()
 
         # If title is a dictionary, use the first (default) value
         title = self.config_data.resources[self.current_res_name].title
