@@ -1695,6 +1695,9 @@
                   </item>
                   <item row="0" column="1">
                     <widget class="QLineEdit" name="lineEditResExtentsSpatialBbox">
+                      <property name="placeholderText">
+                        <string>-180,-90,180,90</string>
+                      </property>
                     </widget>
                   </item>
                   <item row="1" column="0">

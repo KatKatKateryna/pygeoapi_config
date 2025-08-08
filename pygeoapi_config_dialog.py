@@ -25,8 +25,6 @@
 import os
 import yaml
 
-from dataclasses import asdict
-
 from .models.top_level.providers.records import ProviderTypes
 from .models.top_level import InlineList
 
@@ -41,6 +39,9 @@ from qgis.core import (
     QgsCoordinateReferenceSystem,
     QgsFillSymbol,
 )
+
+from PyQt5.QtGui import QRegularExpressionValidator
+
 from qgis.gui import QgsMapCanvas
 from qgis.PyQt import QtWidgets, uic
 from PyQt5.QtWidgets import (
@@ -50,6 +51,7 @@ from PyQt5.QtWidgets import (
     QApplication,
 )  # or PyQt6.QtWidgets
 from PyQt5.QtCore import (
+    QRegularExpression,
     QFile,
     QTextStream,
     Qt,
@@ -111,6 +113,14 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
             self.comboBoxMetadataContactRole, self.config_data.metadata.contact.role
         )
 
+        # set validators for come fields
+        regex_bbox = QRegularExpression(
+            r"-?\d+(\.\d+)?,-?\d+(\.\d+)?,-?\d+(\.\d+)?,-?\d+(\.\d+)?"
+        )
+        validator_bbox = QRegularExpressionValidator(regex_bbox)
+        self.lineEditResExtentsSpatialBbox.setValidator(validator_bbox)
+
+        # set UI values from ConfigData
         self.config_data.set_ui_from_data(self)
 
         self._setup_map_widget()
