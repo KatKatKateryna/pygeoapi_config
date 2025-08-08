@@ -54,7 +54,7 @@ class NewProviderWindow(QMainWindow):
             pass
 
         # Add buttons at the bottom
-        self.btn_add = QPushButton("Add")
+        self.btn_add = QPushButton("Save")
         self.btn_cancel = QPushButton("Cancel")
 
         # Buttons container layout
