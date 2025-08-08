@@ -16,10 +16,3 @@ class ProviderTemplate:
 
     # optional, but with assumed default value:
     crs: str = field(default="http://www.opengis.net/def/crs/OGC/1.3/CRS84")
-
-    # optional
-    # id_field: str | None = None
-    # title_field: str | None = None
-    # geometry: dict | None = None
-    # options: dict | None = None
-    # format: dict | None = None

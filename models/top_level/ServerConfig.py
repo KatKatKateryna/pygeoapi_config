@@ -6,7 +6,7 @@ from .utils import is_valid_string
 
 
 # records
-class OnExceed(Enum):
+class ServerOnExceedEnum(Enum):
     THROTTLE = "throttle"
     ERROR = "error"
 
@@ -22,7 +22,9 @@ class BindConfig:
 class LimitsConfig:
     default_items: int = field(default=20)
     max_items: int = field(default=50)
-    on_exceed: OnExceed = field(default_factory=lambda: OnExceed.THROTTLE)
+    on_exceed: ServerOnExceedEnum = field(
+        default_factory=lambda: ServerOnExceedEnum.THROTTLE
+    )
 
 
 @dataclass(kw_only=True)

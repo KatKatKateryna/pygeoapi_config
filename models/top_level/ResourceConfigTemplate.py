@@ -4,53 +4,24 @@ from enum import Enum
 
 from .providers import ProviderPostgresql, ProviderMvtProxy, ProviderWmsFacade
 from .utils import InlineList, get_enum_value_from_string
+from .providers.records import CrsAuthorities
 
 
 # records
-class ResourceTypes(Enum):
+class ResourceTypesEnum(Enum):
     COLLECTION = "collection"
     STAC = "stac-collection"
 
 
-class VisibilityTypes(Enum):
+class ResourceVisibilityEnum(Enum):
     NONE = ""
     DEFAULT = "default"
     HIDDEN = "hidden"
 
 
-class CrsAuthorities(Enum):
-    OGC13 = "OGC/1.3"
-    OGC0 = "OGC/0"
-    AUTO = "AUTO/1.3"
-    EPSG0 = "EPSG/0"
-    EPSG85 = "EPSG/8.5"
-    EPSG892 = "EPSG/8.9.2"
-    EPSG942 = "EPSG/9.4.2"
-    EPSG953 = "EPSG/9.5.3"
-    EPSG954 = "EPSG/9.5.4"
-    EPSG96 = "EPSG/9.6"
-    EPSG961 = "EPSG/9.6.1"
-    EPSG963 = "EPSG/9.6.3"
-    EPSG965 = "EPSG/9.6.5"
-    EPSG981 = "EPSG/9.8.1"
-    EPSG982 = "EPSG/9.8.2"
-    EPSG983 = "EPSG/9.8.3"
-    EPSG984 = "EPSG/9.8.4"
-    EPSG986 = "EPSG/9.8.6"
-    EPSG987 = "EPSG/9.8.7"
-    EPSG9811 = "EPSG/9.8.11"
-    EPSG9813 = "EPSG/9.8.13"
-    EPSG9814 = "EPSG/9.8.14"
-    EPSG9815 = "EPSG/9.8.15"
-    EPSG99 = "EPSG/9.9"
-    EPSG991 = "EPSG/9.9.1"
-    IAU0 = "IAU/0"
-    IAU2015 = "IAU/2015"
-
-
 # data classes
 @dataclass(kw_only=True)
-class LinkTemplate:
+class ResourceLinkTemplate:
     """Class to represent a Link configuration template."""
 
     type: str = ""
@@ -64,7 +35,7 @@ class LinkTemplate:
 
 
 @dataclass(kw_only=True)
-class SpatialConfig:
+class ResourceSpatialConfig:
     bbox: InlineList = field(default_factory=lambda: InlineList([-180, -90, 180, 90]))
 
     # optional, but with assumed default value:
@@ -85,7 +56,7 @@ class SpatialConfig:
 
 
 @dataclass(kw_only=True)
-class TemporalConfig:
+class ResourceTemporalConfig:
 
     # optional
     begin: str | datetime | None = None
@@ -96,14 +67,16 @@ class TemporalConfig:
 
 
 @dataclass(kw_only=True)
-class ExtentsConfig:
+class ResourceExtentsConfig:
     """Class to represent Extents configuration template."""
 
     # fields with default values:
-    spatial: SpatialConfig = field(default_factory=lambda: SpatialConfig())
+    spatial: ResourceSpatialConfig = field(
+        default_factory=lambda: ResourceSpatialConfig()
+    )
 
     # optional
-    temporal: TemporalConfig | None = None
+    temporal: ResourceTemporalConfig | None = None
 
 
 @dataclass(kw_only=True)
@@ -111,19 +84,23 @@ class ResourceConfigTemplate:
     """Class to represent a Resource configuration template."""
 
     # fields with default values:
-    type: ResourceTypes = field(default_factory=lambda: ResourceTypes.COLLECTION)
+    type: ResourceTypesEnum = field(
+        default_factory=lambda: ResourceTypesEnum.COLLECTION
+    )
     title: str | dict = field(default="")
     description: str | dict = field(default="")
     keywords: list | dict = field(default_factory=lambda: [])
-    links: list[LinkTemplate] = field(default_factory=lambda: [])
-    extents: ExtentsConfig = field(default_factory=lambda: ExtentsConfig())
+    links: list[ResourceLinkTemplate] = field(default_factory=lambda: [])
+    extents: ResourceExtentsConfig = field(
+        default_factory=lambda: ResourceExtentsConfig()
+    )
     # for providers, the types have to be explicitly listed so they are picked up on deserialization
     providers: list[ProviderPostgresql | ProviderMvtProxy | ProviderWmsFacade] = field(
         default_factory=lambda: []
     )
 
     # optional
-    visibility: VisibilityTypes | None = None
+    visibility: ResourceVisibilityEnum | None = None
     # limits, linked-data: ignored for now
 
     # Overwriding __init__ method to pass 'instance_name' as an input but not make it an instance property
@@ -132,16 +109,16 @@ class ResourceConfigTemplate:
         self,
         *,
         instance_name: str,
-        type: ResourceTypes = ResourceTypes.COLLECTION,
+        type: ResourceTypesEnum = ResourceTypesEnum.COLLECTION,
         title: str = "",
         description: str = "",
         keywords: dict = None,
-        links: list[LinkTemplate] = None,
-        extents: ExtentsConfig = None,
+        links: list[ResourceLinkTemplate] = None,
+        extents: ResourceExtentsConfig = None,
         providers: list[
             ProviderPostgresql | ProviderMvtProxy | ProviderWmsFacade
         ] = None,
-        visibility: VisibilityTypes | None = None
+        visibility: ResourceVisibilityEnum | None = None
     ):
         self._instance_name = instance_name
         self.type = type

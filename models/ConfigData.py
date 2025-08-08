@@ -5,18 +5,18 @@ from enum import Enum
 from .utils import update_dataclass_from_dict
 from .top_level import (
     ServerConfig,
-    OnExceed,
+    ServerOnExceedEnum,
     TemplatesConfig,
     LoggingConfig,
     LoggingLevel,
     MetadataConfig,
-    KeywordType,
-    Role,
+    MetadataKeywordTypeEnum,
+    MetadataRoleEnum,
     ResourceConfigTemplate,
-    VisibilityTypes,
-    ResourceTypes,
-    TemporalConfig,
-    LinkTemplate,
+    ResourceVisibilityEnum,
+    ResourceTypesEnum,
+    ResourceTemporalConfig,
+    ResourceLinkTemplate,
 )
 from .top_level.utils import (
     InlineList,
@@ -183,7 +183,7 @@ class ConfigData:
         self.server.limits.max_items = dialog.spinBoxMax.value()
 
         self.server.limits.on_exceed = get_enum_value_from_string(
-            OnExceed, dialog.comboBoxExceed.currentText()
+            ServerOnExceedEnum, dialog.comboBoxExceed.currentText()
         )
 
         # logging
@@ -222,7 +222,7 @@ class ConfigData:
         )
 
         self.metadata.identification.keywords_type = get_enum_value_from_string(
-            KeywordType, dialog.comboBoxMetadataIdKeywordsType.currentText()
+            MetadataKeywordTypeEnum, dialog.comboBoxMetadataIdKeywordsType.currentText()
         )
         self.metadata.identification.terms_of_service = (
             dialog.lineEditMetadataIdTerms.text()
@@ -256,7 +256,8 @@ class ConfigData:
             dialog.lineEditMetadataContactInstructions.text()
         )
         self.metadata.contact.role = get_enum_value_from_string(
-            Role, dialog.comboBoxMetadataContactRole.currentText()
+            MetadataRoleEnum,
+            dialog.comboBoxMetadataContactRole.currentText(),
         )
 
     def set_ui_from_data(self, dialog):
@@ -439,7 +440,7 @@ class ConfigData:
         # visibility
         self._set_combo_box_value_from_data(
             combo_box=dialog.comboBoxResVisibility,
-            value=res_data.visibility or VisibilityTypes.NONE,
+            value=res_data.visibility or ResourceVisibilityEnum.NONE,
         )
 
         # spatial bbox
@@ -524,7 +525,7 @@ class ConfigData:
         res_name = dialog.current_res_name
 
         self.resources[res_name].type = get_enum_value_from_string(
-            ResourceTypes, dialog.comboBoxResType.currentText()
+            ResourceTypesEnum, dialog.comboBoxResType.currentText()
         )
         self.resources[res_name].title = self._unpack_locales_values_list_to_dict(
             dialog.listWidgetResTitle, False
@@ -539,7 +540,7 @@ class ConfigData:
         # visibility: if empty, ignore
         if is_valid_string(dialog.comboBoxResVisibility.currentText()):
             self.resources[res_name].visibility = get_enum_value_from_string(
-                VisibilityTypes, dialog.comboBoxResVisibility.currentText()
+                ResourceVisibilityEnum, dialog.comboBoxResVisibility.currentText()
             )
         else:
             self.resources[res_name].visibility = None
@@ -565,7 +566,7 @@ class ConfigData:
             or is_valid_string(dialog.lineEditResExtentsTemporalEnd.text())
             or is_valid_string(dialog.lineEditResExtentsTemporalTrs.text())
         ):
-            self.resources[res_name].extents.temporal = TemporalConfig()
+            self.resources[res_name].extents.temporal = ResourceTemporalConfig()
         else:
             self.resources[res_name].extents.temporal = None
 
@@ -598,7 +599,7 @@ class ConfigData:
             dialog.listWidgetResLinks, 6
         )
         for link in links_data_lists:
-            new_link = LinkTemplate()
+            new_link = ResourceLinkTemplate()
             new_link.type = link[0]
             new_link.rel = link[1]
             new_link.href = link[2]

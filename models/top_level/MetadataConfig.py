@@ -4,7 +4,7 @@ from urllib.parse import urlparse
 
 
 # records
-class KeywordType(Enum):
+class MetadataKeywordTypeEnum(Enum):
     DISCIPLINE = "discipline"
     TEMPORAL = "temporal"
     PLACE = "place"
@@ -12,7 +12,7 @@ class KeywordType(Enum):
     STRATUM = "stratum"
 
 
-class Role(Enum):
+class MetadataRoleEnum(Enum):
     AUTHOR = "author"
     COAUTHOR = "coAuthor"
     COLLABORATOR = "collaborator"
@@ -41,7 +41,9 @@ class IdentificationConfig:
     title: str | dict = field(default_factory=lambda: "")
     description: str | dict = field(default_factory=lambda: "")
     keywords: list | dict = field(default_factory=lambda: [])
-    keywords_type: KeywordType = field(default_factory=lambda: KeywordType.THEME)
+    keywords_type: MetadataKeywordTypeEnum = field(
+        default_factory=lambda: MetadataKeywordTypeEnum.THEME
+    )
     terms_of_service: str = field(
         default="https://creativecommons.org/licenses/by/4.0/"
     )
@@ -75,7 +77,9 @@ class ContactConfig:
     url: str = field(default="Contact URL")
     hours: str = field(default="Mo-Fr 08:00-17:00")
     instructions: str = field(default="During hours of service. Off on weekends.")
-    role: Role = field(default_factory=lambda: Role.POINTOFCONTACT)
+    role: MetadataRoleEnum = field(
+        default_factory=lambda: MetadataRoleEnum.POINTOFCONTACT
+    )
 
 
 @dataclass(kw_only=True)

@@ -1,26 +1,26 @@
-from .ServerConfig import ServerConfig, OnExceed, TemplatesConfig
+from .ServerConfig import ServerConfig, ServerOnExceedEnum, TemplatesConfig
 from .LoggingConfig import LoggingConfig, LoggingLevel
-from .MetadataConfig import MetadataConfig, KeywordType, Role
+from .MetadataConfig import MetadataConfig, MetadataKeywordTypeEnum, MetadataRoleEnum
 from .ResourceConfigTemplate import (
     ResourceConfigTemplate,
-    VisibilityTypes,
-    ResourceTypes,
-    TemporalConfig,
-    LinkTemplate,
+    ResourceVisibilityEnum,
+    ResourceTypesEnum,
+    ResourceTemporalConfig,
+    ResourceLinkTemplate,
 )
 
 __all__ = [
     "ServerConfig",
-    "OnExceed",
+    "ServerOnExceedEnum",
     "TemplatesConfig",
     "LoggingConfig",
     "LoggingLevel",
     "MetadataConfig",
-    "KeywordType",
-    "Role",
+    "MetadataKeywordTypeEnum",
+    "MetadataRoleEnum",
     "ResourceConfigTemplate",
-    "VisibilityTypes",
-    "ResourceTypes",
-    "TemporalConfig",
-    "LinkTemplate",
+    "ResourceVisibilityEnum",
+    "ResourceTypesEnum",
+    "ResourceTemporalConfig",
+    "ResourceLinkTemplate",
 ]
