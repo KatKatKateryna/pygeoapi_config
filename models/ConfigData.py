@@ -177,16 +177,16 @@ class ConfigData:
 
         # metadata identification
         self.metadata.identification.title = self._unpack_locales_values_list_to_dict(
-            dialog.listWidgetMetadataIdTitle
+            dialog.listWidgetMetadataIdTitle, False
         )
         self.metadata.identification.description = (
             self._unpack_locales_values_list_to_dict(
-                dialog.listWidgetMetadataIdDescription
+                dialog.listWidgetMetadataIdDescription, False
             )
         )
         self.metadata.identification.keywords = (
             self._unpack_locales_values_list_to_dict(
-                dialog.listWidgetMetadataIdKeywords
+                dialog.listWidgetMetadataIdKeywords, True
             )
         )
 
@@ -403,13 +403,13 @@ class ConfigData:
             ResourceTypes, dialog.comboBoxResType.currentText()
         )
         self.resources[res_name].title = self._unpack_locales_values_list_to_dict(
-            dialog.listWidgetResTitle
+            dialog.listWidgetResTitle, False
         )
         self.resources[res_name].description = self._unpack_locales_values_list_to_dict(
-            dialog.listWidgetResDescription
+            dialog.listWidgetResDescription, False
         )
         self.resources[res_name].keywords = self._unpack_locales_values_list_to_dict(
-            dialog.listWidgetResKeywords
+            dialog.listWidgetResKeywords, True
         )
 
         self.resources[res_name].visibility = get_enum_value_from_string(
@@ -474,7 +474,7 @@ class ConfigData:
         else:
             combo_box.clear()
 
-    def _unpack_locales_values_list_to_dict(self, list_widget):
+    def _unpack_locales_values_list_to_dict(self, list_widget, allow_list: bool):
         # unpack string values with locales
 
         all_locales_dict = {}
@@ -483,9 +483,12 @@ class ConfigData:
             locale = full_line_text.split(": ", 1)[0]
             value = full_line_text.split(": ", 1)[1]
 
-            if locale not in all_locales_dict:
-                all_locales_dict[locale] = []
-            all_locales_dict[locale].append(value)
+            if allow_list:  # for multiple entries per language
+                if locale not in all_locales_dict:
+                    all_locales_dict[locale] = []
+                all_locales_dict[locale].append(value)
+            else:
+                all_locales_dict[locale] = value
 
         return all_locales_dict
 
