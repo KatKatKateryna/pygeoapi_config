@@ -431,87 +431,89 @@
         <widget class="QGroupBox" name="groupBox">
          <property name="title">
           <string>logging</string>
-         </property>
-         <layout class="QVBoxLayout" name="verticalLayout">
-          <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_10">
-            <item>
-             <widget class="QLabel" name="label_13">
-              <property name="text">
-               <string>level</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QComboBox" name="comboBoxLog">
-             </widget>
-            </item>
-           </layout>
-          </item>
-          <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_11">
-            <item>
-             <widget class="QLabel" name="label_14">
-              <property name="text">
-               <string>logfile</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLineEdit" name="lineEditLogfile"/>
-            </item>
-            <item>
-             <widget class="QPushButton" name="pushButtonBrowse">
-              <property name="text">
-                <string>📂</string>
-              </property>
-              <property name="icon">
-               <iconset theme="folder-open">
-                <normaloff></normaloff>
-                </iconset>
-              </property>
-              <property name="maximumSize">
-                <size>
-                <width>50</width>
-                <height>100</height>
-                </size>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-          
-          <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_12">
-            <item>
-             <widget class="QLabel" name="label_15">
-              <property name="text">
-               <string>logformat</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLineEdit" name="lineEditLogformat"/>
-            </item>
-           </layout>
-          </item>
-          
-          <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_13">
-            <item>
-             <widget class="QLabel" name="label_16">
-              <property name="text">
-               <string>dateformat</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLineEdit" name="lineEditDateformat"/>
-            </item>
-           </layout>
-          </item>
+              </property><layout class="QGridLayout" name="gridLayoutLogSettings">
+  
+                <!-- Row 0: level -->
+                <item row="0" column="0">
+                  <widget class="QLabel" name="label_13">
+                    <property name="text">
+                      <string>level</string>
+                    </property>
+                  </widget>
+                </item>
+                <item row="0" column="1">
+                  <layout class="QHBoxLayout">
+                    <item>
+                      <widget class="QComboBox" name="comboBoxLog"/>
+                    </item>
+                  </layout>
+                </item>
 
-         </layout>
+                <item row="1" column="0">
+                  <widget class="QLabel" name="label_14">
+                    <property name="text">
+                      <string>logfile</string>
+                    </property>
+                  </widget>
+                </item>
+                <item row="1" column="1">
+                  <layout class="QHBoxLayout">
+                    <item>
+                      <widget class="QLineEdit" name="lineEditLogfile"/>
+                    </item>
+                    <item>
+                      <widget class="QPushButton" name="pushButtonBrowse">
+                        <property name="text">
+                          <string>📂</string>
+                        </property>
+                        <property name="icon">
+                          <iconset theme="folder-open">
+                            <normaloff></normaloff>
+                          </iconset>
+                        </property>
+                        <property name="maximumSize">
+                          <size>
+                            <width>50</width>
+                            <height>100</height>
+                          </size>
+                        </property>
+                      </widget>
+                    </item>
+                  </layout>
+                </item>
+
+                <item row="2" column="0">
+                  <widget class="QLabel" name="label_15">
+                    <property name="text">
+                      <string>logformat</string>
+                    </property>
+                  </widget>
+                </item>
+                <item row="2" column="1">
+                  <layout class="QHBoxLayout">
+                    <item>
+                      <widget class="QLineEdit" name="lineEditLogformat"/>
+                    </item>
+                  </layout>
+                </item>
+
+                <item row="3" column="0">
+                  <widget class="QLabel" name="label_16">
+                    <property name="text">
+                      <string>dateformat</string>
+                    </property>
+                  </widget>
+                </item>
+                <item row="3" column="1">
+                  <layout class="QHBoxLayout">
+                    <item>
+                      <widget class="QLineEdit" name="lineEditDateformat"/>
+                    </item>
+                  </layout>
+                </item>
+
+              </layout>
+
         </widget>
        </item>
        <item row="8" column="1">
@@ -1890,6 +1892,12 @@
                           <item>
                           
                             <widget class="QListWidget" name="listWidgetResProvider">
+                            <property name="maximumSize">
+                              <size>
+                              <width>200</width>
+                              <height>300</height>
+                              </size>
+                            </property>
                             </widget>
                           </item>
                           <item>
