@@ -655,7 +655,7 @@ class ConfigData:
     def set_new_provider_data(
         self, dialog, values: dict, res_name: str, provider_type: ProviderTypes
     ):
-        """Adds a provider data to the resource."""
+        """Adds a provider data to the resource. Called on Save click from New Providere window."""
 
         if provider_type == ProviderTypes.FEATURE:
             new_provider = ProviderPostgresql()
@@ -669,6 +669,12 @@ class ConfigData:
 
             update_dataclass_from_dict(new_provider, values, "ProviderPostgresql")
 
+            # if incomplete data, remove Provider from ConfigData and show Warning
+            invalid_props = new_provider.get_invalid_properties()
+            if len(invalid_props) > 0:
+                self.resources[res_name].providers.pop(-1)
+                return invalid_props
+
         elif provider_type == ProviderTypes.MAP:
             pass
 
@@ -677,6 +683,7 @@ class ConfigData:
 
         # set value to the provider widget
         self.set_providers_ui_from_data(dialog, self.resources[res_name])
+        return []
 
     def _bbox_from_string(self, raw_bbox_str):
 

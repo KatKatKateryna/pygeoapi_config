@@ -543,7 +543,7 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
             sort=False,
         )
 
-    def add_res_provider(self):
+    def try_add_res_provider(self):
         provider_type: ProviderTypes = get_enum_value_from_string(
             ProviderTypes, self.comboBoxResProviderType.currentText()
         )
@@ -552,10 +552,20 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
         )
         # set new provider data to ConfigData when user clicks 'Add'
         self.provider_window.signal_provider_values.connect(
-            lambda values: self.config_data.set_new_provider_data(
-                self, values, self.current_res_name, provider_type
-            )
+            lambda values: self.validate_and_add_res_provider(values, provider_type)
         )
+
+    def validate_and_add_res_provider(self, values, provider_type):
+        """Calls the Provider validation method and displays a warning if data invalid."""
+        invalid_fields = self.config_data.set_new_provider_data(
+            self, values, self.current_res_name, provider_type
+        )
+        if len(invalid_fields) > 0:
+            QMessageBox.warning(
+                self,
+                "Warning",
+                f"Invalid Provider values: {invalid_fields}",
+            )
 
     def delete_metadata_id_title(self):
         """Delete keyword from metadata, called from .ui file."""

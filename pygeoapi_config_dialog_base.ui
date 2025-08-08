@@ -2174,7 +2174,7 @@
    <sender>addResProviderButton</sender>
    <signal>clicked()</signal>
    <receiver>PygeoapiConfigDialogBase</receiver>
-   <slot>add_res_provider()</slot>
+   <slot>try_add_res_provider()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>822</x>

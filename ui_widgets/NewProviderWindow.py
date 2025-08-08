@@ -65,13 +65,13 @@ class NewProviderWindow(QMainWindow):
 
         # Connect buttons
         self.btn_cancel.clicked.connect(self.close)
-        self.btn_add.clicked.connect(self.on_add_clicked)
+        self.btn_add.clicked.connect(self.on_save_clicked)
 
         # Show the window
         self.resize(400, 300)
         self.show()
 
-    def on_add_clicked(self):
+    def on_save_clicked(self):
         values = {}
         # Extract all QLineEdit values into a list
         for key, element in self.elements_with_values.items():
