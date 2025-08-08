@@ -523,6 +523,8 @@ class ConfigData:
             return result
         elif isinstance(obj, Enum):
             return obj.value
+        elif isinstance(obj, InlineList):
+            return obj
         elif isinstance(obj, list):
             return [self.asdict_enum_safe(v) for v in obj]
         elif isinstance(obj, dict):
