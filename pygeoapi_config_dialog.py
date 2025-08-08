@@ -487,6 +487,7 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
         """Switch widgets to Preview, reset selected resource. Called from .ui."""
         # hide detailed collection UI, show preview
         self.groupBoxCollectionLoaded.hide()
+        self.groupBoxCollectionSelect.show()
         self.groupBoxCollectionPreview.show()
         self.config_data.refresh_resources_list_ui(self)
 
@@ -519,6 +520,7 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
             self.lineEditDescription.setText("")
 
             self.groupBoxCollectionLoaded.hide()
+            self.groupBoxCollectionSelect.show()
             self.groupBoxCollectionPreview.show()
             return
 
@@ -529,6 +531,7 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
 
         # hide detailed collection UI, show preview
         self.groupBoxCollectionLoaded.hide()
+        self.groupBoxCollectionSelect.show()
         self.groupBoxCollectionPreview.show()
 
         self.current_res_name = new_res_name
@@ -584,6 +587,7 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
 
         # hide preview collection UI, show detailed UI
         self.groupBoxCollectionPreview.hide()
+        self.groupBoxCollectionSelect.hide()
         self.groupBoxCollectionLoaded.show()
 
         res_data = self.config_data.resources[self.current_res_name]
