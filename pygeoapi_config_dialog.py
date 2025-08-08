@@ -518,6 +518,7 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
         if not model_index:
             self.lineEditTitle.setText("")
             self.lineEditDescription.setText("")
+            self._setup_map_widget()
 
             self.groupBoxCollectionLoaded.hide()
             self.groupBoxCollectionSelect.show()
