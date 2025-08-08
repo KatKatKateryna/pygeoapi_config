@@ -27,6 +27,15 @@ def update_dataclass_from_dict(
             # If field is a dataclass and new_value is a dict, recurse
             # This behavior works when 'current_value' is an already instantiated dataclass
             # with all set properties - we just need to overwrite the values
+
+            # case where default value in None, but another class might be expected
+            if current_value is None and type(expected_type) is UnionType:
+                args = get_args(expected_type)
+                valid_type = next((t for t in args if t is not type(None)), None)
+                if is_dataclass(valid_type) and isinstance(new_value, dict):
+                    current_value = valid_type()
+                    setattr(instance, field_name, current_value)
+
             if is_dataclass(current_value) and isinstance(new_value, dict):
                 new_missing_fields, new_wrong_types, new_missing_props = (
                     update_dataclass_from_dict(

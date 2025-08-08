@@ -475,12 +475,13 @@ class ConfigData:
 
         # temporal: only initialize if any of the values are present, otherwise leave as default None
         if (
-            self.resources[res_name].extents.temporal
-            or is_valid_string(dialog.lineEditResExtentsTemporalBegin.text())
+            is_valid_string(dialog.lineEditResExtentsTemporalBegin.text())
             or is_valid_string(dialog.lineEditResExtentsTemporalEnd.text())
             or is_valid_string(dialog.lineEditResExtentsTemporalTrs.text())
         ):
             self.resources[res_name].extents.temporal = TemporalConfig()
+        else:
+            self.resources[res_name].extents.temporal = None
 
         # if initialized or already existed:
         if self.resources[res_name].extents.temporal:

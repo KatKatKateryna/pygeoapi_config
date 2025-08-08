@@ -76,7 +76,6 @@ class SpatialConfig:
             -1
         ]  # OGC/1.3/CRS84
         auth_string = "/".join(crs_auth_id.split("/")[:-1])
-        print(auth_string)
         return get_enum_value_from_string(CrsAuthorities, auth_string)
 
     @property
