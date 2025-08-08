@@ -173,9 +173,21 @@ class ConfigData:
         self.logging.level = get_enum_value_from_string(
             LoggingLevel, dialog.comboBoxLog.currentText()
         )
-        self.logging.logfile = dialog.lineEditLogfile.text()
-        self.logging.logformat = dialog.lineEditLogformat.text()
-        self.logging.dateformat = dialog.lineEditDateformat.text()
+
+        if is_valid_string(dialog.lineEditLogfile.text()):
+            self.logging.logfile = dialog.lineEditLogfile.text()
+        else:
+            self.logging.logfile = None
+
+        if is_valid_string(dialog.lineEditLogformat.text()):
+            self.logging.logformat = dialog.lineEditLogformat.text()
+        else:
+            self.logging.logformat = None
+
+        if is_valid_string(dialog.lineEditDateformat.text()):
+            self.logging.dateformat = dialog.lineEditDateformat.text()
+        else:
+            self.logging.dateformat = None
 
         # metadata identification
         self.metadata.identification.title = self._unpack_locales_values_list_to_dict(
@@ -290,9 +302,20 @@ class ConfigData:
             value=self.logging.level,
         )
 
-        dialog.lineEditLogfile.setText(self.logging.logfile)
-        dialog.lineEditLogformat.setText(self.logging.logformat)
-        dialog.lineEditDateformat.setText(self.logging.dateformat)
+        if self.logging.logfile:
+            dialog.lineEditLogfile.setText(self.logging.logfile)
+        else:
+            dialog.lineEditLogfile.setText("")
+
+        if self.logging.logformat:
+            dialog.lineEditLogformat.setText(self.logging.logformat)
+        else:
+            dialog.lineEditLogformat.setText("")
+
+        if self.logging.dateformat:
+            dialog.lineEditDateformat.setText(self.logging.dateformat)
+        else:
+            dialog.lineEditDateformat.setText("")
 
         # metadata identification
 
@@ -422,16 +445,24 @@ class ConfigData:
                 dialog.lineEditResExtentsTemporalBegin.setText(
                     res_data.extents.temporal.begin.strftime("%Y-%m-%dT%H:%M:%SZ")
                 )
+            else:
+                dialog.lineEditResExtentsTemporalBegin.setText("")
+
             # temporal end
             if res_data.extents.temporal.end:
                 dialog.lineEditResExtentsTemporalEnd.setText(
                     res_data.extents.temporal.end.strftime("%Y-%m-%dT%H:%M:%SZ")
                 )
+            else:
+                dialog.lineEditResExtentsTemporalEnd.setText("")
+
             # temporal end
             if res_data.extents.temporal.trs:
                 dialog.lineEditResExtentsTemporalTrs.setText(
                     res_data.extents.temporal.trs
                 )
+            else:
+                dialog.lineEditResExtentsTemporalTrs.setText("")
 
     def set_resource_data_from_ui(self, dialog):
         res_name = dialog.current_res_name
@@ -495,12 +526,14 @@ class ConfigData:
                 )
             else:
                 self.resources[res_name].extents.temporal.begin = None
+
             if is_valid_string(dialog.lineEditResExtentsTemporalEnd.text()):
                 self.resources[res_name].extents.temporal.end = datetime.strptime(
                     dialog.lineEditResExtentsTemporalEnd.text(), "%Y-%m-%dT%H:%M:%SZ"
                 )
             else:
                 self.resources[res_name].extents.temporal.end = None
+
             if is_valid_string(dialog.lineEditResExtentsTemporalTrs.text()):
                 self.resources[res_name].extents.temporal.trs = (
                     dialog.lineEditResExtentsTemporalTrs.text()

@@ -29,9 +29,9 @@ class LoggingConfig:
 
     # fields with default values:
     level: LoggingLevel = field(default_factory=lambda: LoggingLevel.ERROR)
-    logfile: str = field(default="")
 
     # optional fields:
+    logfile: str | None = None
     logformat: str | None = None
     dateformat: str | None = None
     # TODO: Not currently used in the UI
