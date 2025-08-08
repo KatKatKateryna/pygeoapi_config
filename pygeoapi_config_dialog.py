@@ -25,7 +25,7 @@
 import os
 import yaml
 
-from .ui_widgets.NewProviderWindow import NewProviderWindow
+from .ui_widgets.providers.NewProviderWindow import NewProviderWindow
 
 from .models.top_level.providers.records import ProviderTypes
 from .models.top_level.utils import (

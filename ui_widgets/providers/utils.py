@@ -9,9 +9,3 @@ def create_label_lineedit_pair(
     line_edit.setPlaceholderText(placeholder)
 
     return label, line_edit
-
-
-def extract_value_from_ui(element):
-
-    if isinstance(element, QLineEdit):
-        return element.text()

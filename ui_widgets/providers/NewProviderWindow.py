@@ -13,9 +13,8 @@ from PyQt5.QtWidgets import (
 )
 from PyQt5.QtCore import pyqtSignal
 
-from ..models.top_level.providers.records import ProviderTypes
+from ...models.top_level.providers.records import ProviderTypes
 from .provider_features import create_feature_provider_window
-from .utils import extract_value_from_ui
 
 
 class NewProviderWindow(QMainWindow):
@@ -75,10 +74,15 @@ class NewProviderWindow(QMainWindow):
         values = {}
         # Extract all QLineEdit values into a list
         for key, element in self.elements_with_values.items():
-            values[key] = extract_value_from_ui(element)
+            values[key] = self.extract_value_from_ui(element)
 
         # emit values to the parent widget
         self.signal_provider_values.emit(values)
 
         # Close the window
         self.close()
+
+    def extract_value_from_ui(self, element):
+
+        if isinstance(element, QLineEdit):
+            return element.text()

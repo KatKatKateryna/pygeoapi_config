@@ -50,7 +50,7 @@ class ProviderPostgresql(ProviderTemplate):
             all_invalid_fields.append("data.user")
         if not is_valid_string(self.data.password):
             all_invalid_fields.append("data.password")
-        if not is_valid_string(self.data.search_path):
+        if len(self.data.search_path) == 0:
             all_invalid_fields.append("data.search_path")
 
         return all_invalid_fields
