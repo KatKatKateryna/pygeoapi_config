@@ -16,8 +16,14 @@ from .top_level import (
     VisibilityTypes,
     ResourceTypes,
     TemporalConfig,
+    LinkTemplate,
 )
-from .top_level.utils import InlineList, is_valid_string, get_enum_value_from_string
+from .top_level.utils import (
+    InlineList,
+    is_valid_string,
+    get_enum_value_from_string,
+    STRING_SEPARATOR,
+)
 
 
 @dataclass(kw_only=True)
@@ -452,6 +458,15 @@ class ConfigData:
         # spatial crs id
         dialog.lineEditResExtentsSpatialCrs.setText(res_data.extents.spatial.crs_id)
 
+        # links
+        self._pack_list_data_into_list_widget(
+            [
+                [l.type, l.rel, l.href, l.title, l.hreflang, l.length]
+                for l in res_data.links
+            ],
+            dialog.listWidgetResLinks,
+        )
+
         if res_data.extents.temporal:
             # temporal begin
             if res_data.extents.temporal.begin:
@@ -500,6 +515,26 @@ class ConfigData:
             )
         else:
             self.resources[res_name].visibility = None
+
+        # links
+        self.resources[res_name].links = []
+        links_data_lists = self._unpack_listwidget_values_to_sublists(
+            dialog.listWidgetResLinks, 6
+        )
+        for link in links_data_lists:
+            new_link = LinkTemplate()
+            new_link.type = link[0]
+            new_link.rel = link[1]
+            new_link.href = link[2]
+
+            if is_valid_string(link[3]):
+                new_link.title = link[3]
+            if is_valid_string(link[4]):
+                new_link.hreflang = link[4]
+            if is_valid_string(link[5]):
+                new_link.length = int(link[5])
+
+            self.resources[res_name].links.append(new_link)
 
         # spatial bbox
         raw_bbox_str = dialog.lineEditResExtentsSpatialBbox.text()
@@ -615,6 +650,22 @@ class ConfigData:
         else:
             combo_box.clear()
 
+    def _unpack_listwidget_values_to_sublists(self, list_widget, expected_members: int):
+        # unpack string values with locales
+
+        all_sublists = []
+        for i in range(list_widget.count()):
+            full_line_text = list_widget.item(i).text()
+            values = full_line_text.split(STRING_SEPARATOR)
+
+            if len(values) != expected_members:
+                raise ValueError(
+                    f"Not enough values to unpack in {list_widget}: {len(all_sublists)}. Expected: {expected_members}"
+                )
+            all_sublists.append(values)
+
+        return all_sublists
+
     def _unpack_locales_values_list_to_dict(self, list_widget, allow_list: bool):
         # unpack string values with locales
 
@@ -632,6 +683,13 @@ class ConfigData:
                 all_locales_dict[locale] = value
 
         return all_locales_dict
+
+    def _pack_list_data_into_list_widget(self, data: list[list], list_widget):
+        list_widget.clear()
+
+        for line_data in data:
+            text_entry = STRING_SEPARATOR.join([str(d) if d else "" for d in line_data])
+            list_widget.addItem(text_entry)
 
     def _pack_locales_data_into_list(self, data, list_widget):
         """Use ConfigData (list of strings, dict with strings, or a single string) to fill the UI widget list."""

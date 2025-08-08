@@ -26,7 +26,7 @@ import os
 import yaml
 
 from .models.top_level.providers.records import ProviderTypes
-from .models.top_level import InlineList
+from .models.top_level.utils import InlineList, STRING_SEPARATOR
 
 from qgis.core import (
     QgsMessageLog,
@@ -40,7 +40,7 @@ from qgis.core import (
     QgsFillSymbol,
 )
 
-from PyQt5.QtGui import QRegularExpressionValidator
+from PyQt5.QtGui import QRegularExpressionValidator, QIntValidator
 
 from qgis.gui import QgsMapCanvas
 from qgis.PyQt import QtWidgets, uic
@@ -114,11 +114,14 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
         )
 
         # set validators for come fields
+        # resource bbox
         regex_bbox = QRegularExpression(
             r"-?\d+(\.\d+)?,-?\d+(\.\d+)?,-?\d+(\.\d+)?,-?\d+(\.\d+)?"
         )
         validator_bbox = QRegularExpressionValidator(regex_bbox)
         self.lineEditResExtentsSpatialBbox.setValidator(validator_bbox)
+        # resource content size
+        self.addResLinksLengthLineEdit.setValidator(QIntValidator())
 
         # set UI values from ConfigData
         self.config_data.set_ui_from_data(self)
@@ -334,6 +337,42 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
                 return True
         return False
 
+    def add_listwidget_element_from_multi_lineedit(
+        self,
+        *,
+        line_widgets_mandatory: list,
+        line_widgets_optional: list,
+        list_widget,
+        sort=False,
+    ):
+        final_text = ""
+        for line_edit_widget in line_widgets_mandatory:
+            text = line_edit_widget.text().strip()
+            if not text:
+                QMessageBox.warning(self, "Warning", "Mandatory field is empty")
+                return
+
+            # add separator if not the first value
+            if len(final_text) > 0:
+                final_text += STRING_SEPARATOR
+            final_text += text
+            line_edit_widget.clear()
+
+        for line_edit_widget in line_widgets_optional:
+            text = line_edit_widget.text().strip()
+
+            # add separator if not the first value
+            if len(final_text) > 0:
+                final_text += STRING_SEPARATOR
+            final_text += text
+            line_edit_widget.clear()
+
+        list_widget.addItem(final_text)
+
+        # sort the content
+        if sort:
+            list_widget.model().sort(0)
+
     def add_listwidget_element_from_lineedit(
         self,
         *,
@@ -478,6 +517,23 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
             sort=True,
         )
 
+    def add_res_link(self):
+        """Called from .ui file."""
+        self.add_listwidget_element_from_multi_lineedit(
+            line_widgets_mandatory=[
+                self.addResLinksTypeLineEdit,
+                self.addResLinksRelLineEdit,
+                self.addResLinksHrefLineEdit,
+            ],
+            line_widgets_optional=[
+                self.addResLinksTitleLineEdit,
+                self.addResLinkshreflangLineEdit,
+                self.addResLinksLengthLineEdit,
+            ],
+            list_widget=self.listWidgetResLinks,
+            sort=False,
+        )
+
     def delete_metadata_id_title(self):
         """Delete keyword from metadata, called from .ui file."""
         self.delete_list_widget_selected_item(self.listWidgetMetadataIdTitle)
@@ -501,6 +557,10 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
     def delete_res_keyword(self):
         """Called from .ui file."""
         self.delete_list_widget_selected_item(self.listWidgetResKeywords)
+
+    def delete_res_link(self):
+        """Called from .ui file."""
+        self.delete_list_widget_selected_item(self.listWidgetResLinks)
 
     def filterResources(self, filter):
         """Called from .ui."""

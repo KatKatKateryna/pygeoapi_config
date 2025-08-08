@@ -1,5 +1,7 @@
 from enum import Enum
 
+STRING_SEPARATOR = " | "
+
 
 class InlineList(list):
     """Class wrapper to indicate that the list should be written as one line in YAML.

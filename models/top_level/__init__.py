@@ -6,8 +6,8 @@ from .ResourceConfigTemplate import (
     VisibilityTypes,
     ResourceTypes,
     TemporalConfig,
+    LinkTemplate,
 )
-from .utils import InlineList
 
 __all__ = [
     "ServerConfig",
@@ -19,8 +19,8 @@ __all__ = [
     "KeywordType",
     "Role",
     "ResourceConfigTemplate",
-    "InlineList",
     "VisibilityTypes",
     "ResourceTypes",
     "TemporalConfig",
+    "LinkTemplate",
 ]
