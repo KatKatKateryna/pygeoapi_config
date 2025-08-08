@@ -539,14 +539,9 @@ class ConfigData:
         # spatial bbox
         raw_bbox_str = dialog.lineEditResExtentsSpatialBbox.text()
         # this loop is to not add empty decimals unnecessarily
-        list_bbox_val = []
-        for part in raw_bbox_str.split(","):
-            part = part.strip()
-            if "." in part:
-                list_bbox_val.append(float(part))
-            else:
-                list_bbox_val.append(int(part))
-        self.resources[res_name].extents.spatial.bbox = InlineList(list_bbox_val)
+        self.resources[res_name].extents.spatial.bbox = InlineList(
+            self._bbox_from_string(raw_bbox_str)
+        )
 
         # spatial crs
         self.resources[res_name].extents.spatial.crs = (
@@ -593,6 +588,68 @@ class ConfigData:
         new_alias = dialog.lineEditResAlias.text()
         if res_name in self.resources:
             self.resources[new_alias] = self.resources.pop(res_name)
+
+    def _bbox_from_string(self, raw_bbox_str):
+
+        # this loop is to not add empty decimals unnecessarily
+        list_bbox_val = []
+        for part in raw_bbox_str.split(","):
+            part = part.strip()
+            if "." in part:
+                list_bbox_val.append(float(part))
+            else:
+                list_bbox_val.append(int(part))
+
+        if len(list_bbox_val) != 4 and len(list_bbox_val) != 6:
+            raise ValueError(
+                f"Wrong number of values: {len(list_bbox_val)}. Expected: 4 or 6"
+            )
+
+        return InlineList(list_bbox_val)
+
+    def invalid_resource_ui_fields(self, dialog) -> list[str]:
+
+        invalid_fields = []
+
+        if not is_valid_string(dialog.lineEditResAlias.text()):
+            invalid_fields.append("alias")
+        if dialog.listWidgetResTitle.count() == 0:
+            invalid_fields.append("title")
+        if dialog.listWidgetResDescription.count() == 0:
+            invalid_fields.append("description")
+        if dialog.listWidgetResKeywords.count() == 0:
+            invalid_fields.append("keywords")
+
+        try:
+            raw_bbox_str = dialog.lineEditResExtentsSpatialBbox.text()
+            self._bbox_from_string(raw_bbox_str)
+        except Exception as e:
+            invalid_fields.append("spatial extents (bbox)")
+
+        if not is_valid_string(dialog.lineEditResExtentsSpatialCrs.text()):
+            invalid_fields.append("spatial extents (crs)")
+            
+        if dialog.listWidgetResProvider.count() == 0:
+            invalid_fields.append("providers")
+
+        # optional fields, but can cause crash if wrong format
+        if is_valid_string(dialog.lineEditResExtentsTemporalBegin.text()):
+            try:
+                datetime.strptime(
+                    dialog.lineEditResExtentsTemporalBegin.text(), "%Y-%m-%dT%H:%M:%SZ"
+                )
+            except:
+                invalid_fields.append("temporal extents (begin)")
+
+        if is_valid_string(dialog.lineEditResExtentsTemporalEnd.text()):
+            try:
+                datetime.strptime(
+                    dialog.lineEditResExtentsTemporalEnd.text(), "%Y-%m-%dT%H:%M:%SZ"
+                )
+            except:
+                invalid_fields.append("temporal extents (end)")
+
+        return invalid_fields
 
     def add_new_resource(self) -> str:
         new_name = "new_resource"

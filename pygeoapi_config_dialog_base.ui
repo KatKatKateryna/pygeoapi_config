@@ -2409,7 +2409,7 @@
    <sender>pushLoadCollection</sender>
    <signal>clicked()</signal>
    <receiver>PygeoapiConfigDialogBase</receiver>
-   <slot>loadCollection()</slot>
+   <slot>load_resource()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>434</x>

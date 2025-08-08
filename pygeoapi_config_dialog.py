@@ -578,12 +578,12 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
     def save_resource_edit_and_preview(self):
         """Save current changes to the resource data, reset widgets to Preview. Called from .ui."""
 
-        if self.current_res_name == "":
-            QgsMessageLog.logMessage("Resource alias is missing")
+        invalid_fields = self.config_data.invalid_resource_ui_fields(self)
+        if len(invalid_fields) > 0:
             QMessageBox.warning(
                 self,
                 "Warning",
-                "Resource alias is missing",
+                f"Invalid fields' values: {invalid_fields}",
             )
             return
 
@@ -657,9 +657,9 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
 
         # set new resource as current and load details
         self.current_res_name = new_name
-        self.loadCollection()
+        self.load_resource()
 
-    def loadCollection(self):
+    def load_resource(self):
 
         # if no resource selected, do nothing
         if self.current_res_name == "":
