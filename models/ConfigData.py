@@ -2,6 +2,8 @@ from dataclasses import dataclass, field, fields, is_dataclass
 from datetime import datetime
 from enum import Enum
 
+from ..ui_widgets.set_ui_from_data import UiSetter
+
 from .utils import update_dataclass_from_dict
 from .top_level import (
     ServerConfig,
@@ -261,296 +263,19 @@ class ConfigData:
         )
 
     def set_ui_from_data(self, dialog):
-
-        # bind
-        dialog.lineEditHost.setText(self.server.bind.host)
-        dialog.spinBoxPort.setValue(self.server.bind.port)
-
-        # gzip
-        dialog.checkBoxGzip.setChecked(self.server.gzip)
-
-        # mimetype
-        self._set_combo_box_value_from_data(
-            combo_box=dialog.comboBoxMime,
-            value=self.server.mimetype,
-        )
-
-        # encoding
-        self._set_combo_box_value_from_data(
-            combo_box=dialog.comboBoxEncoding,
-            value=self.server.encoding,
-        )
-
-        # pretty print
-        dialog.checkBoxPretty.setChecked(self.server.pretty_print)
-
-        # admin
-        dialog.checkBoxAdmin.setChecked(self.server.admin)
-
-        # cors
-        dialog.checkBoxCors.setChecked(self.server.cors)
-
-        # templates
-        if self.server.templates:
-            dialog.lineEditTemplatesPath.setText(self.server.templates.path)
-            dialog.lineEditTemplatesStatic.setText(self.server.templates.static)
-        else:
-            dialog.lineEditTemplatesPath.setText("")
-            dialog.lineEditTemplatesStatic.setText("")
-
-        # map
-        dialog.lineEditMapUrl.setText(self.server.map.url)
-        dialog.lineEditAttribution.setText(self.server.map.attribution)
-
-        dialog.lineEditUrl.setText(self.server.url)
-
-        # language
-        self._select_list_widget_items_by_texts(
-            list_widget=dialog.listWidgetLang, texts_to_select=self.server.languages
-        )
-
-        # limits
-        dialog.spinBoxDefault.setValue(self.server.limits.default_items)
-        dialog.spinBoxMax.setValue(self.server.limits.max_items)
-
-        self._set_combo_box_value_from_data(
-            combo_box=dialog.comboBoxExceed,
-            value=self.server.limits.on_exceed,
-        )
-
-        # logging
-        self._set_combo_box_value_from_data(
-            combo_box=dialog.comboBoxLog,
-            value=self.logging.level,
-        )
-
-        if self.logging.logfile:
-            dialog.lineEditLogfile.setText(self.logging.logfile)
-        else:
-            dialog.lineEditLogfile.setText("")
-
-        if self.logging.logformat:
-            dialog.lineEditLogformat.setText(self.logging.logformat)
-        else:
-            dialog.lineEditLogformat.setText("")
-
-        if self.logging.dateformat:
-            dialog.lineEditDateformat.setText(self.logging.dateformat)
-        else:
-            dialog.lineEditDateformat.setText("")
-
-        # metadata identification
-
-        # DATA WITH LOCALES
-        # incoming type: possible list of strings or dictionary
-        # limitation: even if YAML had just a list of strings, it will be interpreted here as "en" locale by default
-
-        # title
-        self._pack_locales_data_into_list(
-            self.metadata.identification.title,
-            dialog.listWidgetMetadataIdTitle,
-        )
-
-        # description
-        self._pack_locales_data_into_list(
-            self.metadata.identification.description,
-            dialog.listWidgetMetadataIdDescription,
-        )
-
-        # keywords
-        self._pack_locales_data_into_list(
-            self.metadata.identification.keywords, dialog.listWidgetMetadataIdKeywords
-        )
-        self._set_combo_box_value_from_data(
-            combo_box=dialog.comboBoxMetadataIdKeywordsType,
-            value=self.metadata.identification.keywords_type,
-        )
-        dialog.lineEditMetadataIdTerms.setText(
-            self.metadata.identification.terms_of_service
-        )
-        dialog.lineEditMetadataIdUrl.setText(self.metadata.identification.url)
-
-        # metadata license
-        dialog.lineEditMetadataLicenseName.setText(self.metadata.license.name)
-        dialog.lineEditMetadataLicenseUrl.setText(self.metadata.license.url)
-
-        # metadata provider
-        dialog.lineEditMetadataProviderName.setText(self.metadata.provider.name)
-        dialog.lineEditMetadataProviderUrl.setText(self.metadata.provider.url)
-
-        # metadata contact
-        dialog.lineEditMetadataContactName.setText(self.metadata.contact.name)
-        dialog.lineEditMetadataContactPosition.setText(self.metadata.contact.position)
-        dialog.lineEditMetadataContactAddress.setText(self.metadata.contact.address)
-        dialog.lineEditMetadataContactCity.setText(self.metadata.contact.city)
-        dialog.lineEditMetadataContactState.setText(
-            self.metadata.contact.stateorprovince
-        )
-        dialog.lineEditMetadataContactPostal.setText(self.metadata.contact.postalcode)
-        dialog.lineEditMetadataContactCountry.setText(self.metadata.contact.country)
-        dialog.lineEditMetadataContactPhone.setText(self.metadata.contact.phone)
-        dialog.lineEditMetadataContactFax.setText(self.metadata.contact.fax)
-        dialog.lineEditMetadataContactEmail.setText(self.metadata.contact.email)
-        dialog.lineEditMetadataContactUrl.setText(self.metadata.contact.url)
-        dialog.lineEditMetadataContactHours.setText(self.metadata.contact.hours)
-        dialog.lineEditMetadataContactInstructions.setText(
-            self.metadata.contact.instructions
-        )
-        self._set_combo_box_value_from_data(
-            combo_box=dialog.comboBoxMetadataContactRole,
-            value=self.metadata.contact.role,
-        )
-
-        # collections
-        self.refresh_resources_list_ui(dialog)
+        UiSetter.set_ui_from_data(self, dialog)
 
     def refresh_resources_list_ui(self, dialog):
-        dialog.model.setStringList([k for k, _ in self.resources.items()])
-        dialog.proxy.setSourceModel(dialog.model)
-        dialog.listViewCollection.setModel(dialog.proxy)
+        UiSetter.refresh_resources_list_ui(self, dialog)
 
     def set_resource_ui_from_data(self, dialog, res_data: ResourceConfigTemplate):
-
-        # alias
-        dialog.lineEditResAlias.setText(dialog.current_res_name)
-
-        # type
-        self._set_combo_box_value_from_data(
-            combo_box=dialog.comboBoxResType,
-            value=res_data.type,
-        )
-
-        # title
-        self._pack_locales_data_into_list(
-            res_data.title,
-            dialog.listWidgetResTitle,
-        )
-
-        # description
-        self._pack_locales_data_into_list(
-            res_data.description,
-            dialog.listWidgetResDescription,
-        )
-
-        # keywords
-        self._pack_locales_data_into_list(
-            res_data.keywords, dialog.listWidgetResKeywords
-        )
-
-        # visibility
-        self._set_combo_box_value_from_data(
-            combo_box=dialog.comboBoxResVisibility,
-            value=res_data.visibility or ResourceVisibilityEnum.NONE,
-        )
-
-        # spatial bbox
-        bbox_str = (
-            str(res_data.extents.spatial.bbox)
-            .replace("[", "")
-            .replace("]", "")
-            .replace(" ", "")
-        )
-        dialog.lineEditResExtentsSpatialBbox.setText(bbox_str)
-
-        # spatial CRS authority
-        self._set_combo_box_value_from_data(
-            combo_box=dialog.comboBoxResExtentsSpatialCrsType,
-            value=res_data.extents.spatial.crs_authority,
-        )
-
-        # spatial crs id
-        dialog.lineEditResExtentsSpatialCrs.setText(res_data.extents.spatial.crs_id)
-
-        # temporal extents
-        if res_data.extents.temporal:
-            # temporal begin
-            if res_data.extents.temporal.begin:
-                dialog.lineEditResExtentsTemporalBegin.setText(
-                    res_data.extents.temporal.begin.strftime("%Y-%m-%dT%H:%M:%SZ")
-                )
-            else:
-                dialog.lineEditResExtentsTemporalBegin.setText("")
-
-            # temporal end
-            if res_data.extents.temporal.end:
-                dialog.lineEditResExtentsTemporalEnd.setText(
-                    res_data.extents.temporal.end.strftime("%Y-%m-%dT%H:%M:%SZ")
-                )
-            else:
-                dialog.lineEditResExtentsTemporalEnd.setText("")
-
-            # temporal end
-            if res_data.extents.temporal.trs:
-                dialog.lineEditResExtentsTemporalTrs.setText(
-                    res_data.extents.temporal.trs
-                )
-            else:
-                dialog.lineEditResExtentsTemporalTrs.setText("")
-
-        # links
-        self._pack_list_data_into_list_widget(
-            [
-                [l.type, l.rel, l.href, l.title, l.hreflang, l.length]
-                for l in res_data.links
-            ],
-            dialog.listWidgetResLinks,
-        )
-
-        # providers
-        self.set_providers_ui_from_data(dialog, res_data)
+        UiSetter.set_resource_ui_from_data(dialog, res_data)
 
     def set_providers_ui_from_data(self, dialog, res_data: ResourceConfigTemplate):
         """Setting provider data separately, to not refresh entire UI when adding a provider.
         Resreshing all when adding a provider can lead to loosing other unsaved data from the Resource UI.
         """
-
-        data_lists = []
-        for p in res_data.providers:
-            if isinstance(p, ProviderPostgresql):
-                data_chunk = [
-                    p.type.value,
-                    p.name,
-                    p.crs,
-                    p.data.host,
-                    p.data.port,
-                    p.data.dbname,
-                    p.data.user,
-                    p.data.password,
-                    p.data.search_path,
-                    p.id_field,
-                    p.table,
-                    p.geom_field,
-                ]
-            elif isinstance(p, ProviderWmsFacade):
-                data_chunk = [
-                    p.type.value,
-                    p.name,
-                    p.crs,
-                    p.data,
-                    p.options.layer,
-                    p.options.style,
-                    p.options.version,
-                    p.format.name,
-                    p.format.mimetype,
-                ]
-            elif isinstance(p, ProviderMvtProxy):
-                data_chunk = [
-                    p.type.value,
-                    p.name,
-                    p.crs,
-                    p.data,
-                    p.options.zoom.min,
-                    p.options.zoom.max,
-                    p.format.name,
-                    p.format.mimetype,
-                ]
-
-            data_lists.append(data_chunk)
-
-        self._pack_list_data_into_list_widget(
-            data_lists,
-            dialog.listWidgetResProvider,
-        )
+        UiSetter.set_providers_ui_from_data(dialog, res_data)
 
     def set_resource_data_from_ui(self, dialog):
         res_name = dialog.current_res_name
@@ -666,7 +391,7 @@ class ConfigData:
                 new_pr.data.dbname = pr[5]
                 new_pr.data.user = pr[6]
                 new_pr.data.password = pr[7]
-                new_pr.data.search_path = pr[8]
+                new_pr.data.search_path = pr[8].split(",")
 
                 if is_valid_string(pr[9]):
                     new_pr.id_field = pr[9]
@@ -697,8 +422,8 @@ class ConfigData:
                 new_pr.name = pr[1]
                 new_pr.crs = pr[2]
                 new_pr.data = pr[3]
-                new_pr.options.zoom.min = pr[4]
-                new_pr.options.zoom.max = pr[5]
+                new_pr.options.zoom.min = int(pr[4])
+                new_pr.options.zoom.max = int(pr[5])
                 new_pr.format.name = pr[6]
                 new_pr.format.mimetype = pr[7]
 
@@ -711,6 +436,24 @@ class ConfigData:
         new_alias = dialog.lineEditResAlias.text()
         if res_name in self.resources:
             self.resources[new_alias] = self.resources.pop(res_name)
+
+    def _unpack_listwidget_values_to_sublists(
+        self, list_widget, expected_members: int | None = None
+    ):
+        # unpack string values with locales
+
+        all_sublists = []
+        for i in range(list_widget.count()):
+            full_line_text = list_widget.item(i).text()
+            values = full_line_text.split(STRING_SEPARATOR)
+
+            if expected_members and len(values) != expected_members:
+                raise ValueError(
+                    f"Not enough values to unpack in {list_widget}: {len(all_sublists)}. Expected: {expected_members}"
+                )
+            all_sublists.append(values)
+
+        return all_sublists
 
     def set_new_provider_data(
         self, dialog, values: dict, res_name: str, provider_type: ProviderTypes
@@ -726,6 +469,8 @@ class ConfigData:
             for k, v in values.items():
                 if k in ["host", "port", "dbname", "user", "password", "search_path"]:
                     values["data"][k] = v
+                # custom change
+            values["data"]["search_path"] = values["search_path"].split(",")
 
             update_dataclass_from_dict(new_provider, values, "ProviderPostgresql")
 
@@ -835,52 +580,6 @@ class ConfigData:
         else:
             return obj
 
-    def _select_list_widget_items_by_texts(self, *, list_widget, texts_to_select):
-        for i in range(list_widget.count()):
-            item = list_widget.item(i)
-            if item.text() in texts_to_select:
-                item.setSelected(True)
-            else:
-                item.setSelected(False)
-
-    def _set_combo_box_value_from_data(self, *, combo_box, value):
-        """Set the combo box value based on the available choice and provided value."""
-
-        for i in range(combo_box.count()):
-            if isinstance(value, str):
-                if combo_box.itemText(i) == value:
-                    combo_box.setCurrentIndex(i)
-                    return
-
-            if isinstance(value, Enum):
-                if combo_box.itemText(i) == value.value:
-                    combo_box.setCurrentIndex(i)
-                    return
-
-        # If the value is not found, set to the first item or clear it
-        if combo_box.count() > 0:
-            combo_box.setCurrentIndex(0)
-        else:
-            combo_box.clear()
-
-    def _unpack_listwidget_values_to_sublists(
-        self, list_widget, expected_members: int | None = None
-    ):
-        # unpack string values with locales
-
-        all_sublists = []
-        for i in range(list_widget.count()):
-            full_line_text = list_widget.item(i).text()
-            values = full_line_text.split(STRING_SEPARATOR)
-
-            if expected_members and len(values) != expected_members:
-                raise ValueError(
-                    f"Not enough values to unpack in {list_widget}: {len(all_sublists)}. Expected: {expected_members}"
-                )
-            all_sublists.append(values)
-
-        return all_sublists
-
     def _unpack_locales_values_list_to_dict(self, list_widget, allow_list: bool):
         # unpack string values with locales
 
@@ -898,50 +597,3 @@ class ConfigData:
                 all_locales_dict[locale] = value
 
         return all_locales_dict
-
-    def _pack_list_data_into_list_widget(self, data: list[list], list_widget):
-        list_widget.clear()
-
-        for line_data in data:
-            all_elements = []
-            for d in line_data:
-                # convert all values to strings and joint with SEPARATOR symbol
-                if d:
-                    if isinstance(d, list):
-                        # convert list to a string without brackets
-                        all_elements.append(",".join(d))
-                    else:
-                        all_elements.append(str(d))
-                else:
-                    all_elements.append("")
-
-            text_entry = STRING_SEPARATOR.join(all_elements)
-            list_widget.addItem(text_entry)
-
-    def _pack_locales_data_into_list(self, data, list_widget):
-        """Use ConfigData (list of strings, dict with strings, or a single string) to fill the UI widget list."""
-        list_widget.clear()
-
-        # data can be string, list or dict (for properties like title, description, keywords)
-        if isinstance(data, str):
-            if is_valid_string(data):
-                value = f"en: {data}"
-                list_widget.addItem(value)
-                return
-
-        for key in data:
-            if isinstance(data, dict):
-                local_key_content = data[key]
-                if isinstance(local_key_content, str):
-                    if is_valid_string(local_key_content):
-                        value = f"{key}: {local_key_content}"
-                        list_widget.addItem(value)
-                else:  # list
-                    for local_key in local_key_content:
-                        if is_valid_string(local_key):
-                            value = f"{key}: {local_key}"
-                            list_widget.addItem(value)
-            elif isinstance(data, list):  # list of strings
-                if is_valid_string(key):
-                    value = f"en: {key}"
-                    list_widget.addItem(value)
