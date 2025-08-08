@@ -3,7 +3,7 @@ from enum import Enum
 from types import UnionType
 from typing import Any, get_origin, get_args, Union, get_type_hints
 
-from .top_level.utils import InlineList
+from .top_level.utils import InlineList, get_enum_value_from_string
 
 
 def update_dataclass_from_dict(
@@ -78,14 +78,6 @@ def update_dataclass_from_dict(
                 all_missing_props.append(f"{prop_name}.{field_name}")
 
     return missing_fields, wrong_types, all_missing_props
-
-
-def get_enum_value_from_string(enum_type: Enum, text: str):
-    if isinstance(enum_type, type) and issubclass(enum_type, Enum):
-        for member in enum_type:
-            if text == member.value:
-                return member
-    raise AttributeError(f"Unexpected attribute type '{text}'", name="text")
 
 
 def _cast_element_to_type(value: Any, expected_type, prop_name: str):

@@ -1,7 +1,7 @@
-from dataclasses import asdict, dataclass, field, fields, is_dataclass
+from dataclasses import dataclass, field, fields, is_dataclass
 from enum import Enum
 
-from .utils import update_dataclass_from_dict, get_enum_value_from_string
+from .utils import update_dataclass_from_dict
 from .top_level import (
     ServerConfig,
     OnExceed,
@@ -14,7 +14,7 @@ from .top_level import (
     VisibilityTypes,
     ResourceTypes,
 )
-from .top_level.utils import is_valid_string
+from .top_level.utils import is_valid_string, get_enum_value_from_string
 
 
 @dataclass(kw_only=True)
@@ -395,6 +395,41 @@ class ConfigData:
             combo_box=dialog.comboBoxResVisibility,
             value=res_data.visibility or VisibilityTypes.DEFAULT,
         )
+
+        # spatial bbox
+        bbox_str = (
+            str(res_data.extents.spatial.bbox)
+            .replace("[", "")
+            .replace("]", "")
+            .replace(" ", "")
+        )
+        dialog.lineEditResExtentsSpatialBbox.setText(bbox_str)
+
+        # spatial CRS authority
+        self._set_combo_box_value_from_data(
+            combo_box=dialog.comboBoxResExtentsSpatialCrsType,
+            value=res_data.extents.spatial.crs_authority,
+        )
+
+        # spatial crs id
+        dialog.lineEditResExtentsSpatialCrs.setText(res_data.extents.spatial.crs_id)
+
+        if res_data.extents.temporal:
+            # temporal begin
+            if res_data.extents.temporal.begin:
+                dialog.lineEditResExtentsTemporalBegin.setText(
+                    res_data.extents.temporal.begin
+                )
+            # temporal end
+            if res_data.extents.temporal.end:
+                dialog.lineEditResExtentsTemporalEnd.setText(
+                    res_data.extents.temporal.end
+                )
+            # temporal end
+            if res_data.extents.temporal.trs:
+                dialog.lineEditResExtentsTemporalTrs.setText(
+                    res_data.extents.temporal.trs
+                )
 
     def set_resource_data_from_ui(self, dialog):
         res_name = dialog.current_res_name
