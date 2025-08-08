@@ -3,7 +3,7 @@ from datetime import datetime
 from enum import Enum
 
 from .providers import ProviderPostgresql, ProviderMvtProxy, ProviderWmsFacade
-from .utils import InlineList, get_enum_value_from_string
+from .utils import InlineList, get_enum_value_from_string, is_valid_string
 from .providers.records import CrsAuthorities
 
 
@@ -152,3 +152,24 @@ class ResourceConfigTemplate:
     @property
     def instance_name(self):
         return self._instance_name
+
+    def get_invalid_properties(self):
+        """Checks the values of mandatory fields: identification (title, description, keywords)."""
+        all_invalid_fields = []
+
+        if not isinstance(self.type, ResourceTypesEnum):
+            all_invalid_fields.append("type")
+        if len(self.title) == 0:
+            all_invalid_fields.append("title")
+        if len(self.description) == 0:
+            all_invalid_fields.append("description")
+        if len(self.keywords) == 0:
+            all_invalid_fields.append("keywords")
+        if len(self.providers) == 0:
+            all_invalid_fields.append("providers")
+        if not is_valid_string(self.extents.spatial.crs):
+            all_invalid_fields.append("extents.spatial.crs")
+        if len(self.extents.spatial.bbox) < 4:
+            all_invalid_fields.append("extents.spatial.bbox")
+
+        return all_invalid_fields

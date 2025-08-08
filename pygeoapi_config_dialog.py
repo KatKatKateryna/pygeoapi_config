@@ -147,6 +147,12 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
             invalid_props = []
             invalid_props.extend(self.config_data.server.get_invalid_properties())
             invalid_props.extend(self.config_data.metadata.get_invalid_properties())
+            for key, resource in self.config_data.resources.items():
+                invalid_res_props = [
+                    f"resources.{key}.{prop}"
+                    for prop in resource.get_invalid_properties()
+                ]
+                invalid_props.extend(invalid_res_props)
 
             if len(invalid_props) > 0:
                 QgsMessageLog.logMessage(
@@ -615,7 +621,7 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
     def save_resource_edit_and_preview(self):
         """Save current changes to the resource data, reset widgets to Preview. Called from .ui."""
 
-        invalid_fields = self.config_data.invalid_resource_ui_fields(self)
+        invalid_fields = self.config_data.get_invalid_resource_ui_fields(self)
         if len(invalid_fields) > 0:
             QMessageBox.warning(
                 self,

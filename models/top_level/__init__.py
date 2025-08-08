@@ -1,4 +1,4 @@
-from .ServerConfig import ServerConfig, ServerOnExceedEnum, TemplatesConfig
+from .ServerConfig import ServerConfig, ServerOnExceedEnum, ServerTemplatesConfig
 from .LoggingConfig import LoggingConfig, LoggingLevel
 from .MetadataConfig import MetadataConfig, MetadataKeywordTypeEnum, MetadataRoleEnum
 from .ResourceConfigTemplate import (
@@ -12,7 +12,7 @@ from .ResourceConfigTemplate import (
 __all__ = [
     "ServerConfig",
     "ServerOnExceedEnum",
-    "TemplatesConfig",
+    "ServerTemplatesConfig",
     "LoggingConfig",
     "LoggingLevel",
     "MetadataConfig",

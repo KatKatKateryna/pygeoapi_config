@@ -37,7 +37,7 @@ class MetadataRoleEnum(Enum):
 
 # data classes
 @dataclass(kw_only=True)
-class IdentificationConfig:
+class MetadataIdentificationConfig:
     title: str | dict = field(default_factory=lambda: "")
     description: str | dict = field(default_factory=lambda: "")
     keywords: list | dict = field(default_factory=lambda: [])
@@ -51,19 +51,19 @@ class IdentificationConfig:
 
 
 @dataclass(kw_only=True)
-class LicenseConfig:
+class MetadataLicenseConfig:
     name: str = field(default="CC-BY 4.0 license")
     url: str = field(default="https://creativecommons.org/licenses/by/4.0/")
 
 
 @dataclass(kw_only=True)
-class ProviderConfig:
+class MetadataProviderConfig:
     name: str = field(default="Organization Name")
     url: str = field(default="https://pygeoapi.io")
 
 
 @dataclass(kw_only=True)
-class ContactConfig:
+class MetadataContactConfig:
     name: str = field(default="Lastname, Firstname")
     position: str = field(default="Position Title")
     address: str = field(default="Mailing Address")
@@ -86,12 +86,18 @@ class ContactConfig:
 class MetadataConfig:
     """Placeholder class for Metadata configuration data."""
 
-    identification: IdentificationConfig = field(
-        default_factory=lambda: IdentificationConfig()
+    identification: MetadataIdentificationConfig = field(
+        default_factory=lambda: MetadataIdentificationConfig()
     )
-    license: LicenseConfig = field(default_factory=lambda: LicenseConfig())
-    provider: ProviderConfig = field(default_factory=lambda: ProviderConfig())
-    contact: ContactConfig = field(default_factory=lambda: ContactConfig())
+    license: MetadataLicenseConfig = field(
+        default_factory=lambda: MetadataLicenseConfig()
+    )
+    provider: MetadataProviderConfig = field(
+        default_factory=lambda: MetadataProviderConfig()
+    )
+    contact: MetadataContactConfig = field(
+        default_factory=lambda: MetadataContactConfig()
+    )
 
     def get_invalid_properties(self):
         """Checks the values of mandatory fields: identification (title, description, keywords)."""
