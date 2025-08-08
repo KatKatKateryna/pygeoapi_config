@@ -1701,131 +1701,101 @@
 
                         <item>
                           <layout class="QVBoxLayout">
-                          <item>
-                          <layout class="QVBoxLayout">
-
                             <item>
+                            <layout class="QGridLayout" name="gridLayoutAddResLinks">
 
-                              <layout class="QHBoxLayout">
-                                <item>
-                                  <widget class="QLabel">
-                                    <property name="text">
+                              <item row="0" column="0">
+                                <widget class="QLabel">
+                                  <property name="text">
                                     <string>Type</string>
-                                    </property>
-                                  </widget>
-                                </item>
-                              <item>
-
+                                  </property>
+                                </widget>
+                              </item>
+                              <item row="0" column="1">
                                 <widget class="QLineEdit" name="addResLinksTypeLineEdit">
-                                <property name="placeholderText">
-                                  <string>text/csv</string>
-                                </property>
+                                  <property name="placeholderText">
+                                    <string>text/csv</string>
+                                  </property>
                                 </widget>
                               </item>
-                              </layout>
-                            </item>
-                            <item>
 
-                              <layout class="QHBoxLayout">
-                                <item>
-                                  <widget class="QLabel">
-                                    <property name="text">
+                              <item row="1" column="0">
+                                <widget class="QLabel">
+                                  <property name="text">
                                     <string>Relations</string>
-                                    </property>
-                                  </widget>
-                                </item>
-                              <item>
-
+                                  </property>
+                                </widget>
+                              </item>
+                              <item row="1" column="1">
                                 <widget class="QLineEdit" name="addResLinksRelLineEdit">
-                                <property name="placeholderText">
-                                  <string>canonical</string>
-                                </property>
+                                  <property name="placeholderText">
+                                    <string>canonical</string>
+                                  </property>
                                 </widget>
                               </item>
-                              </layout>
-                            </item>
-                            <item>
 
-                              <layout class="QHBoxLayout">
-                                <item>
-                                  <widget class="QLabel">
-                                    <property name="text">
+                              <item row="2" column="0">
+                                <widget class="QLabel">
+                                  <property name="text">
                                     <string>URL</string>
-                                    </property>
-                                  </widget>
-                                </item>
-                              <item>
-
+                                  </property>
+                                </widget>
+                              </item>
+                              <item row="2" column="1">
                                 <widget class="QLineEdit" name="addResLinksHrefLineEdit">
-                                <property name="placeholderText">
-                                  <string></string>
-                                </property>
+                                  <property name="placeholderText">
+                                    <string></string>
+                                  </property>
                                 </widget>
                               </item>
-                              </layout>
-                            </item>
-                            <item>
 
-                              <layout class="QHBoxLayout">
-                                <item>
-                                  <widget class="QLabel">
-                                    <property name="text">
+                              <item row="3" column="0">
+                                <widget class="QLabel">
+                                  <property name="text">
                                     <string>Title</string>
-                                    </property>
-                                  </widget>
-                                </item>
-                              <item>
-
+                                  </property>
+                                </widget>
+                              </item>
+                              <item row="3" column="1">
                                 <widget class="QLineEdit" name="addResLinksTitleLineEdit">
-                                <property name="placeholderText">
-                                  <string>(optional)</string>
-                                </property>
+                                  <property name="placeholderText">
+                                    <string>(optional)</string>
+                                  </property>
                                 </widget>
                               </item>
-                              </layout>
-                            </item>
-                            <item>
 
-                              <layout class="QHBoxLayout">
-                                <item>
-                                  <widget class="QLabel">
-                                    <property name="text">
+                              <item row="4" column="0">
+                                <widget class="QLabel">
+                                  <property name="text">
                                     <string>Language</string>
-                                    </property>
-                                  </widget>
-                                </item>
-                              <item>
-
+                                  </property>
+                                </widget>
+                              </item>
+                              <item row="4" column="1">
                                 <widget class="QLineEdit" name="addResLinkshreflangLineEdit">
-                                <property name="placeholderText">
-                                  <string>(optional) e.g. 'en-US'</string>
-                                </property>
+                                  <property name="placeholderText">
+                                    <string>(optional) e.g. 'en-US'</string>
+                                  </property>
                                 </widget>
                               </item>
-                              </layout>
-                            </item>
-                            <item>
 
-                              <layout class="QHBoxLayout">
-                                <item>
-                                  <widget class="QLabel">
-                                    <property name="text">
+                              <item row="5" column="0">
+                                <widget class="QLabel">
+                                  <property name="text">
                                     <string>Length</string>
-                                    </property>
-                                  </widget>
-                                </item>
-                              <item>
-
-                                <widget class="QLineEdit" name="addResLinksLengthLineEdit">
-                                <property name="placeholderText">
-                                  <string>(optional) content size</string>
-                                </property>
+                                  </property>
                                 </widget>
                               </item>
-                              </layout>
-                            </item>
+                              <item row="5" column="1">
+                                <widget class="QLineEdit" name="addResLinksLengthLineEdit">
+                                  <property name="placeholderText">
+                                    <string>(optional) content size</string>
+                                  </property>
+                                </widget>
+                              </item>
 
-                          </layout>
+                            </layout>
+
 
                           </item>
                           <item>
@@ -1846,7 +1816,7 @@
                             <widget class="QListWidget" name="listWidgetResLinks">
                             <property name="maximumSize">
                               <size>
-                              <width>1000</width>
+                              <width>200</width>
                               <height>300</height>
                               </size>
                             </property>
@@ -1994,7 +1964,7 @@
               </item>
               
 
-              <item row="5" column="0">
+              <item row="5" column="1">
                 <layout class="QHBoxLayout" name="horizontalLayout">
                   <item>
                     <widget class="QPushButton" name="pushSaveAndPreviewResource">
