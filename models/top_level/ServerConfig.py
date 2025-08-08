@@ -56,17 +56,18 @@ class ServerConfig:
     url: str = field(default="http://localhost:5000")
     mimetype: str = field(default="application/json; charset=UTF-8")
     encoding: str = field(default="utf-8")
+    map: MapConfig = field(default_factory=lambda: MapConfig())
+
+    # optional fields:
     gzip: bool = field(default=False)
     languages: list = field(default_factory=lambda: ["en-US"])  # to format with " - "
     cors: bool = field(default=False)
     pretty_print: bool = field(default=False)
     limits: LimitsConfig = field(default_factory=lambda: LimitsConfig())
-    map: MapConfig = field(default_factory=lambda: MapConfig())
     admin: bool = field(default=False)
-    templates: TemplatesConfig = field(default_factory=lambda: TemplatesConfig())
+    templates: TemplatesConfig | None = None
 
-    # optional fields:
-    # TODO: Not currently used in the UI
+    # Not currently used in the UI
     # api_rules: ApiRulesConfig | None = None
 
     def get_invalid_properties(self):

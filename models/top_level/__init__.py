@@ -1,4 +1,4 @@
-from .ServerConfig import ServerConfig, OnExceed
+from .ServerConfig import ServerConfig, OnExceed, TemplatesConfig
 from .LoggingConfig import LoggingConfig, LoggingLevel
 from .MetadataConfig import MetadataConfig, KeywordType, Role
 from .ResourceConfigTemplate import (
@@ -12,6 +12,7 @@ from .utils import InlineList
 __all__ = [
     "ServerConfig",
     "OnExceed",
+    "TemplatesConfig",
     "LoggingConfig",
     "LoggingLevel",
     "MetadataConfig",

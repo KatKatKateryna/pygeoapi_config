@@ -6,6 +6,7 @@ from .utils import update_dataclass_from_dict
 from .top_level import (
     ServerConfig,
     OnExceed,
+    TemplatesConfig,
     LoggingConfig,
     LoggingLevel,
     MetadataConfig,
@@ -144,8 +145,16 @@ class ConfigData:
         self.server.cors = dialog.checkBoxCors.isChecked()
 
         # templates
-        self.server.templates.path = dialog.lineEditTemplatesPath.text()
-        self.server.templates.static = dialog.lineEditTemplatesStatic.text()
+        if is_valid_string(dialog.lineEditTemplatesPath.text()) or is_valid_string(
+            dialog.lineEditTemplatesStatic.text()
+        ):
+            self.server.templates = TemplatesConfig()
+        else:
+            self.server.templates = None
+
+        if self.server.templates:
+            self.server.templates.path = dialog.lineEditTemplatesPath.text()
+            self.server.templates.static = dialog.lineEditTemplatesStatic.text()
 
         # map
         self.server.map.url = dialog.lineEditMapUrl.text()
@@ -273,8 +282,12 @@ class ConfigData:
         dialog.checkBoxCors.setChecked(self.server.cors)
 
         # templates
-        dialog.lineEditTemplatesPath.setText(self.server.templates.path)
-        dialog.lineEditTemplatesStatic.setText(self.server.templates.static)
+        if self.server.templates:
+            dialog.lineEditTemplatesPath.setText(self.server.templates.path)
+            dialog.lineEditTemplatesStatic.setText(self.server.templates.static)
+        else:
+            dialog.lineEditTemplatesPath.setText("")
+            dialog.lineEditTemplatesStatic.setText("")
 
         # map
         dialog.lineEditMapUrl.setText(self.server.map.url)
