@@ -520,7 +520,8 @@ class ConfigData:
             result = {}
             for f in fields(obj):
                 value = getattr(obj, f.name)
-                result[f.name] = self.asdict_enum_safe(value)
+                if value is not None:
+                    result[f.name] = self.asdict_enum_safe(value)
             return result
         elif isinstance(obj, Enum):
             return obj.value
