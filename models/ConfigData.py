@@ -497,6 +497,13 @@ class ConfigData:
         )
 
         # providers
+        self.set_providers_ui_from_data(dialog, res_data)
+
+    def set_providers_ui_from_data(self, dialog, res_data):
+        """Setting provider data separately, to not refresh entire UI when adding a provider.
+        Resreshing all when adding a provider can lead to loosing other unsaved data from the Resource UI.
+        """
+
         self._pack_list_data_into_list_widget(
             [
                 (
@@ -668,8 +675,8 @@ class ConfigData:
         elif provider_type == ProviderTypes.TILE:
             pass
 
-        # set UI of the resource (again, now with provider/s)
-        self.set_resource_ui_from_data(dialog, self.resources[res_name])
+        # set value to the provider widget
+        self.set_providers_ui_from_data(dialog, self.resources[res_name])
 
     def _bbox_from_string(self, raw_bbox_str):
 
