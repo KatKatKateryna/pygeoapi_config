@@ -25,8 +25,14 @@
 import os
 import yaml
 
+from .ui_widgets.NewProviderWindow import NewProviderWindow
+
 from .models.top_level.providers.records import ProviderTypes
-from .models.top_level.utils import InlineList, STRING_SEPARATOR
+from .models.top_level.utils import (
+    InlineList,
+    STRING_SEPARATOR,
+    get_enum_value_from_string,
+)
 
 from qgis.core import (
     QgsMessageLog,
@@ -45,6 +51,7 @@ from PyQt5.QtGui import QRegularExpressionValidator, QIntValidator
 from qgis.gui import QgsMapCanvas
 from qgis.PyQt import QtWidgets, uic
 from PyQt5.QtWidgets import (
+    QMainWindow,
     QFileDialog,
     QMessageBox,
     QDialogButtonBox,
@@ -74,6 +81,7 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
     current_res_name = ""
 
     # these need to be class properties, otherwise, without constant reference, they are not displayed in a widget
+    provider_window: QMainWindow
     bbox_map_canvas: QgsMapCanvas
     bbox_base_layer: QgsRasterLayer
     bbox_extents_layer: QgsVectorLayer
@@ -534,6 +542,20 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
             sort=False,
         )
 
+    def add_res_provider(self):
+        provider_type: ProviderTypes = get_enum_value_from_string(
+            ProviderTypes, self.comboBoxResProviderType.currentText()
+        )
+        self.provider_window = NewProviderWindow(
+            self.comboBoxResProviderType, provider_type
+        )
+        # set new provider data to ConfigData when user clicks 'Add'
+        self.provider_window.signal_provider_values.connect(
+            lambda values: self.config_data.set_new_provider_data(
+                self, values, self.current_res_name, provider_type
+            )
+        )
+
     def delete_metadata_id_title(self):
         """Delete keyword from metadata, called from .ui file."""
         self.delete_list_widget_selected_item(self.listWidgetMetadataIdTitle)
@@ -561,6 +583,10 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
     def delete_res_link(self):
         """Called from .ui file."""
         self.delete_list_widget_selected_item(self.listWidgetResLinks)
+
+    def delete_res_provider(self):
+        """Called from .ui file."""
+        self.delete_list_widget_selected_item(self.listWidgetResProvider)
 
     def filterResources(self, filter):
         """Called from .ui."""

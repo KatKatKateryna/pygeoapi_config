@@ -50,6 +50,9 @@ def update_dataclass_from_dict(
 
                     # Exception: remap list to internally used InlineList (needed later for YAML formatting)
                     if expected_type is InlineList:
+                        if isinstance(new_value, str):
+                            new_value = new_value.split(",")
+
                         new_value = InlineList(new_value)
 
                     # Exception: remap str to Enum

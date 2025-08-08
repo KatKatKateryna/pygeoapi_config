@@ -28,4 +28,4 @@ class ProviderPostgresql(ProviderTemplate):
     # provider-specific attributes
     id_field: str = ""
     table: str = ""
-    geom_field = ""
+    geom_field: str = ""

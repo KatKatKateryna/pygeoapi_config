@@ -24,6 +24,8 @@ from .top_level.utils import (
     get_enum_value_from_string,
     STRING_SEPARATOR,
 )
+from .top_level.providers import ProviderPostgresql, ProviderMvtProxy, ProviderWmsFacade
+from .top_level.providers.records import ProviderTypes
 
 
 @dataclass(kw_only=True)
@@ -458,15 +460,7 @@ class ConfigData:
         # spatial crs id
         dialog.lineEditResExtentsSpatialCrs.setText(res_data.extents.spatial.crs_id)
 
-        # links
-        self._pack_list_data_into_list_widget(
-            [
-                [l.type, l.rel, l.href, l.title, l.hreflang, l.length]
-                for l in res_data.links
-            ],
-            dialog.listWidgetResLinks,
-        )
-
+        # temporal extents
         if res_data.extents.temporal:
             # temporal begin
             if res_data.extents.temporal.begin:
@@ -492,6 +486,40 @@ class ConfigData:
             else:
                 dialog.lineEditResExtentsTemporalTrs.setText("")
 
+        # links
+        self._pack_list_data_into_list_widget(
+            [
+                [l.type, l.rel, l.href, l.title, l.hreflang, l.length]
+                for l in res_data.links
+            ],
+            dialog.listWidgetResLinks,
+        )
+
+        # providers
+        self._pack_list_data_into_list_widget(
+            [
+                (
+                    [
+                        p.type.value,
+                        p.name,
+                        p.crs,
+                        p.data.host,
+                        p.data.port,
+                        p.data.dbname,
+                        p.data.user,
+                        p.data.password,
+                        p.data.search_path,
+                        p.id_field,
+                        p.table,
+                        p.geom_field,
+                    ]
+                )
+                for p in res_data.providers
+                if isinstance(p, ProviderPostgresql)
+            ],
+            dialog.listWidgetResProvider,
+        )
+
     def set_resource_data_from_ui(self, dialog):
         res_name = dialog.current_res_name
 
@@ -515,26 +543,6 @@ class ConfigData:
             )
         else:
             self.resources[res_name].visibility = None
-
-        # links
-        self.resources[res_name].links = []
-        links_data_lists = self._unpack_listwidget_values_to_sublists(
-            dialog.listWidgetResLinks, 6
-        )
-        for link in links_data_lists:
-            new_link = LinkTemplate()
-            new_link.type = link[0]
-            new_link.rel = link[1]
-            new_link.href = link[2]
-
-            if is_valid_string(link[3]):
-                new_link.title = link[3]
-            if is_valid_string(link[4]):
-                new_link.hreflang = link[4]
-            if is_valid_string(link[5]):
-                new_link.length = int(link[5])
-
-            self.resources[res_name].links.append(new_link)
 
         # spatial bbox
         raw_bbox_str = dialog.lineEditResExtentsSpatialBbox.text()
@@ -584,10 +592,83 @@ class ConfigData:
             else:
                 self.resources[res_name].extents.temporal.trs = None
 
+        # links
+        self.resources[res_name].links = []
+        links_data_lists = self._unpack_listwidget_values_to_sublists(
+            dialog.listWidgetResLinks, 6
+        )
+        for link in links_data_lists:
+            new_link = LinkTemplate()
+            new_link.type = link[0]
+            new_link.rel = link[1]
+            new_link.href = link[2]
+
+            if is_valid_string(link[3]):
+                new_link.title = link[3]
+            if is_valid_string(link[4]):
+                new_link.hreflang = link[4]
+            if is_valid_string(link[5]):
+                new_link.length = int(link[5])
+
+            self.resources[res_name].links.append(new_link)
+
+        # providers
+        self.resources[res_name].providers = []
+        providers_data_lists = self._unpack_listwidget_values_to_sublists(
+            dialog.listWidgetResProvider, 12
+        )
+        for pr in providers_data_lists:
+            if pr[0] == ProviderTypes.FEATURE.value:
+                new_pr = ProviderPostgresql()
+                new_pr.type = get_enum_value_from_string(ProviderTypes, pr[0])
+                new_pr.name = pr[1]
+                new_pr.crs = pr[2]
+                new_pr.data.host = pr[3]
+                new_pr.data.port = pr[4]
+                new_pr.data.dbname = pr[5]
+                new_pr.data.user = pr[6]
+                new_pr.data.password = pr[7]
+                new_pr.data.search_path = pr[8]
+
+                if is_valid_string(pr[9]):
+                    new_pr.id_field = pr[9]
+                if is_valid_string(pr[10]):
+                    new_pr.table = pr[10]
+                if is_valid_string(pr[11]):
+                    new_pr.geom_field = pr[11]
+
+                self.resources[res_name].providers.append(new_pr)
+
         # change resource key to a new alias
         new_alias = dialog.lineEditResAlias.text()
         if res_name in self.resources:
             self.resources[new_alias] = self.resources.pop(res_name)
+
+    def set_new_provider_data(
+        self, dialog, values: dict, res_name: str, provider_type: ProviderTypes
+    ):
+        """Adds a provider data to the resource."""
+
+        if provider_type == ProviderTypes.FEATURE:
+            new_provider = ProviderPostgresql()
+            self.resources[res_name].providers.append(new_provider)
+
+            # adjust structure to match the class structure
+            values["data"] = {}
+            for k, v in values.items():
+                if k in ["host", "port", "dbname", "user", "password", "search_path"]:
+                    values["data"][k] = v
+
+            update_dataclass_from_dict(new_provider, values, "ProviderPostgresql")
+
+        elif provider_type == ProviderTypes.MAP:
+            pass
+
+        elif provider_type == ProviderTypes.TILE:
+            pass
+
+        # set UI of the resource (again, now with provider/s)
+        self.set_resource_ui_from_data(dialog, self.resources[res_name])
 
     def _bbox_from_string(self, raw_bbox_str):
 
@@ -628,7 +709,7 @@ class ConfigData:
 
         if not is_valid_string(dialog.lineEditResExtentsSpatialCrs.text()):
             invalid_fields.append("spatial extents (crs)")
-            
+
         if dialog.listWidgetResProvider.count() == 0:
             invalid_fields.append("providers")
 
@@ -745,7 +826,19 @@ class ConfigData:
         list_widget.clear()
 
         for line_data in data:
-            text_entry = STRING_SEPARATOR.join([str(d) if d else "" for d in line_data])
+            all_elements = []
+            for d in line_data:
+                # convert all values to strings and joint with SEPARATOR symbol
+                if d:
+                    if isinstance(d, list):
+                        # convert list to a string without brackets
+                        all_elements.append(",".join(d))
+                    else:
+                        all_elements.append(str(d))
+                else:
+                    all_elements.append("")
+
+            text_entry = STRING_SEPARATOR.join(all_elements)
             list_widget.addItem(text_entry)
 
     def _pack_locales_data_into_list(self, data, list_widget):
