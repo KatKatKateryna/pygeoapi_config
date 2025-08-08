@@ -499,32 +499,56 @@ class ConfigData:
         # providers
         self.set_providers_ui_from_data(dialog, res_data)
 
-    def set_providers_ui_from_data(self, dialog, res_data):
+    def set_providers_ui_from_data(self, dialog, res_data: ResourceConfigTemplate):
         """Setting provider data separately, to not refresh entire UI when adding a provider.
         Resreshing all when adding a provider can lead to loosing other unsaved data from the Resource UI.
         """
 
+        data_lists = []
+        for p in res_data.providers:
+            if isinstance(p, ProviderPostgresql):
+                data_chunk = [
+                    p.type.value,
+                    p.name,
+                    p.crs,
+                    p.data.host,
+                    p.data.port,
+                    p.data.dbname,
+                    p.data.user,
+                    p.data.password,
+                    p.data.search_path,
+                    p.id_field,
+                    p.table,
+                    p.geom_field,
+                ]
+            elif isinstance(p, ProviderWmsFacade):
+                data_chunk = [
+                    p.type.value,
+                    p.name,
+                    p.crs,
+                    p.data,
+                    p.options.layer,
+                    p.options.style,
+                    p.options.version,
+                    p.format.name,
+                    p.format.mimetype,
+                ]
+            elif isinstance(p, ProviderMvtProxy):
+                data_chunk = [
+                    p.type.value,
+                    p.name,
+                    p.crs,
+                    p.data,
+                    p.options.zoom.min,
+                    p.options.zoom.max,
+                    p.format.name,
+                    p.format.mimetype,
+                ]
+
+            data_lists.append(data_chunk)
+
         self._pack_list_data_into_list_widget(
-            [
-                (
-                    [
-                        p.type.value,
-                        p.name,
-                        p.crs,
-                        p.data.host,
-                        p.data.port,
-                        p.data.dbname,
-                        p.data.user,
-                        p.data.password,
-                        p.data.search_path,
-                        p.id_field,
-                        p.table,
-                        p.geom_field,
-                    ]
-                )
-                for p in res_data.providers
-                if isinstance(p, ProviderPostgresql)
-            ],
+            data_lists,
             dialog.listWidgetResProvider,
         )
 
@@ -623,10 +647,16 @@ class ConfigData:
         # providers
         self.resources[res_name].providers = []
         providers_data_lists = self._unpack_listwidget_values_to_sublists(
-            dialog.listWidgetResProvider, 12
+            dialog.listWidgetResProvider
         )
+
         for pr in providers_data_lists:
-            if pr[0] == ProviderTypes.FEATURE.value:
+            if len(pr) == 0:
+                # unknown/failed provider
+                continue
+
+            if len(pr) == 12 and pr[0] == ProviderTypes.FEATURE.value:
+
                 new_pr = ProviderPostgresql()
                 new_pr.type = get_enum_value_from_string(ProviderTypes, pr[0])
                 new_pr.name = pr[1]
@@ -646,6 +676,36 @@ class ConfigData:
                     new_pr.geom_field = pr[11]
 
                 self.resources[res_name].providers.append(new_pr)
+
+            elif len(pr) == 9 and pr[0] == ProviderTypes.MAP.value:
+                new_pr = ProviderWmsFacade()
+                new_pr.type = get_enum_value_from_string(ProviderTypes, pr[0])
+                new_pr.name = pr[1]
+                new_pr.crs = pr[2]
+                new_pr.data = pr[3]
+                new_pr.options.layer = pr[4]
+                new_pr.options.style = pr[5]
+                new_pr.options.version = pr[6]
+                new_pr.format.name = pr[7]
+                new_pr.format.mimetype = pr[8]
+
+                self.resources[res_name].providers.append(new_pr)
+
+            elif len(pr) == 8 and pr[0] == ProviderTypes.TILE.value:
+                new_pr = ProviderMvtProxy()
+                new_pr.type = get_enum_value_from_string(ProviderTypes, pr[0])
+                new_pr.name = pr[1]
+                new_pr.crs = pr[2]
+                new_pr.data = pr[3]
+                new_pr.options.zoom.min = pr[4]
+                new_pr.options.zoom.max = pr[5]
+                new_pr.format.name = pr[6]
+                new_pr.format.mimetype = pr[7]
+
+                self.resources[res_name].providers.append(new_pr)
+            else:
+                # unknown provider
+                continue
 
         # change resource key to a new alias
         new_alias = dialog.lineEditResAlias.text()
@@ -803,7 +863,9 @@ class ConfigData:
         else:
             combo_box.clear()
 
-    def _unpack_listwidget_values_to_sublists(self, list_widget, expected_members: int):
+    def _unpack_listwidget_values_to_sublists(
+        self, list_widget, expected_members: int | None = None
+    ):
         # unpack string values with locales
 
         all_sublists = []
@@ -811,7 +873,7 @@ class ConfigData:
             full_line_text = list_widget.item(i).text()
             values = full_line_text.split(STRING_SEPARATOR)
 
-            if len(values) != expected_members:
+            if expected_members and len(values) != expected_members:
                 raise ValueError(
                     f"Not enough values to unpack in {list_widget}: {len(all_sublists)}. Expected: {expected_members}"
                 )

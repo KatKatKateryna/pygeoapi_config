@@ -236,14 +236,9 @@ def can_cast_to_dataclass(data: dict, cls: type) -> bool:
         field_type = type_hints.get(field_name)
 
         if field_name not in data:
-            if (
-                field.default is not MISSING and field.default is None
-            ):  # field has default None
+            if field.default is not MISSING:  # field has default
                 continue  # field is ok, go to next
-            if field.default is not field.default_factory:  # field has default
-                continue  # field is ok, go to next
-            if field.default_factory is not None:  # field has default factory
-                continue  # field is ok, go to next
+
             return False  # field and defaults are missing
 
         value = data[field_name]
