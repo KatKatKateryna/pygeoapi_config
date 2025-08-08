@@ -1185,6 +1185,13 @@
            </widget>
           </item>
           <item>
+           <widget class="QPushButton" name="pushDeleteCollection">
+            <property name="text">
+             <string>Delete</string>
+            </property>
+           </widget>
+          </item>
+          <item>
            <widget class="QPushButton" name="pushNewCollection">
             <property name="text">
              <string>New</string>
@@ -2096,10 +2103,26 @@
    </hints>
   </connection>
   <connection>
+   <sender>pushDeleteCollection</sender>
+   <signal>clicked()</signal>
+   <receiver>PygeoapiConfigDialogBase</receiver>
+   <slot>delete_resource()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>434</x>
+     <y>160</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>434</x>
+     <y>244</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
    <sender>pushNewCollection</sender>
    <signal>clicked()</signal>
    <receiver>PygeoapiConfigDialogBase</receiver>
-   <slot>newCollection()</slot>
+   <slot>new_resource()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>434</x>

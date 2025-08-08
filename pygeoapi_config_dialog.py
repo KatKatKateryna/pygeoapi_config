@@ -511,8 +511,17 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
         self.current_res_name = new_alias
         self.exit_resource_edit()
 
-    def preview_resource(self, model_index: "QModelIndex"):
+    def preview_resource(self, model_index: "QModelIndex" = None):
         """Display basic Resource info, called from .ui."""
+        # if called as a generic preview, no selected collection
+        if not model_index:
+            self.lineEditTitle.setText("")
+            self.lineEditDescription.setText("")
+
+            self.groupBoxCollectionLoaded.hide()
+            self.groupBoxCollectionPreview.show()
+            return
+
         # if current resource already selected, do nothing
         new_res_name = model_index.data()
         if self.current_res_name == new_res_name:
@@ -545,7 +554,17 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
         self.bbox_map_canvas.setExtent(self.bbox_extents_layer.extent(), True)
         # self.canvas.refreshAllLayers()
 
-    def newCollection(self):
+    def delete_resource(self):
+        """Delete selected resource. Called from .ui."""
+
+        # hide detailed collection UI, show preview
+        self.preview_resource()
+
+        self.config_data.resources.pop(self.current_res_name)
+        self.config_data.refresh_resources_list_ui(self)
+        self.current_res_name = ""
+
+    def new_resource(self):
         # add resource and reload UI
         new_name = self.config_data.add_new_resource()
         self.config_data.refresh_resources_list_ui(self)
