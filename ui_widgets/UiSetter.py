@@ -1,5 +1,7 @@
 from enum import Enum
 
+from ..models.top_level import ResourceConfigTemplate
+from ..models.top_level.ResourceConfigTemplate import ResourceVisibilityEnum
 from ..models.top_level.providers.records import ProviderTypes
 
 from ..models.top_level.providers import (
@@ -8,42 +10,26 @@ from ..models.top_level.providers import (
     ProviderWmsFacade,
 )
 
-from ..models.top_level.ResourceConfigTemplate import ResourceVisibilityEnum
-
 from ..models.top_level.utils import (
     STRING_SEPARATOR,
-    get_enum_value_from_string,
     is_valid_string,
 )
-from ..models.top_level import ResourceConfigTemplate
 
 
 from PyQt5.QtGui import QRegularExpressionValidator, QIntValidator
 from PyQt5.QtCore import (
     QRegularExpression,
-    QFile,
-    QTextStream,
     Qt,
-    QStringListModel,
-    QSortFilterProxyModel,
 )
-from PyQt5.QtWidgets import (
-    QMainWindow,
-    QFileDialog,
-    QMessageBox,
-    QDialogButtonBox,
-    QApplication,
-)
+from PyQt5.QtWidgets import QMessageBox
 
 from qgis.gui import QgsMapCanvas
 from qgis.core import (
-    QgsMessageLog,
     QgsRasterLayer,
     QgsVectorLayer,
     QgsFeature,
     QgsGeometry,
     QgsRectangle,
-    QgsProject,
     QgsCoordinateReferenceSystem,
     QgsFillSymbol,
 )

@@ -1,5 +1,4 @@
 from dataclasses import dataclass, field, fields, is_dataclass
-from datetime import datetime
 from enum import Enum
 
 from ..ui_widgets import DataSetterFromUi, UiSetter
@@ -7,26 +6,12 @@ from ..ui_widgets import DataSetterFromUi, UiSetter
 from .utils import update_dataclass_from_dict
 from .top_level import (
     ServerConfig,
-    ServerOnExceedEnum,
-    ServerTemplatesConfig,
     LoggingConfig,
-    LoggingLevel,
     MetadataConfig,
-    MetadataKeywordTypeEnum,
-    MetadataRoleEnum,
     ResourceConfigTemplate,
-    ResourceVisibilityEnum,
-    ResourceTypesEnum,
-    ResourceTemporalConfig,
-    ResourceLinkTemplate,
 )
-from .top_level.utils import (
-    InlineList,
-    is_valid_string,
-    get_enum_value_from_string,
-    STRING_SEPARATOR,
-)
-from .top_level.providers import ProviderPostgresql, ProviderMvtProxy, ProviderWmsFacade
+from .top_level.utils import InlineList
+from .top_level.providers import ProviderPostgresql
 from .top_level.providers.records import ProviderTypes
 
 
@@ -208,10 +193,6 @@ class ConfigData:
         UiSetter.set_providers_ui_from_data(dialog, self.resources[res_name])
         return []
 
-    def set_data_from_ui(self, dialog):
-        """Collect all data from the main UI tabs and save to ConfigData."""
-        DataSetterFromUi.set_data_from_ui(dialog)
-
     def set_ui_from_data(self, dialog):
         """Set values for all main UI tabs from ConfigData."""
         UiSetter.set_ui_from_data(self, dialog)
@@ -229,6 +210,10 @@ class ConfigData:
         Resreshing all when adding a provider can lead to loosing other unsaved data from the Resource UI.
         """
         UiSetter.set_providers_ui_from_data(dialog, res_data)
+
+    def set_data_from_ui(self, dialog):
+        """Collect all data from the main UI tabs and save to ConfigData."""
+        DataSetterFromUi.set_data_from_ui(dialog)
 
     def set_resource_data_from_ui(self, dialog):
         """Collect data from Resource UI and add to ConfigData."""

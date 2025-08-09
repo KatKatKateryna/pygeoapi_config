@@ -26,24 +26,9 @@ import os
 import yaml
 
 from .ui_widgets import DataSetterFromUi, UiSetter
+from .models.ConfigData import ConfigData
 from .models.top_level.utils import InlineList
 
-
-from qgis.core import (
-    QgsMessageLog,
-    QgsRasterLayer,
-    QgsVectorLayer,
-    QgsFeature,
-    QgsGeometry,
-    QgsRectangle,
-    QgsProject,
-    QgsCoordinateReferenceSystem,
-    QgsFillSymbol,
-)
-
-
-from qgis.gui import QgsMapCanvas
-from qgis.PyQt import QtWidgets, uic
 from PyQt5.QtWidgets import (
     QMainWindow,
     QFileDialog,
@@ -51,16 +36,23 @@ from PyQt5.QtWidgets import (
     QDialogButtonBox,
     QApplication,
 )  # or PyQt6.QtWidgets
+
 from PyQt5.QtCore import (
-    QRegularExpression,
-    QFile,
-    QTextStream,
     Qt,
+    QModelIndex,
     QStringListModel,
     QSortFilterProxyModel,
 )  # Not strictly needed, can use Python file API instead
 
-from .models.ConfigData import ConfigData
+from qgis.core import (
+    QgsMessageLog,
+    QgsRasterLayer,
+    QgsVectorLayer,
+)
+
+from qgis.gui import QgsMapCanvas
+from qgis.PyQt import QtWidgets, uic
+
 
 # This loads your .ui file so that PyQt can populate your plugin with the elements from Qt Designer
 FORM_CLASS, _ = uic.loadUiType(
@@ -374,7 +366,7 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
         """Save current changes to the resource data, reset widgets to Preview. Called from .ui."""
         DataSetterFromUi.save_resource_edit_and_preview(self)
 
-    def preview_resource(self, model_index: "QModelIndex" = None):
+    def preview_resource(self, model_index: QModelIndex = None):
         """Display basic Resource info, called from .ui."""
         UiSetter.preview_resource(self, model_index)
 
