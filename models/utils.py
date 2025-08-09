@@ -24,13 +24,15 @@ def update_dataclass_from_dict(
             current_value = getattr(instance, field_name)
             expected_type = hints[field_name]
 
+            args = get_args(expected_type)
+
             # If field is a dataclass and new_value is a dict, recurse
             # This behavior works when 'current_value' is an already instantiated dataclass
             # with all set properties - we just need to overwrite the values
 
             # case where default value in None, but another class might be expected
             if current_value is None and type(expected_type) is UnionType:
-                args = get_args(expected_type)
+
                 valid_type = next((t for t in args if t is not type(None)), None)
                 if is_dataclass(valid_type) and isinstance(new_value, dict):
                     current_value = valid_type()
@@ -60,6 +62,12 @@ def update_dataclass_from_dict(
                         expected_type, Enum
                     ):
                         new_value = get_enum_value_from_string(expected_type, new_value)
+
+                    # Exception: remap str to Enum (when one of possible classes is Enum)
+                    elif type(expected_type) is UnionType:
+                        subtype = next((t for t in args if t is not type(None)), None)
+                        if isinstance(subtype, type) and issubclass(subtype, Enum):
+                            new_value = get_enum_value_from_string(subtype, new_value)
 
                     # Exception with 'expected_type' 'list[some dataclass]'
                     # In this case, 'current_value' will be a 'default'=None (for optional fields) or 'default_factory'=[] (for mandatory fields)
