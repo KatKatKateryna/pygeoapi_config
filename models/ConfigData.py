@@ -210,7 +210,7 @@ class ConfigData:
 
     def set_data_from_ui(self, dialog):
         """Collect all data from the main UI tabs and save to ConfigData."""
-        DataSetterFromUi.set_data_from_ui(self, dialog)
+        DataSetterFromUi.set_data_from_ui(dialog)
 
     def set_ui_from_data(self, dialog):
         """Set values for all main UI tabs from ConfigData."""

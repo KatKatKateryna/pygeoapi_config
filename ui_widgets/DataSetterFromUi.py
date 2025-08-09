@@ -34,12 +34,17 @@ from PyQt5.QtWidgets import (
     QApplication,
 )
 
+from qgis.core import (
+    QgsMessageLog,
+)
+
 
 class DataSetterFromUi:
 
     @staticmethod
-    def set_data_from_ui(config_data, dialog):
-
+    def set_data_from_ui(dialog):
+        """Collect all data from the main UI tabs and save to ConfigData."""
+        config_data = dialog.config_data
         # bind
         config_data.server.bind.host = dialog.lineEditHost.text()
         config_data.server.bind.port = dialog.spinBoxPort.value()
@@ -498,3 +503,17 @@ class DataSetterFromUi:
         # reset the current resource name, refresh UI list
         dialog.current_res_name = dialog.lineEditResAlias.text()
         dialog.exit_resource_edit()
+
+    @staticmethod
+    def validate_config_data(dialog) -> int:
+        # validate mandatory fields before saving to file
+        invalid_props = []
+        invalid_props.extend(dialog.config_data.server.get_invalid_properties())
+        invalid_props.extend(dialog.config_data.metadata.get_invalid_properties())
+        for key, resource in dialog.config_data.resources.items():
+            invalid_res_props = [
+                f"resources.{key}.{prop}" for prop in resource.get_invalid_properties()
+            ]
+            invalid_props.extend(invalid_res_props)
+
+        return invalid_props

@@ -26,15 +26,8 @@ import os
 import yaml
 
 from .ui_widgets import DataSetterFromUi, UiSetter
+from .models.top_level.utils import InlineList
 
-from .ui_widgets.providers.NewProviderWindow import NewProviderWindow
-
-from .models.top_level.providers.records import ProviderTypes
-from .models.top_level.utils import (
-    InlineList,
-    STRING_SEPARATOR,
-    get_enum_value_from_string,
-)
 
 from qgis.core import (
     QgsMessageLog,
@@ -113,22 +106,10 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
         UiSetter.setup_map_widget(self)
 
     def save_to_file(self):
-
         # Set and validate data from UI
         try:
-            self.config_data.set_data_from_ui(self)
-
-            # validate mandatory fields before saving to file
-            invalid_props = []
-            invalid_props.extend(self.config_data.server.get_invalid_properties())
-            invalid_props.extend(self.config_data.metadata.get_invalid_properties())
-            for key, resource in self.config_data.resources.items():
-                invalid_res_props = [
-                    f"resources.{key}.{prop}"
-                    for prop in resource.get_invalid_properties()
-                ]
-                invalid_props.extend(invalid_res_props)
-
+            DataSetterFromUi.set_data_from_ui(self)
+            invalid_props = DataSetterFromUi.validate_config_data(self)
             if len(invalid_props) > 0:
                 QgsMessageLog.logMessage(
                     f"Properties are missing or have invalid values: {invalid_props}"
@@ -251,101 +232,14 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
         if logFile:
             self.lineEditLogfile.setText(logFile[0])
 
-    def _lang_entry_exists_in_list_widget(self, list_widget, locale) -> bool:
-        for i in range(list_widget.count()):
-            if list_widget.item(i).text().startswith(f"{locale}: "):
-                QMessageBox.warning(
-                    self,
-                    "Message",
-                    f"Data entry in selected language already exists: {locale}",
-                )
-                return True
-        return False
-
-    def add_listwidget_element_from_multi_lineedit(
-        self,
-        *,
-        line_widgets_mandatory: list,
-        line_widgets_optional: list,
-        list_widget,
-        sort=False,
-    ):
-        final_text = ""
-        for line_edit_widget in line_widgets_mandatory:
-            text = line_edit_widget.text().strip()
-            if not text:
-                QMessageBox.warning(self, "Warning", "Mandatory field is empty")
-                return
-
-            # add separator if not the first value
-            if len(final_text) > 0:
-                final_text += STRING_SEPARATOR
-            final_text += text
-            line_edit_widget.clear()
-
-        for line_edit_widget in line_widgets_optional:
-            text = line_edit_widget.text().strip()
-
-            # add separator if not the first value
-            if len(final_text) > 0:
-                final_text += STRING_SEPARATOR
-            final_text += text
-            line_edit_widget.clear()
-
-        list_widget.addItem(final_text)
-
-        # sort the content
-        if sort:
-            list_widget.model().sort(0)
-
-    def add_listwidget_element_from_lineedit(
-        self,
-        *,
-        line_edit_widget,
-        list_widget,
-        locale_combobox=None,
-        allow_repeated_locale=True,
-        sort=True,
-    ):
-        """Take the content of LineEdit and add it as a new List entry."""
-
-        text = line_edit_widget.text().strip()
-        if text:
-
-            text_to_print = text
-            if locale_combobox:
-                # get text with locale
-                locale = locale_combobox.currentText()
-                text_to_print = f"{locale}: {text}"
-
-                # check if repeated language entries are allowed
-                if allow_repeated_locale or not self._lang_entry_exists_in_list_widget(
-                    list_widget, locale
-                ):
-                    list_widget.addItem(text_to_print)
-                    line_edit_widget.clear()
-
-            else:
-                list_widget.addItem(text_to_print)
-                line_edit_widget.clear()
-
-            # sort the content
-            if sort:
-                list_widget.model().sort(0)
-
-    def delete_list_widget_selected_item(self, list_widget):
-        """Delete selected List item from widget."""
-        selected_item = list_widget.currentRow()
-        if selected_item >= 0:
-            list_widget.takeItem(selected_item)
-
     #################################################################
-    ################## the methods are called from .ui file
+    ################## methods that are called from .ui file:
     #################################################################
 
     def add_metadata_id_title(self):
         """Add title to metadata, called from .ui file."""
-        self.add_listwidget_element_from_lineedit(
+        UiSetter.add_listwidget_element_from_lineedit(
+            dialog=self,
             line_edit_widget=self.addMetadataIdTitleLineEdit,
             list_widget=self.listWidgetMetadataIdTitle,
             locale_combobox=self.comboBoxIdTitleLocale,
@@ -355,7 +249,8 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
 
     def add_metadata_id_description(self):
         """Add description to metadata, called from .ui file."""
-        self.add_listwidget_element_from_lineedit(
+        UiSetter.add_listwidget_element_from_lineedit(
+            dialog=self,
             line_edit_widget=self.addMetadataIdDescriptionLineEdit,
             list_widget=self.listWidgetMetadataIdDescription,
             locale_combobox=self.comboBoxIdDescriptionLocale,
@@ -365,7 +260,8 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
 
     def add_metadata_keyword(self):
         """Add keyword to metadata, called from .ui file."""
-        self.add_listwidget_element_from_lineedit(
+        UiSetter.add_listwidget_element_from_lineedit(
+            dialog=self,
             line_edit_widget=self.addMetadataKeywordLineEdit,
             list_widget=self.listWidgetMetadataIdKeywords,
             locale_combobox=self.comboBoxKeywordsLocale,
@@ -375,7 +271,8 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
 
     def add_res_title(self):
         """Called from .ui file."""
-        self.add_listwidget_element_from_lineedit(
+        UiSetter.add_listwidget_element_from_lineedit(
+            dialog=self,
             line_edit_widget=self.addResTitleLineEdit,
             list_widget=self.listWidgetResTitle,
             locale_combobox=self.comboBoxResTitleLocale,
@@ -385,7 +282,8 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
 
     def add_res_description(self):
         """Called from .ui file."""
-        self.add_listwidget_element_from_lineedit(
+        UiSetter.add_listwidget_element_from_lineedit(
+            dialog=self,
             line_edit_widget=self.addResDescriptionLineEdit,
             list_widget=self.listWidgetResDescription,
             locale_combobox=self.comboBoxResDescriptionLocale,
@@ -395,7 +293,8 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
 
     def add_res_keyword(self):
         """Called from .ui file."""
-        self.add_listwidget_element_from_lineedit(
+        UiSetter.add_listwidget_element_from_lineedit(
+            dialog=self,
             line_edit_widget=self.addResKeywordsLineEdit,
             list_widget=self.listWidgetResKeywords,
             locale_combobox=self.comboBoxResKeywordsLocale,
@@ -405,7 +304,8 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
 
     def add_res_link(self):
         """Called from .ui file."""
-        self.add_listwidget_element_from_multi_lineedit(
+        UiSetter.add_listwidget_element_from_multi_lineedit(
+            dialog=self,
             line_widgets_mandatory=[
                 self.addResLinksTypeLineEdit,
                 self.addResLinksRelLineEdit,
@@ -426,35 +326,35 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
 
     def delete_metadata_id_title(self):
         """Delete keyword from metadata, called from .ui file."""
-        self.delete_list_widget_selected_item(self.listWidgetMetadataIdTitle)
+        UiSetter.delete_list_widget_selected_item(self.listWidgetMetadataIdTitle)
 
     def delete_metadata_id_description(self):
         """Delete keyword from metadata, called from .ui file."""
-        self.delete_list_widget_selected_item(self.listWidgetMetadataIdDescription)
+        UiSetter.delete_list_widget_selected_item(self.listWidgetMetadataIdDescription)
 
     def delete_metadata_keyword(self):
         """Delete keyword from metadata, called from .ui file."""
-        self.delete_list_widget_selected_item(self.listWidgetMetadataIdKeywords)
+        UiSetter.delete_list_widget_selected_item(self.listWidgetMetadataIdKeywords)
 
     def delete_res_title(self):
         """Called from .ui file."""
-        self.delete_list_widget_selected_item(self.listWidgetResTitle)
+        UiSetter.delete_list_widget_selected_item(self.listWidgetResTitle)
 
     def delete_res_description(self):
         """Called from .ui file."""
-        self.delete_list_widget_selected_item(self.listWidgetResDescription)
+        UiSetter.delete_list_widget_selected_item(self.listWidgetResDescription)
 
     def delete_res_keyword(self):
         """Called from .ui file."""
-        self.delete_list_widget_selected_item(self.listWidgetResKeywords)
+        UiSetter.delete_list_widget_selected_item(self.listWidgetResKeywords)
 
     def delete_res_link(self):
         """Called from .ui file."""
-        self.delete_list_widget_selected_item(self.listWidgetResLinks)
+        UiSetter.delete_list_widget_selected_item(self.listWidgetResLinks)
 
     def delete_res_provider(self):
         """Called from .ui file."""
-        self.delete_list_widget_selected_item(self.listWidgetResProvider)
+        UiSetter.delete_list_widget_selected_item(self.listWidgetResProvider)
 
     def filterResources(self, filter):
         """Called from .ui."""

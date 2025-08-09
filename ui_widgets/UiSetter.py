@@ -622,3 +622,98 @@ class UiSetter:
             dialog.comboBoxResProviderType,
             ProviderTypes.FEATURE,  # mock value if we don't yet have an object to get the value from
         )
+
+    @staticmethod
+    def _lang_entry_exists_in_list_widget(dialog, list_widget, locale) -> bool:
+        for i in range(list_widget.count()):
+            if list_widget.item(i).text().startswith(f"{locale}: "):
+                QMessageBox.warning(
+                    dialog,
+                    "Message",
+                    f"Data entry in selected language already exists: {locale}",
+                )
+                return True
+        return False
+
+    @staticmethod
+    def add_listwidget_element_from_lineedit(
+        *,
+        dialog,
+        line_edit_widget,
+        list_widget,
+        locale_combobox=None,
+        allow_repeated_locale=True,
+        sort=True,
+    ):
+        """Take the content of LineEdit and add it as a new List entry."""
+
+        text = line_edit_widget.text().strip()
+        if text:
+
+            text_to_print = text
+            if locale_combobox:
+                # get text with locale
+                locale = locale_combobox.currentText()
+                text_to_print = f"{locale}: {text}"
+
+                # check if repeated language entries are allowed
+                if (
+                    allow_repeated_locale
+                    or not UiSetter._lang_entry_exists_in_list_widget(
+                        dialog, list_widget, locale
+                    )
+                ):
+                    list_widget.addItem(text_to_print)
+                    line_edit_widget.clear()
+
+            else:
+                list_widget.addItem(text_to_print)
+                line_edit_widget.clear()
+
+            # sort the content
+            if sort:
+                list_widget.model().sort(0)
+
+    @staticmethod
+    def add_listwidget_element_from_multi_lineedit(
+        *,
+        dialog,
+        line_widgets_mandatory: list,
+        line_widgets_optional: list,
+        list_widget,
+        sort=False,
+    ):
+        final_text = ""
+        for line_edit_widget in line_widgets_mandatory:
+            text = line_edit_widget.text().strip()
+            if not text:
+                QMessageBox.warning(dialog, "Warning", "Mandatory field is empty")
+                return
+
+            # add separator if not the first value
+            if len(final_text) > 0:
+                final_text += STRING_SEPARATOR
+            final_text += text
+            line_edit_widget.clear()
+
+        for line_edit_widget in line_widgets_optional:
+            text = line_edit_widget.text().strip()
+
+            # add separator if not the first value
+            if len(final_text) > 0:
+                final_text += STRING_SEPARATOR
+            final_text += text
+            line_edit_widget.clear()
+
+        list_widget.addItem(final_text)
+
+        # sort the content
+        if sort:
+            list_widget.model().sort(0)
+
+    @staticmethod
+    def delete_list_widget_selected_item(list_widget):
+        """Delete selected List item from widget."""
+        selected_item = list_widget.currentRow()
+        if selected_item >= 0:
+            list_widget.takeItem(selected_item)
