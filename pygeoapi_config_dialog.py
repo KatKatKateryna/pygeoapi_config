@@ -25,6 +25,8 @@
 import os
 import yaml
 
+from .ui_widgets import DataSetterFromUi, UiSetter
+
 from .ui_widgets.providers.NewProviderWindow import NewProviderWindow
 
 from .models.top_level.providers.records import ProviderTypes
@@ -46,7 +48,6 @@ from qgis.core import (
     QgsFillSymbol,
 )
 
-from PyQt5.QtGui import QRegularExpressionValidator, QIntValidator
 
 from qgis.gui import QgsMapCanvas
 from qgis.PyQt import QtWidgets, uic
@@ -67,7 +68,6 @@ from PyQt5.QtCore import (
 )  # Not strictly needed, can use Python file API instead
 
 from .models.ConfigData import ConfigData
-from .models.top_level import ResourceConfigTemplate, ResourceVisibilityEnum
 
 # This loads your .ui file so that PyQt can populate your plugin with the elements from Qt Designer
 FORM_CLASS, _ = uic.loadUiType(
@@ -108,34 +108,9 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
         self.model = QStringListModel()
         self.proxy = QSortFilterProxyModel()
 
-        # add default values to the UI
-        self.fill_combo_box(
-            self.comboBoxExceed, self.config_data.server.limits.on_exceed
-        )
-        self.fill_combo_box(self.comboBoxLog, self.config_data.logging.level)
-        self.fill_combo_box(
-            self.comboBoxMetadataIdKeywordsType,
-            self.config_data.metadata.identification.keywords_type,
-        )
-        self.fill_combo_box(
-            self.comboBoxMetadataContactRole,
-            self.config_data.metadata.contact.role,
-        )
-
-        # set validators for come fields
-        # resource bbox
-        regex_bbox = QRegularExpression(
-            r"-?\d+(\.\d+)?,-?\d+(\.\d+)?,-?\d+(\.\d+)?,-?\d+(\.\d+)?"
-        )
-        validator_bbox = QRegularExpressionValidator(regex_bbox)
-        self.lineEditResExtentsSpatialBbox.setValidator(validator_bbox)
-        # resource content size
-        self.addResLinksLengthLineEdit.setValidator(QIntValidator())
-
-        # set UI values from ConfigData
-        self.config_data.set_ui_from_data(self)
-
-        self._setup_map_widget()
+        UiSetter.customize_ui_on_launch(self)
+        UiSetter.set_ui_from_data(self.config_data, self)
+        UiSetter.setup_map_widget(self)
 
     def save_to_file(self):
 
@@ -219,7 +194,6 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
                 )
 
                 # summarize all properties missing/overwitten with defaults
-                # TODO: opportunity to match against the list of absolutely crucial properties
                 # atm, warning with the full list of properties
                 all_missing_props = self.config_data.all_missing_props
                 QgsMessageLog.logMessage(
@@ -237,70 +211,6 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
             QMessageBox.warning(self, "Error", f"Cannot open file:\n{str(e)}")
         finally:
             QApplication.restoreOverrideCursor()
-
-    def _select_listcollection_item_by_text(self, target_text: str):
-        model = self.listViewCollection.model()
-        for row in range(model.rowCount()):
-            index = model.index(row, 0)
-            if model.data(index) == target_text:
-                self.listViewCollection.setCurrentIndex(index)
-                break
-
-    def _setup_resouce_loaded_ui(self, res_data: ResourceConfigTemplate):
-
-        self.fill_combo_box(
-            self.comboBoxResType,
-            res_data.type,
-        )
-        self.fill_combo_box(
-            self.comboBoxResVisibility,
-            res_data.visibility
-            or ResourceVisibilityEnum.NONE,  # mock value, as default is None
-        )
-        self.fill_combo_box(
-            self.comboBoxResExtentsSpatialCrsType,
-            res_data.extents.spatial.crs_authority,
-        )
-        self.fill_combo_box(
-            self.comboBoxResProviderType,
-            ProviderTypes.FEATURE,  # mock value if we don't yet have an object to get the value from
-        )
-
-    def clear_layout(self, layout):
-        while layout.count():
-            item = layout.takeAt(0)
-            widget = item.widget()
-            if widget is not None:
-                widget.setParent(None)
-            elif item.layout() is not None:
-                self.clear_layout(item.layout())
-
-    def _setup_map_widget(self):
-
-        # Define base tile layer (OSM)
-        urlWithParams = "type=xyz&url=https://tile.openstreetmap.org/{z}/{x}/{y}.png"
-        self.bbox_base_layer = QgsRasterLayer(urlWithParams, "OpenStreetMap", "wms")
-
-        # Create QgsMapCanvas with OSM layer
-        self.bbox_map_canvas = QgsMapCanvas()
-        crs = QgsCoordinateReferenceSystem("EPSG:4326")
-        self.bbox_map_canvas.setDestinationCrs(crs)
-        self.bbox_map_canvas.setCanvasColor(Qt.white)
-        self.bbox_map_canvas.setLayers([self.bbox_base_layer])
-        self.bbox_map_canvas.zoomToFullExtent()
-        # self.canvas.setExtent(layer.extent(), True)
-        # self.canvas.refreshAllLayers()
-
-        # Add QgsMapCanvas as a widget to the Resource Tab
-        self.clear_layout(self.bboxMapPlaceholder)
-        self.bboxMapPlaceholder.addWidget(self.bbox_map_canvas)
-
-    def fill_combo_box(self, combo_box, enum_class):
-        """Set values to dropdown ComboBox, based on the values expected by the corresponding class."""
-
-        combo_box.clear()
-        for item in type(enum_class):
-            combo_box.addItem(item.value)
 
     def on_button_clicked(self, button):
 
@@ -429,47 +339,8 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
         if selected_item >= 0:
             list_widget.takeItem(selected_item)
 
-    def create_rect_layer_from_bbox(self, bbox: list[float], layer_name="Rectangle"):
-
-        xmin, ymin, xmax, ymax = bbox
-        # Create memory vector layer with polygon geometry
-        layer = QgsVectorLayer("Polygon?crs=EPSG:4326", layer_name, "memory")
-        provider = layer.dataProvider()
-        crs = QgsCoordinateReferenceSystem("EPSG:4326")
-        layer.setCrs(crs)
-
-        # Create rectangular geometry from bbox
-        rect = QgsRectangle(xmin, ymin, xmax, ymax)
-        geom = QgsGeometry.fromRect(rect)
-
-        # Create feature and assign geometry
-        feature = QgsFeature()
-        feature.setGeometry(geom)
-        provider.addFeatures([feature])
-
-        # Update layer
-        layer.updateExtents()
-        self.apply_red_transparent_style(layer)
-
-        # QgsProject.instance().addMapLayer(layer)
-        return layer
-
-    def apply_red_transparent_style(self, layer):
-        # Create a fill symbol with red color and 50% transparency
-        symbol = QgsFillSymbol.createSimple(
-            {
-                "color": "255,0,0,80",  # Red fill with 128/255 alpha (50% transparent)
-                "outline_color": "255,0,0, 128",  # Red outline
-                "outline_width": "0.5",  # Outline width in mm
-            }
-        )
-
-        # Apply symbol to layer renderer
-        layer.renderer().setSymbol(symbol)
-        layer.triggerRepaint()
-
     #################################################################
-    ################## the methods called from .ui file
+    ################## the methods are called from .ui file
     #################################################################
 
     def add_metadata_id_title(self):
@@ -550,28 +421,8 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
         )
 
     def try_add_res_provider(self):
-        provider_type: ProviderTypes = get_enum_value_from_string(
-            ProviderTypes, self.comboBoxResProviderType.currentText()
-        )
-        self.provider_window = NewProviderWindow(
-            self.comboBoxResProviderType, provider_type
-        )
-        # set new provider data to ConfigData when user clicks 'Add'
-        self.provider_window.signal_provider_values.connect(
-            lambda values: self.validate_and_add_res_provider(values, provider_type)
-        )
-
-    def validate_and_add_res_provider(self, values, provider_type):
-        """Calls the Provider validation method and displays a warning if data invalid."""
-        invalid_fields = self.config_data.set_new_provider_data(
-            self, values, self.current_res_name, provider_type
-        )
-        if len(invalid_fields) > 0:
-            QMessageBox.warning(
-                self,
-                "Warning",
-                f"Invalid Provider values: {invalid_fields}",
-            )
+        """Called from .ui file."""
+        DataSetterFromUi.try_add_res_provider(self)
 
     def delete_metadata_id_title(self):
         """Delete keyword from metadata, called from .ui file."""
@@ -611,98 +462,40 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
         self.proxy.setFilterFixedString(filter)
 
     def exit_resource_edit(self):
-        """Switch widgets to Preview, reset selected resource. Called from .ui."""
+        """Switch widgets to Preview, reset selected resource. Called from .ui and from this class too."""
         # hide detailed collection UI, show preview
         self.groupBoxCollectionLoaded.hide()
         self.groupBoxCollectionSelect.show()
         self.groupBoxCollectionPreview.show()
-        self.config_data.refresh_resources_list_ui(self)
+        UiSetter.refresh_resources_list_ui(self.config_data, self)
 
     def save_resource_edit_and_preview(self):
         """Save current changes to the resource data, reset widgets to Preview. Called from .ui."""
-
-        invalid_fields = self.config_data.get_invalid_resource_ui_fields(self)
-        if len(invalid_fields) > 0:
-            QMessageBox.warning(
-                self,
-                "Warning",
-                f"Invalid fields' values: {invalid_fields}",
-            )
-            return
-
-        self.config_data.set_resource_data_from_ui(self)
-
-        # rename resource if alias changed
-        new_alias = self.lineEditResAlias.text()
-
-        # reset the current resource name, refresh UI list
-        self.current_res_name = new_alias
-        self.exit_resource_edit()
+        DataSetterFromUi.save_resource_edit_and_preview(self)
 
     def preview_resource(self, model_index: "QModelIndex" = None):
         """Display basic Resource info, called from .ui."""
-        # if called as a generic preview, no selected collection
-        if not model_index:
-            self.lineEditTitle.setText("")
-            self.lineEditDescription.setText("")
-            self._setup_map_widget()
-
-            self.groupBoxCollectionLoaded.hide()
-            self.groupBoxCollectionSelect.show()
-            self.groupBoxCollectionPreview.show()
-            return
-
-        # hide detailed collection UI, show preview
-        self.groupBoxCollectionLoaded.hide()
-        self.groupBoxCollectionSelect.show()
-        self.groupBoxCollectionPreview.show()
-
-        self.current_res_name = model_index.data()
-
-        # If title is a dictionary, use the first (default) value
-        title = self.config_data.resources[self.current_res_name].title
-        if isinstance(title, dict):
-            title = next(iter(title.values()), "")
-        self.lineEditTitle.setText(title)
-
-        # If description is a dictionary, use the first (default) value
-        description = self.config_data.resources[self.current_res_name].description
-        if isinstance(description, dict):
-            description = next(iter(description.values()), "")
-        self.lineEditDescription.setText(description)
-
-        # load bbox
-        bbox = self.config_data.resources[self.current_res_name].extents.spatial.bbox
-
-        self.bbox_extents_layer = self.create_rect_layer_from_bbox(bbox)
-        self.bbox_map_canvas.setLayers([self.bbox_extents_layer, self.bbox_base_layer])
-        # self.bbox_map_canvas.zoomToFullExtent()
-        self.bbox_map_canvas.setExtent(self.bbox_extents_layer.extent(), True)
-        # self.canvas.refreshAllLayers()
+        UiSetter.preview_resource(self, model_index)
 
     def delete_resource(self):
         """Delete selected resource. Called from .ui."""
-
-        # hide detailed collection UI, show preview
-        self.preview_resource()
-
-        self.config_data.resources.pop(self.current_res_name)
-        self.config_data.refresh_resources_list_ui(self)
-        self.current_res_name = ""
+        self.config_data.delete_resource(self)
 
     def new_resource(self):
+        """Called from .ui."""
         # add resource and reload UI
         new_name = self.config_data.add_new_resource()
-        self.config_data.refresh_resources_list_ui(self)
+        UiSetter.refresh_resources_list_ui(self.config_data, self)
 
-        # select new resource
-        self._select_listcollection_item_by_text(new_name)
+        # visually select new resource
+        UiSetter.select_listcollection_item_by_text(self, new_name)
 
         # set new resource as current and load details
         self.current_res_name = new_name
         self.load_resource()
 
     def load_resource(self):
+        """Called from .ui and from this class too."""
 
         # if no resource selected, do nothing
         if self.current_res_name == "":
@@ -714,15 +507,7 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
         self.groupBoxCollectionLoaded.show()
 
         res_data = self.config_data.resources[self.current_res_name]
-        self._setup_resouce_loaded_ui(res_data)
+        UiSetter.setup_resouce_loaded_ui(self, res_data)
 
         # set the values to UI widgets
         self.config_data.set_resource_ui_from_data(self, res_data)
-
-    def editCollectionTitle(self, value):
-        QgsMessageLog.logMessage(f"Current collection - title: {self.current_res_name}")
-        self.config_data.resources[self.current_res_name].title = value
-
-    def editCollectionDescription(self, value):
-        QgsMessageLog.logMessage(f"Current collection - desc: {self.current_res_name}")
-        self.config_data.resources[self.current_res_name].description = value

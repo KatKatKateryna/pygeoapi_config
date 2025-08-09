@@ -2463,38 +2463,6 @@
    </hints>
   </connection>
 
-  <connection>
-   <sender>lineEditTitle</sender>
-   <signal>textEdited(QString)</signal>
-   <receiver>PygeoapiConfigDialogBase</receiver>
-   <slot>editCollectionTitle(QString)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>455</x>
-     <y>321</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>434</x>
-     <y>244</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>lineEditDescription</sender>
-   <signal>textEdited(QString)</signal>
-   <receiver>PygeoapiConfigDialogBase</receiver>
-   <slot>editCollectionDescription(QString)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>360</x>
-     <y>377</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>434</x>
-     <y>244</y>
-    </hint>
-   </hints>
-  </connection>
  </connections>
  <slots>
   <slot>open_logfile_dialog()</slot>

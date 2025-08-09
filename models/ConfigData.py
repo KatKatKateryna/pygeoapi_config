@@ -165,6 +165,14 @@ class ConfigData:
         self.resources[new_name] = ResourceConfigTemplate(instance_name=new_name)
         return new_name
 
+    def delete_resource(self, dialog):
+        # hide detailed collection UI, show preview
+        UiSetter.preview_resource(dialog)
+
+        self.resources.pop(dialog.current_res_name)
+        UiSetter.refresh_resources_list_ui(self, dialog)
+        dialog.current_res_name = ""
+
     def set_new_provider_data(
         self, dialog, values: dict, res_name: str, provider_type: ProviderTypes
     ):
@@ -224,8 +232,4 @@ class ConfigData:
 
     def set_resource_data_from_ui(self, dialog):
         """Collect data from Resource UI and add to ConfigData."""
-        DataSetterFromUi.set_resource_data_from_ui(self, dialog)
-
-    def get_invalid_resource_ui_fields(self, dialog) -> list[str]:
-        """Get list of invalid UI values in Resource UI."""
-        return DataSetterFromUi.get_invalid_resource_ui_fields(dialog)
+        DataSetterFromUi.set_resource_data_from_ui(dialog)

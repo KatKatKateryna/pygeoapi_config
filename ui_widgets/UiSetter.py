@@ -1,5 +1,7 @@
 from enum import Enum
 
+from ..models.top_level.providers.records import ProviderTypes
+
 from ..models.top_level.providers import (
     ProviderMvtProxy,
     ProviderPostgresql,
@@ -8,8 +10,43 @@ from ..models.top_level.providers import (
 
 from ..models.top_level.ResourceConfigTemplate import ResourceVisibilityEnum
 
-from ..models.top_level.utils import STRING_SEPARATOR, is_valid_string
+from ..models.top_level.utils import (
+    STRING_SEPARATOR,
+    get_enum_value_from_string,
+    is_valid_string,
+)
 from ..models.top_level import ResourceConfigTemplate
+
+
+from PyQt5.QtGui import QRegularExpressionValidator, QIntValidator
+from PyQt5.QtCore import (
+    QRegularExpression,
+    QFile,
+    QTextStream,
+    Qt,
+    QStringListModel,
+    QSortFilterProxyModel,
+)
+from PyQt5.QtWidgets import (
+    QMainWindow,
+    QFileDialog,
+    QMessageBox,
+    QDialogButtonBox,
+    QApplication,
+)
+
+from qgis.gui import QgsMapCanvas
+from qgis.core import (
+    QgsMessageLog,
+    QgsRasterLayer,
+    QgsVectorLayer,
+    QgsFeature,
+    QgsGeometry,
+    QgsRectangle,
+    QgsProject,
+    QgsCoordinateReferenceSystem,
+    QgsFillSymbol,
+)
 
 
 class UiSetter:
@@ -171,6 +208,7 @@ class UiSetter:
 
     @staticmethod
     def refresh_resources_list_ui(config_data, dialog):
+        """Refresh ListWidget with resources from ConfigData."""
         dialog.model.setStringList([k for k, _ in config_data.resources.items()])
         dialog.proxy.setSourceModel(dialog.model)
         dialog.listViewCollection.setModel(dialog.proxy)
@@ -398,3 +436,189 @@ class UiSetter:
                 item.setSelected(True)
             else:
                 item.setSelected(False)
+
+    @staticmethod
+    def customize_ui_on_launch(dialog):
+        """Pre-fill ComboBoxes, assign validators to LineEdits where needed."""
+
+        # add default values to the UI
+        UiSetter.fill_combo_box(
+            dialog.comboBoxExceed, dialog.config_data.server.limits.on_exceed
+        )
+        UiSetter.fill_combo_box(dialog.comboBoxLog, dialog.config_data.logging.level)
+        UiSetter.fill_combo_box(
+            dialog.comboBoxMetadataIdKeywordsType,
+            dialog.config_data.metadata.identification.keywords_type,
+        )
+        UiSetter.fill_combo_box(
+            dialog.comboBoxMetadataContactRole,
+            dialog.config_data.metadata.contact.role,
+        )
+
+        # set validators for come fields
+
+        # resource bbox
+        regex_bbox = QRegularExpression(
+            r"-?\d+(\.\d+)?,-?\d+(\.\d+)?,-?\d+(\.\d+)?,-?\d+(\.\d+)?"
+        )
+        validator_bbox = QRegularExpressionValidator(regex_bbox)
+        dialog.lineEditResExtentsSpatialBbox.setValidator(validator_bbox)
+
+        # resource content size
+        dialog.addResLinksLengthLineEdit.setValidator(QIntValidator())
+
+    @staticmethod
+    def setup_map_widget(dialog):
+
+        # Define base tile layer (OSM)
+        urlWithParams = "type=xyz&url=https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+        dialog.bbox_base_layer = QgsRasterLayer(urlWithParams, "OpenStreetMap", "wms")
+
+        # Create QgsMapCanvas with OSM layer
+        dialog.bbox_map_canvas = QgsMapCanvas()
+        crs = QgsCoordinateReferenceSystem("EPSG:4326")
+        dialog.bbox_map_canvas.setDestinationCrs(crs)
+        dialog.bbox_map_canvas.setCanvasColor(Qt.white)
+        dialog.bbox_map_canvas.setLayers([dialog.bbox_base_layer])
+        dialog.bbox_map_canvas.zoomToFullExtent()
+        # self.canvas.setExtent(layer.extent(), True)
+        # self.canvas.refreshAllLayers()
+
+        # Add QgsMapCanvas as a widget to the Resource Tab
+        UiSetter.clear_layout(dialog.bboxMapPlaceholder)
+        dialog.bboxMapPlaceholder.addWidget(dialog.bbox_map_canvas)
+
+    @staticmethod
+    def preview_resource(dialog, model_index: "QModelIndex" = None):
+
+        # if called as a generic preview, no selected collection
+        if not model_index:
+            dialog.lineEditTitle.setText("")
+            dialog.lineEditDescription.setText("")
+            UiSetter.setup_map_widget(dialog)
+
+            dialog.groupBoxCollectionLoaded.hide()
+            dialog.groupBoxCollectionSelect.show()
+            dialog.groupBoxCollectionPreview.show()
+            return
+
+        # hide detailed collection UI, show preview
+        dialog.groupBoxCollectionLoaded.hide()
+        dialog.groupBoxCollectionSelect.show()
+        dialog.groupBoxCollectionPreview.show()
+
+        dialog.current_res_name = model_index.data()
+
+        # If title is a dictionary, use the first (default) value
+        title = dialog.config_data.resources[dialog.current_res_name].title
+        if isinstance(title, dict):
+            title = next(iter(title.values()), "")
+        dialog.lineEditTitle.setText(title)
+
+        # If description is a dictionary, use the first (default) value
+        description = dialog.config_data.resources[dialog.current_res_name].description
+        if isinstance(description, dict):
+            description = next(iter(description.values()), "")
+        dialog.lineEditDescription.setText(description)
+
+        # load bbox
+        bbox = dialog.config_data.resources[
+            dialog.current_res_name
+        ].extents.spatial.bbox
+
+        dialog.bbox_extents_layer = UiSetter.create_rect_layer_from_bbox(bbox)
+        dialog.bbox_map_canvas.setLayers(
+            [dialog.bbox_extents_layer, dialog.bbox_base_layer]
+        )
+        # self.bbox_map_canvas.zoomToFullExtent()
+        dialog.bbox_map_canvas.setExtent(dialog.bbox_extents_layer.extent(), True)
+        # self.canvas.refreshAllLayers()
+
+    @staticmethod
+    def create_rect_layer_from_bbox(bbox: list[float], layer_name="Rectangle"):
+
+        xmin, ymin, xmax, ymax = bbox
+        # Create memory vector layer with polygon geometry
+        layer = QgsVectorLayer("Polygon?crs=EPSG:4326", layer_name, "memory")
+        provider = layer.dataProvider()
+        crs = QgsCoordinateReferenceSystem("EPSG:4326")
+        layer.setCrs(crs)
+
+        # Create rectangular geometry from bbox
+        rect = QgsRectangle(xmin, ymin, xmax, ymax)
+        geom = QgsGeometry.fromRect(rect)
+
+        # Create feature and assign geometry
+        feature = QgsFeature()
+        feature.setGeometry(geom)
+        provider.addFeatures([feature])
+
+        # Update layer
+        layer.updateExtents()
+        UiSetter.apply_red_transparent_style(layer)
+
+        # QgsProject.instance().addMapLayer(layer)
+        return layer
+
+    @staticmethod
+    def apply_red_transparent_style(layer):
+        # Create a fill symbol with red color and 50% transparency
+        symbol = QgsFillSymbol.createSimple(
+            {
+                "color": "255,0,0,80",  # Red fill with 128/255 alpha (50% transparent)
+                "outline_color": "255,0,0, 128",  # Red outline
+                "outline_width": "0.5",  # Outline width in mm
+            }
+        )
+
+        # Apply symbol to layer renderer
+        layer.renderer().setSymbol(symbol)
+        layer.triggerRepaint()
+
+    @staticmethod
+    def select_listcollection_item_by_text(dialog, target_text: str):
+        model = dialog.listViewCollection.model()
+        for row in range(model.rowCount()):
+            index = model.index(row, 0)
+            if model.data(index) == target_text:
+                dialog.listViewCollection.setCurrentIndex(index)
+                break
+
+    @staticmethod
+    def clear_layout(layout):
+        while layout.count():
+            item = layout.takeAt(0)
+            widget = item.widget()
+            if widget is not None:
+                widget.setParent(None)
+            elif item.layout() is not None:
+                UiSetter.clear_layout(item.layout())
+
+    @staticmethod
+    def fill_combo_box(combo_box, enum_class):
+        """Set values to dropdown ComboBox, based on the values expected by the corresponding class."""
+
+        combo_box.clear()
+        for item in type(enum_class):
+            combo_box.addItem(item.value)
+
+    @staticmethod
+    def setup_resouce_loaded_ui(dialog, res_data: ResourceConfigTemplate):
+
+        UiSetter.fill_combo_box(
+            dialog.comboBoxResType,
+            res_data.type,
+        )
+        UiSetter.fill_combo_box(
+            dialog.comboBoxResVisibility,
+            res_data.visibility
+            or ResourceVisibilityEnum.NONE,  # mock value, as default is None
+        )
+        UiSetter.fill_combo_box(
+            dialog.comboBoxResExtentsSpatialCrsType,
+            res_data.extents.spatial.crs_authority,
+        )
+        UiSetter.fill_combo_box(
+            dialog.comboBoxResProviderType,
+            ProviderTypes.FEATURE,  # mock value if we don't yet have an object to get the value from
+        )
