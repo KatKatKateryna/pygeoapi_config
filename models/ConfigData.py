@@ -192,29 +192,3 @@ class ConfigData:
         # set value to the provider widget
         UiSetter.set_providers_ui_from_data(dialog, self.resources[res_name])
         return []
-
-    def set_ui_from_data(self, dialog):
-        """Set values for all main UI tabs from ConfigData."""
-        UiSetter.set_ui_from_data(self, dialog)
-
-    def refresh_resources_list_ui(self, dialog):
-        """Refresh ListWidget with resources from ConfigData."""
-        UiSetter.refresh_resources_list_ui(self, dialog)
-
-    def set_resource_ui_from_data(self, dialog, res_data: ResourceConfigTemplate):
-        """Set values for Resource UI from resource data."""
-        UiSetter.set_resource_ui_from_data(dialog, res_data)
-
-    def set_providers_ui_from_data(self, dialog, res_data: ResourceConfigTemplate):
-        """Setting provider data to Resource UI separately, to not refresh entire UI when adding a provider.
-        Resreshing all when adding a provider can lead to loosing other unsaved data from the Resource UI.
-        """
-        UiSetter.set_providers_ui_from_data(dialog, res_data)
-
-    def set_data_from_ui(self, dialog):
-        """Collect all data from the main UI tabs and save to ConfigData."""
-        DataSetterFromUi.set_data_from_ui(dialog)
-
-    def set_resource_data_from_ui(self, dialog):
-        """Collect data from Resource UI and add to ConfigData."""
-        DataSetterFromUi.set_resource_data_from_ui(dialog)

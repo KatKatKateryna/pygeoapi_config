@@ -38,7 +38,9 @@ from qgis.core import (
 class UiSetter:
 
     @staticmethod
-    def set_ui_from_data(config_data, dialog):
+    def set_ui_from_data(dialog):
+        """Set values for all main UI tabs from ConfigData."""
+        config_data = dialog.config_data
 
         # bind
         dialog.lineEditHost.setText(config_data.server.bind.host)
@@ -251,6 +253,7 @@ class UiSetter:
 
     @staticmethod
     def set_resource_ui_from_data(dialog, res_data: ResourceConfigTemplate):
+        """Set values for Resource UI from resource data."""
 
         # alias
         dialog.lineEditResAlias.setText(dialog.current_res_name)

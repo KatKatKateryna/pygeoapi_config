@@ -181,6 +181,7 @@ class DataSetterFromUi:
 
     @staticmethod
     def set_resource_data_from_ui(dialog):
+        """Collect data from Resource UI and add to ConfigData."""
         config_data = dialog.config_data
         res_name = dialog.current_res_name
 

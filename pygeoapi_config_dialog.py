@@ -94,7 +94,7 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
         self.proxy = QSortFilterProxyModel()
 
         UiSetter.customize_ui_on_launch(self)
-        UiSetter.set_ui_from_data(self.config_data, self)
+        UiSetter.set_ui_from_data(self)
         UiSetter.setup_map_widget(self)
 
     def save_to_file(self):
@@ -157,7 +157,7 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
                 # reset data
                 self.config_data = ConfigData()
                 self.config_data.set_data_from_yaml(yaml.safe_load(file_content))
-                self.config_data.set_ui_from_data(self)
+                UiSetter.set_ui_from_data(self)
 
                 # log messages about missing or mistyped values during deserialization
                 QgsMessageLog.logMessage(
@@ -403,4 +403,4 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
         UiSetter.setup_resouce_loaded_ui(self, res_data)
 
         # set the values to UI widgets
-        self.config_data.set_resource_ui_from_data(self, res_data)
+        UiSetter.set_resource_ui_from_data(self, res_data)
