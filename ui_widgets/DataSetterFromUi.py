@@ -307,7 +307,7 @@ class DataSetterFromUi:
                 new_pr.data.dbname = pr[5]
                 new_pr.data.user = pr[6]
                 new_pr.data.password = pr[7]
-                new_pr.data.search_path = pr[8].split(",")
+                new_pr.data.search_path = InlineList(pr[8].split(","))
 
                 if is_valid_string(pr[9]):
                     new_pr.id_field = pr[9]
