@@ -67,6 +67,7 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
 
     config_data: ConfigData
     ui_setter: UiSetter
+    data_from_ui_setter: DataSetterFromUi
     current_res_name = ""
 
     # these need to be class properties, otherwise, without constant reference, they are not displayed in a widget
@@ -86,6 +87,7 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
         self.setupUi(self)
         self.config_data = ConfigData()
         self.ui_setter = UiSetter(self)
+        self.data_from_ui_setter = DataSetterFromUi(self)
 
         # make sure InlineList is represented as a YAML sequence (e.g. for 'bbox')
         yaml.add_representer(
@@ -106,8 +108,8 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
     def save_to_file(self):
         # Set and validate data from UI
         try:
-            DataSetterFromUi.set_data_from_ui(self)
-            invalid_props = DataSetterFromUi.validate_config_data(self)
+            self.data_from_ui_setter.set_data_from_ui()
+            invalid_props = self.config_data.validate_config_data()
             if len(invalid_props) > 0:
                 QgsMessageLog.logMessage(
                     f"Properties are missing or have invalid values: {invalid_props}"
@@ -392,7 +394,21 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
 
     def save_resource_edit_and_preview(self):
         """Save current changes to the resource data, reset widgets to Preview. Called from .ui."""
-        DataSetterFromUi.save_resource_edit_and_preview(self)
+
+        invalid_fields = self.data_from_ui_setter.get_invalid_resource_ui_fields()
+        if len(invalid_fields) > 0:
+            QMessageBox.warning(
+                self,
+                "Warning",
+                f"Invalid fields' values: {invalid_fields}",
+            )
+            return
+
+        self.data_from_ui_setter.set_resource_data_from_ui()
+
+        # reset the current resource name, refresh UI list
+        self.current_res_name = self.lineEditResAlias.text()
+        self.exit_resource_edit()
 
     def preview_resource(self, model_index: QModelIndex = None):
         """Display basic Resource info, called from .ui."""

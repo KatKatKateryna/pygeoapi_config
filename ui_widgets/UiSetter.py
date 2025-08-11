@@ -36,12 +36,7 @@ from PyQt5.QtWidgets import QMessageBox
 from qgis.gui import QgsMapCanvas
 from qgis.core import (
     QgsRasterLayer,
-    QgsVectorLayer,
-    QgsFeature,
-    QgsGeometry,
-    QgsRectangle,
     QgsCoordinateReferenceSystem,
-    QgsFillSymbol,
 )
 
 if TYPE_CHECKING:

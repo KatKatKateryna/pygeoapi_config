@@ -1,4 +1,13 @@
+from __future__ import annotations
+from typing import TYPE_CHECKING
+
 from datetime import datetime
+
+from .data_from_ui_setter_utils import (
+    bbox_from_string,
+    unpack_locales_values_list_to_dict,
+    unpack_listwidget_values_to_sublists,
+)
 
 from ..models.top_level import (
     ResourceLinkTemplate,
@@ -19,31 +28,30 @@ from ..models.top_level.providers import (
 from ..models.top_level.providers.records import ProviderTypes
 
 from ..models.top_level.utils import (
-    STRING_SEPARATOR,
     InlineList,
     get_enum_value_from_string,
     is_valid_string,
 )
 
-from PyQt5.QtWidgets import (
-    QMainWindow,
-    QFileDialog,
-    QMessageBox,
-    QDialogButtonBox,
-    QApplication,
-)
 
-from qgis.core import (
-    QgsMessageLog,
-)
+if TYPE_CHECKING:
+    # preserve type checking, but don't import in runtime to avoid circular import
+    from ..pygeoapi_config_dialog import PygeoapiConfigDialog
+    from ..models.ConfigData import ConfigData
 
 
 class DataSetterFromUi:
 
-    @staticmethod
-    def set_data_from_ui(dialog):
+    dialog: PygeoapiConfigDialog
+
+    def __init__(self, dialog: PygeoapiConfigDialog):
+        self.dialog = dialog
+
+    def set_data_from_ui(self):
         """Collect all data from the main UI tabs and save to ConfigData."""
-        config_data = dialog.config_data
+        dialog: PygeoapiConfigDialog = self.dialog
+        config_data: ConfigData = dialog.config_data
+
         # bind
         config_data.server.bind.host = dialog.lineEditHost.text()
         config_data.server.bind.port = dialog.spinBoxPort.value()
@@ -115,18 +123,16 @@ class DataSetterFromUi:
             config_data.logging.dateformat = None
 
         # metadata identification
-        config_data.metadata.identification.title = (
-            DataSetterFromUi._unpack_locales_values_list_to_dict(
-                dialog.listWidgetMetadataIdTitle, False
-            )
+        config_data.metadata.identification.title = unpack_locales_values_list_to_dict(
+            dialog.listWidgetMetadataIdTitle, False
         )
         config_data.metadata.identification.description = (
-            DataSetterFromUi._unpack_locales_values_list_to_dict(
+            unpack_locales_values_list_to_dict(
                 dialog.listWidgetMetadataIdDescription, False
             )
         )
         config_data.metadata.identification.keywords = (
-            DataSetterFromUi._unpack_locales_values_list_to_dict(
+            unpack_locales_values_list_to_dict(
                 dialog.listWidgetMetadataIdKeywords, True
             )
         )
@@ -178,29 +184,23 @@ class DataSetterFromUi:
             dialog.comboBoxMetadataContactRole.currentText(),
         )
 
-    @staticmethod
-    def set_resource_data_from_ui(dialog):
+    def set_resource_data_from_ui(self):
         """Collect data from Resource UI and add to ConfigData."""
-        config_data = dialog.config_data
+        dialog: PygeoapiConfigDialog = self.dialog
+        config_data: ConfigData = dialog.config_data
         res_name = dialog.current_res_name
 
         config_data.resources[res_name].type = get_enum_value_from_string(
             ResourceTypesEnum, dialog.comboBoxResType.currentText()
         )
-        config_data.resources[res_name].title = (
-            DataSetterFromUi._unpack_locales_values_list_to_dict(
-                dialog.listWidgetResTitle, False
-            )
+        config_data.resources[res_name].title = unpack_locales_values_list_to_dict(
+            dialog.listWidgetResTitle, False
         )
         config_data.resources[res_name].description = (
-            DataSetterFromUi._unpack_locales_values_list_to_dict(
-                dialog.listWidgetResDescription, False
-            )
+            unpack_locales_values_list_to_dict(dialog.listWidgetResDescription, False)
         )
-        config_data.resources[res_name].keywords = (
-            DataSetterFromUi._unpack_locales_values_list_to_dict(
-                dialog.listWidgetResKeywords, True
-            )
+        config_data.resources[res_name].keywords = unpack_locales_values_list_to_dict(
+            dialog.listWidgetResKeywords, True
         )
 
         # visibility: if empty, ignore
@@ -215,7 +215,7 @@ class DataSetterFromUi:
         raw_bbox_str = dialog.lineEditResExtentsSpatialBbox.text()
         # this loop is to not add empty decimals unnecessarily
         config_data.resources[res_name].extents.spatial.bbox = InlineList(
-            DataSetterFromUi._bbox_from_string(raw_bbox_str)
+            bbox_from_string(raw_bbox_str)
         )
 
         # spatial crs
@@ -267,7 +267,7 @@ class DataSetterFromUi:
 
         # links
         config_data.resources[res_name].links = []
-        links_data_lists = DataSetterFromUi._unpack_listwidget_values_to_sublists(
+        links_data_lists = unpack_listwidget_values_to_sublists(
             dialog.listWidgetResLinks, 6
         )
         for link in links_data_lists:
@@ -287,7 +287,7 @@ class DataSetterFromUi:
 
         # providers
         config_data.resources[res_name].providers = []
-        providers_data_lists = DataSetterFromUi._unpack_listwidget_values_to_sublists(
+        providers_data_lists = unpack_listwidget_values_to_sublists(
             dialog.listWidgetResProvider
         )
 
@@ -353,48 +353,10 @@ class DataSetterFromUi:
         if res_name in config_data.resources:
             config_data.resources[new_alias] = config_data.resources.pop(res_name)
 
-    @staticmethod
-    def _bbox_from_string(raw_bbox_str):
-
-        # this loop is to not add empty decimals unnecessarily
-        list_bbox_val = []
-        for part in raw_bbox_str.split(","):
-            part = part.strip()
-            if "." in part:
-                list_bbox_val.append(float(part))
-            else:
-                list_bbox_val.append(int(part))
-
-        if len(list_bbox_val) != 4 and len(list_bbox_val) != 6:
-            raise ValueError(
-                f"Wrong number of values: {len(list_bbox_val)}. Expected: 4 or 6"
-            )
-
-        return InlineList(list_bbox_val)
-
-    @staticmethod
-    def _unpack_locales_values_list_to_dict(list_widget, allow_list: bool):
-        # unpack string values with locales
-
-        all_locales_dict = {}
-        for i in range(list_widget.count()):
-            full_line_text = list_widget.item(i).text()
-            locale = full_line_text.split(": ", 1)[0]
-            value = full_line_text.split(": ", 1)[1]
-
-            if allow_list:  # for multiple entries per language
-                if locale not in all_locales_dict:
-                    all_locales_dict[locale] = []
-                all_locales_dict[locale].append(value)
-            else:
-                all_locales_dict[locale] = value
-
-        return all_locales_dict
-
-    @staticmethod
-    def get_invalid_resource_ui_fields(dialog) -> list[str]:
+    def get_invalid_resource_ui_fields(self) -> list[str]:
         """Get list of invalid UI values in Resource UI."""
 
+        dialog: PygeoapiConfigDialog = self.dialog
         invalid_fields = []
 
         if not is_valid_string(dialog.lineEditResAlias.text()):
@@ -408,7 +370,7 @@ class DataSetterFromUi:
 
         try:
             raw_bbox_str = dialog.lineEditResExtentsSpatialBbox.text()
-            DataSetterFromUi._bbox_from_string(raw_bbox_str)
+            bbox_from_string(raw_bbox_str)
         except Exception as e:
             invalid_fields.append("spatial extents (bbox)")
 
@@ -436,55 +398,3 @@ class DataSetterFromUi:
                 invalid_fields.append("temporal extents (end)")
 
         return invalid_fields
-
-    @staticmethod
-    def _unpack_listwidget_values_to_sublists(
-        list_widget, expected_members: int | None = None
-    ):
-        # unpack string values with locales
-
-        all_sublists = []
-        for i in range(list_widget.count()):
-            full_line_text = list_widget.item(i).text()
-            values = full_line_text.split(STRING_SEPARATOR)
-
-            if expected_members and len(values) != expected_members:
-                raise ValueError(
-                    f"Not enough values to unpack in {list_widget}: {len(all_sublists)}. Expected: {expected_members}"
-                )
-            all_sublists.append(values)
-
-        return all_sublists
-
-    @staticmethod
-    def save_resource_edit_and_preview(dialog):
-        """Save current changes to the resource data, reset widgets to Preview. Called from .ui."""
-
-        invalid_fields = DataSetterFromUi.get_invalid_resource_ui_fields(dialog)
-        if len(invalid_fields) > 0:
-            QMessageBox.warning(
-                dialog,
-                "Warning",
-                f"Invalid fields' values: {invalid_fields}",
-            )
-            return
-
-        DataSetterFromUi.set_resource_data_from_ui(dialog)
-
-        # reset the current resource name, refresh UI list
-        dialog.current_res_name = dialog.lineEditResAlias.text()
-        dialog.exit_resource_edit()
-
-    @staticmethod
-    def validate_config_data(dialog) -> int:
-        # validate mandatory fields before saving to file
-        invalid_props = []
-        invalid_props.extend(dialog.config_data.server.get_invalid_properties())
-        invalid_props.extend(dialog.config_data.metadata.get_invalid_properties())
-        for key, resource in dialog.config_data.resources.items():
-            invalid_res_props = [
-                f"resources.{key}.{prop}" for prop in resource.get_invalid_properties()
-            ]
-            invalid_props.extend(invalid_res_props)
-
-        return invalid_props

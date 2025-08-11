@@ -149,7 +149,8 @@ class ConfigData:
         return new_name
 
     def delete_resource(self, dialog):
-        self.resources.pop(dialog.current_res_name)
+        if dialog.current_res_name in self.resources:
+            self.resources.pop(dialog.current_res_name)
 
     def set_new_provider_data(
         self, values: dict, res_name: str, provider_type: ProviderTypes
@@ -184,3 +185,17 @@ class ConfigData:
 
         # set value to the provider widget
         return []
+
+    def validate_config_data(self) -> int:
+        """Validate mandatory fields (e.g. before saving to file)."""
+
+        invalid_props = []
+        invalid_props.extend(self.server.get_invalid_properties())
+        invalid_props.extend(self.metadata.get_invalid_properties())
+        for key, resource in self.resources.items():
+            invalid_res_props = [
+                f"resources.{key}.{prop}" for prop in resource.get_invalid_properties()
+            ]
+            invalid_props.extend(invalid_res_props)
+
+        return invalid_props
