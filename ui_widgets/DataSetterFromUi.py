@@ -1,6 +1,5 @@
 from datetime import datetime
 
-from ..ui_widgets.providers.NewProviderWindow import NewProviderWindow
 from ..models.top_level import (
     ResourceLinkTemplate,
     ResourceTemporalConfig,
@@ -456,35 +455,6 @@ class DataSetterFromUi:
             all_sublists.append(values)
 
         return all_sublists
-
-    @staticmethod
-    def _validate_and_add_res_provider(dialog, values, provider_type):
-        """Calls the Provider validation method and displays a warning if data invalid."""
-        invalid_fields = dialog.config_data.set_new_provider_data(
-            dialog, values, dialog.current_res_name, provider_type
-        )
-        if len(invalid_fields) > 0:
-            QMessageBox.warning(
-                dialog,
-                "Warning",
-                f"Invalid Provider values: {invalid_fields}",
-            )
-
-    @staticmethod
-    def try_add_res_provider(dialog):
-        """Called from .ui file."""
-        provider_type: ProviderTypes = get_enum_value_from_string(
-            ProviderTypes, dialog.comboBoxResProviderType.currentText()
-        )
-        dialog.provider_window = NewProviderWindow(
-            dialog.comboBoxResProviderType, provider_type
-        )
-        # set new provider data to ConfigData when user clicks 'Add'
-        dialog.provider_window.signal_provider_values.connect(
-            lambda values: DataSetterFromUi._validate_and_add_res_provider(
-                dialog, values, provider_type
-            )
-        )
 
     @staticmethod
     def save_resource_edit_and_preview(dialog):

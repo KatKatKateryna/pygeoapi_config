@@ -25,9 +25,12 @@
 import os
 import yaml
 
+from .models.top_level.providers.records import ProviderTypes
+from .ui_widgets.providers.NewProviderWindow import NewProviderWindow
+
 from .ui_widgets import DataSetterFromUi, UiSetter
 from .models.ConfigData import ConfigData
-from .models.top_level.utils import InlineList
+from .models.top_level.utils import InlineList, get_enum_value_from_string
 
 from PyQt5.QtWidgets import (
     QMainWindow,
@@ -62,7 +65,8 @@ FORM_CLASS, _ = uic.loadUiType(
 
 class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
 
-    config_data = ConfigData()
+    config_data: ConfigData
+    ui_setter: UiSetter
     current_res_name = ""
 
     # these need to be class properties, otherwise, without constant reference, they are not displayed in a widget
@@ -80,6 +84,8 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
         # http://qt-project.org/doc/qt-4.8/designer-using-a-ui-file.html
         # #widgets-and-dialogs-with-auto-connect
         self.setupUi(self)
+        self.config_data = ConfigData()
+        self.ui_setter = UiSetter(self)
 
         # make sure InlineList is represented as a YAML sequence (e.g. for 'bbox')
         yaml.add_representer(
@@ -93,9 +99,9 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
         self.model = QStringListModel()
         self.proxy = QSortFilterProxyModel()
 
-        UiSetter.customize_ui_on_launch(self)
-        UiSetter.set_ui_from_data(self)
-        UiSetter.setup_map_widget(self)
+        self.ui_setter.customize_ui_on_launch()
+        self.ui_setter.set_ui_from_data()
+        self.ui_setter.setup_map_widget()
 
     def save_to_file(self):
         # Set and validate data from UI
@@ -157,7 +163,7 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
                 # reset data
                 self.config_data = ConfigData()
                 self.config_data.set_data_from_yaml(yaml.safe_load(file_content))
-                UiSetter.set_ui_from_data(self)
+                self.ui_setter.set_ui_from_data()
 
                 # log messages about missing or mistyped values during deserialization
                 QgsMessageLog.logMessage(
@@ -231,8 +237,7 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
 
     def add_metadata_id_title(self):
         """Add title to metadata, called from .ui file."""
-        UiSetter.add_listwidget_element_from_lineedit(
-            dialog=self,
+        self.ui_setter.add_listwidget_element_from_lineedit(
             line_edit_widget=self.addMetadataIdTitleLineEdit,
             list_widget=self.listWidgetMetadataIdTitle,
             locale_combobox=self.comboBoxIdTitleLocale,
@@ -242,8 +247,7 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
 
     def add_metadata_id_description(self):
         """Add description to metadata, called from .ui file."""
-        UiSetter.add_listwidget_element_from_lineedit(
-            dialog=self,
+        self.ui_setter.add_listwidget_element_from_lineedit(
             line_edit_widget=self.addMetadataIdDescriptionLineEdit,
             list_widget=self.listWidgetMetadataIdDescription,
             locale_combobox=self.comboBoxIdDescriptionLocale,
@@ -253,8 +257,7 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
 
     def add_metadata_keyword(self):
         """Add keyword to metadata, called from .ui file."""
-        UiSetter.add_listwidget_element_from_lineedit(
-            dialog=self,
+        self.ui_setter.add_listwidget_element_from_lineedit(
             line_edit_widget=self.addMetadataKeywordLineEdit,
             list_widget=self.listWidgetMetadataIdKeywords,
             locale_combobox=self.comboBoxKeywordsLocale,
@@ -264,8 +267,7 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
 
     def add_res_title(self):
         """Called from .ui file."""
-        UiSetter.add_listwidget_element_from_lineedit(
-            dialog=self,
+        self.ui_setter.add_listwidget_element_from_lineedit(
             line_edit_widget=self.addResTitleLineEdit,
             list_widget=self.listWidgetResTitle,
             locale_combobox=self.comboBoxResTitleLocale,
@@ -275,8 +277,7 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
 
     def add_res_description(self):
         """Called from .ui file."""
-        UiSetter.add_listwidget_element_from_lineedit(
-            dialog=self,
+        self.ui_setter.add_listwidget_element_from_lineedit(
             line_edit_widget=self.addResDescriptionLineEdit,
             list_widget=self.listWidgetResDescription,
             locale_combobox=self.comboBoxResDescriptionLocale,
@@ -286,8 +287,7 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
 
     def add_res_keyword(self):
         """Called from .ui file."""
-        UiSetter.add_listwidget_element_from_lineedit(
-            dialog=self,
+        self.ui_setter.add_listwidget_element_from_lineedit(
             line_edit_widget=self.addResKeywordsLineEdit,
             list_widget=self.listWidgetResKeywords,
             locale_combobox=self.comboBoxResKeywordsLocale,
@@ -297,8 +297,7 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
 
     def add_res_link(self):
         """Called from .ui file."""
-        UiSetter.add_listwidget_element_from_multi_lineedit(
-            dialog=self,
+        self.ui_setter.add_listwidget_element_from_multi_lineedit(
             line_widgets_mandatory=[
                 self.addResLinksTypeLineEdit,
                 self.addResLinksRelLineEdit,
@@ -315,39 +314,68 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
 
     def try_add_res_provider(self):
         """Called from .ui file."""
-        DataSetterFromUi.try_add_res_provider(self)
+        provider_type: ProviderTypes = get_enum_value_from_string(
+            ProviderTypes, self.comboBoxResProviderType.currentText()
+        )
+        self.provider_window = NewProviderWindow(
+            self.comboBoxResProviderType, provider_type
+        )
+        # set new provider data to ConfigData when user clicks 'Add'
+        self.provider_window.signal_provider_values.connect(
+            lambda values: self._validate_and_add_res_provider(values, provider_type)
+        )
+
+    def _validate_and_add_res_provider(self, values, provider_type):
+        """Calls the Provider validation method and displays a warning if data is invalid."""
+        invalid_fields = self.config_data.set_new_provider_data(
+            values, self.current_res_name, provider_type
+        )
+
+        self.ui_setter.set_providers_ui_from_data(
+            self.config_data.resources[self.current_res_name]
+        )
+        if len(invalid_fields) > 0:
+            QMessageBox.warning(
+                self,
+                "Warning",
+                f"Invalid Provider values: {invalid_fields}",
+            )
 
     def delete_metadata_id_title(self):
         """Delete keyword from metadata, called from .ui file."""
-        UiSetter.delete_list_widget_selected_item(self.listWidgetMetadataIdTitle)
+        self.ui_setter.delete_list_widget_selected_item(self.listWidgetMetadataIdTitle)
 
     def delete_metadata_id_description(self):
         """Delete keyword from metadata, called from .ui file."""
-        UiSetter.delete_list_widget_selected_item(self.listWidgetMetadataIdDescription)
+        self.ui_setter.delete_list_widget_selected_item(
+            self.listWidgetMetadataIdDescription
+        )
 
     def delete_metadata_keyword(self):
         """Delete keyword from metadata, called from .ui file."""
-        UiSetter.delete_list_widget_selected_item(self.listWidgetMetadataIdKeywords)
+        self.ui_setter.delete_list_widget_selected_item(
+            self.listWidgetMetadataIdKeywords
+        )
 
     def delete_res_title(self):
         """Called from .ui file."""
-        UiSetter.delete_list_widget_selected_item(self.listWidgetResTitle)
+        self.ui_setter.delete_list_widget_selected_item(self.listWidgetResTitle)
 
     def delete_res_description(self):
         """Called from .ui file."""
-        UiSetter.delete_list_widget_selected_item(self.listWidgetResDescription)
+        self.ui_setter.delete_list_widget_selected_item(self.listWidgetResDescription)
 
     def delete_res_keyword(self):
         """Called from .ui file."""
-        UiSetter.delete_list_widget_selected_item(self.listWidgetResKeywords)
+        self.ui_setter.delete_list_widget_selected_item(self.listWidgetResKeywords)
 
     def delete_res_link(self):
         """Called from .ui file."""
-        UiSetter.delete_list_widget_selected_item(self.listWidgetResLinks)
+        self.ui_setter.delete_list_widget_selected_item(self.listWidgetResLinks)
 
     def delete_res_provider(self):
         """Called from .ui file."""
-        UiSetter.delete_list_widget_selected_item(self.listWidgetResProvider)
+        self.ui_setter.delete_list_widget_selected_item(self.listWidgetResProvider)
 
     def filterResources(self, filter):
         """Called from .ui."""
@@ -360,7 +388,7 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
         self.groupBoxCollectionLoaded.hide()
         self.groupBoxCollectionSelect.show()
         self.groupBoxCollectionPreview.show()
-        UiSetter.refresh_resources_list_ui(self.config_data, self)
+        self.ui_setter.refresh_resources_list_ui()
 
     def save_resource_edit_and_preview(self):
         """Save current changes to the resource data, reset widgets to Preview. Called from .ui."""
@@ -368,20 +396,24 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
 
     def preview_resource(self, model_index: QModelIndex = None):
         """Display basic Resource info, called from .ui."""
-        UiSetter.preview_resource(self, model_index)
+        self.ui_setter.preview_resource(model_index)
 
     def delete_resource(self):
         """Delete selected resource. Called from .ui."""
+        # hide detailed collection UI, show preview
         self.config_data.delete_resource(self)
+        self.ui_setter.preview_resource()
+        self.ui_setter.refresh_resources_list_ui()
+        self.current_res_name = ""
 
     def new_resource(self):
         """Called from .ui."""
         # add resource and reload UI
         new_name = self.config_data.add_new_resource()
-        UiSetter.refresh_resources_list_ui(self.config_data, self)
+        self.ui_setter.refresh_resources_list_ui()
 
         # visually select new resource
-        UiSetter.select_listcollection_item_by_text(self, new_name)
+        self.ui_setter.select_listcollection_item_by_text(new_name)
 
         # set new resource as current and load details
         self.current_res_name = new_name
@@ -400,7 +432,7 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
         self.groupBoxCollectionLoaded.show()
 
         res_data = self.config_data.resources[self.current_res_name]
-        UiSetter.setup_resouce_loaded_ui(self, res_data)
+        self.ui_setter.setup_resouce_loaded_ui(res_data)
 
         # set the values to UI widgets
-        UiSetter.set_resource_ui_from_data(self, res_data)
+        self.ui_setter.set_resource_ui_from_data(res_data)

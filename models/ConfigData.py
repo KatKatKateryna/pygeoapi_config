@@ -1,8 +1,6 @@
 from dataclasses import dataclass, field, fields, is_dataclass
 from enum import Enum
 
-from ..ui_widgets import DataSetterFromUi, UiSetter
-
 from .utils import update_dataclass_from_dict
 from .top_level import (
     ServerConfig,
@@ -151,15 +149,10 @@ class ConfigData:
         return new_name
 
     def delete_resource(self, dialog):
-        # hide detailed collection UI, show preview
-        UiSetter.preview_resource(dialog)
-
         self.resources.pop(dialog.current_res_name)
-        UiSetter.refresh_resources_list_ui(self, dialog)
-        dialog.current_res_name = ""
 
     def set_new_provider_data(
-        self, dialog, values: dict, res_name: str, provider_type: ProviderTypes
+        self, values: dict, res_name: str, provider_type: ProviderTypes
     ):
         """Adds a provider data to the resource. Called on Save click from New Providere window."""
 
@@ -190,5 +183,4 @@ class ConfigData:
             pass
 
         # set value to the provider widget
-        UiSetter.set_providers_ui_from_data(dialog, self.resources[res_name])
         return []
