@@ -2,8 +2,15 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from ..models.top_level import ResourceConfigTemplate
-from ..models.top_level.ResourceConfigTemplate import ResourceVisibilityEnum
-from ..models.top_level.providers.records import Languages, ProviderTypes
+from ..models.top_level.ResourceConfigTemplate import (
+    ResourceTypesEnum,
+    ResourceVisibilityEnum,
+)
+from ..models.top_level.providers.records import (
+    CrsAuthorities,
+    Languages,
+    ProviderTypes,
+)
 
 from ..models.top_level.providers import (
     ProviderMvtProxy,
@@ -382,22 +389,45 @@ class UiSetter:
 
     def customize_ui_on_launch(self):
         """Pre-fill ComboBoxes, assign validators to LineEdits where needed."""
-        config_data: ConfigData = self.dialog.config_data
+        dialog = self.dialog
+        config_data: ConfigData = dialog.config_data
 
-        # add default values to the UI
-        fill_combo_box(self.dialog.comboBoxExceed, config_data.server.limits.on_exceed)
-        fill_combo_box(self.dialog.comboBoxLog, config_data.logging.level)
+        # add default values to the main UI
+        fill_combo_box(dialog.comboBoxExceed, config_data.server.limits.on_exceed)
+        fill_combo_box(dialog.comboBoxLog, config_data.logging.level)
         fill_combo_box(
-            self.dialog.comboBoxMetadataIdKeywordsType,
+            dialog.comboBoxMetadataIdKeywordsType,
             config_data.metadata.identification.keywords_type,
         )
         fill_combo_box(
-            self.dialog.comboBoxMetadataContactRole,
+            dialog.comboBoxMetadataContactRole,
             config_data.metadata.contact.role,
         )
 
-        # set validators for some fields
+        # add default values to the Resource UI
+        fill_combo_box(
+            dialog.comboBoxResType,
+            ResourceTypesEnum.COLLECTION,
+        )
+        fill_combo_box(
+            dialog.comboBoxResVisibility,
+            ResourceVisibilityEnum.NONE,  # mock value, as default is None
+        )
+        fill_combo_box(
+            dialog.comboBoxResExtentsSpatialCrsType,
+            CrsAuthorities.OGC13,
+        )
+        fill_combo_box(
+            dialog.comboBoxResProviderType,
+            ProviderTypes.FEATURE,  # mock value to get type
+        )
 
+        fill_combo_box(
+            self.dialog.addResLinkshreflangComboBox,
+            Languages.NONE,  # mock value, as default is None. Only for setting data - not actual resource value
+        )
+
+        # set validators for some fields
         # resource bbox
         regex_bbox = QRegularExpression(
             r"-?\d+(\.\d+)?,-?\d+(\.\d+)?,-?\d+(\.\d+)?,-?\d+(\.\d+)?"
@@ -484,33 +514,6 @@ class UiSetter:
             if model.data(index) == target_text:
                 dialog.listViewCollection.setCurrentIndex(index)
                 break
-
-    def setup_resouce_loaded_ui(self, res_data: ResourceConfigTemplate):
-        """Assign dropdown values to select from."""
-        dialog = self.dialog
-
-        fill_combo_box(
-            dialog.comboBoxResType,
-            res_data.type,
-        )
-        fill_combo_box(
-            dialog.comboBoxResVisibility,
-            res_data.visibility
-            or ResourceVisibilityEnum.NONE,  # mock value, as default is None
-        )
-        fill_combo_box(
-            dialog.comboBoxResExtentsSpatialCrsType,
-            res_data.extents.spatial.crs_authority,
-        )
-        fill_combo_box(
-            dialog.comboBoxResProviderType,
-            ProviderTypes.FEATURE,  # mock value if we don't yet have an object to get the value from
-        )
-
-        fill_combo_box(
-            self.dialog.addResLinkshreflangComboBox,
-            Languages.NONE,  # mock value, as default is None. Only for setting data - not actual resource value
-        )
 
     def _lang_entry_exists_in_list_widget(self, list_widget, locale) -> bool:
         for i in range(list_widget.count()):

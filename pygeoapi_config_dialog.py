@@ -448,7 +448,7 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
         self.groupBoxCollectionLoaded.show()
 
         res_data = self.config_data.resources[self.current_res_name]
-        self.ui_setter.setup_resouce_loaded_ui(res_data)
+        # self.ui_setter.setup_resouce_loaded_ui(res_data)
 
         # set the values to UI widgets
         self.ui_setter.set_resource_ui_from_data(res_data)
