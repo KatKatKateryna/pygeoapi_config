@@ -10,6 +10,7 @@ from ..models.top_level.providers.records import (
     CrsAuthorities,
     Languages,
     ProviderTypes,
+    TrsAuthorities,
 )
 
 from ..models.top_level.providers import (
@@ -319,13 +320,11 @@ class UiSetter:
             else:
                 dialog.lineEditResExtentsTemporalEnd.setText("")
 
-            # temporal end
-            if res_data.extents.temporal.trs:
-                dialog.lineEditResExtentsTemporalTrs.setText(
-                    res_data.extents.temporal.trs
-                )
-            else:
-                dialog.lineEditResExtentsTemporalTrs.setText("")
+            # temporal trs
+            set_combo_box_value_from_data(
+                combo_box=dialog.comboBoxResExtentsTemporalTrs,
+                value=res_data.extents.temporal.trs,
+            )
 
         # links
         pack_list_data_into_list_widget(
@@ -423,6 +422,11 @@ class UiSetter:
             dialog.comboBoxResExtentsSpatialCrsType,
             CrsAuthorities.OGC13,
         )
+        fill_combo_box(
+            dialog.comboBoxResExtentsTemporalTrs,
+            TrsAuthorities.ISO8601,
+        )
+
         fill_combo_box(
             dialog.comboBoxResProviderType,
             ProviderTypes.FEATURE,  # mock value to get type

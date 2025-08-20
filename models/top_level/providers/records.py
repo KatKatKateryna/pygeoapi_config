@@ -16,6 +16,10 @@ class Languages(Enum):
     PT_PT = "pt-PT"
 
 
+class TrsAuthorities(Enum):
+    ISO8601 = "http://www.opengis.net/def/uom/ISO-8601/0/Gregorian"
+
+
 class CrsAuthorities(Enum):
     OGC13 = "OGC/1.3"
     OGC0 = "OGC/0"

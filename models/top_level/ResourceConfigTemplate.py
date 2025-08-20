@@ -67,9 +67,7 @@ class ResourceTemporalConfig:
     # optional
     begin: str | datetime | None = None
     end: str | datetime | None = None
-    trs: str | None = (
-        None  # default: 'http://www.opengis.net/def/uom/ISO-8601/0/Gregorian'
-    )
+    trs: str | None = None
 
 
 @dataclass(kw_only=True)

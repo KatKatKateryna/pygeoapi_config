@@ -27,7 +27,11 @@ from ..models.top_level.providers import (
     ProviderPostgresql,
     ProviderWmsFacade,
 )
-from ..models.top_level.providers.records import Languages, ProviderTypes
+from ..models.top_level.providers.records import (
+    Languages,
+    ProviderTypes,
+    TrsAuthorities,
+)
 
 from ..models.top_level.utils import (
     InlineList,
@@ -237,43 +241,31 @@ class DataSetterFromUi:
         )
 
         # temporal: only initialize if any of the values are present, otherwise leave as default None
-        if (
-            is_valid_string(dialog.lineEditResExtentsTemporalBegin.text())
-            or is_valid_string(dialog.lineEditResExtentsTemporalEnd.text())
-            or is_valid_string(dialog.lineEditResExtentsTemporalTrs.text())
-        ):
+        # IGNORE trs if no other values are present
+        temporal_begin = None
+        temporal_end = None
+        if is_valid_string(dialog.lineEditResExtentsTemporalBegin.text()):
+            temporal_begin = datetime.strptime(
+                dialog.lineEditResExtentsTemporalBegin.text(),
+                "%Y-%m-%dT%H:%M:%SZ",
+            )
+        if is_valid_string(dialog.lineEditResExtentsTemporalEnd.text()):
+            temporal_end = datetime.strptime(
+                dialog.lineEditResExtentsTemporalEnd.text(),
+                "%Y-%m-%dT%H:%M:%SZ",
+            )
+
+        if temporal_begin or temporal_end:
             config_data.resources[res_name].extents.temporal = ResourceTemporalConfig()
-        else:
-            config_data.resources[res_name].extents.temporal = None
 
-        # if initialized or already existed:
-        if config_data.resources[res_name].extents.temporal:
-            if is_valid_string(dialog.lineEditResExtentsTemporalBegin.text()):
-                config_data.resources[res_name].extents.temporal.begin = (
-                    datetime.strptime(
-                        dialog.lineEditResExtentsTemporalBegin.text(),
-                        "%Y-%m-%dT%H:%M:%SZ",
-                    )
+            config_data.resources[res_name].extents.temporal.begin = temporal_begin
+            config_data.resources[res_name].extents.temporal.end = temporal_end
+            config_data.resources[res_name].extents.temporal.trs = (
+                get_enum_value_from_string(
+                    TrsAuthorities,
+                    get_widget_text_value(dialog.comboBoxResExtentsTemporalTrs),
                 )
-            else:
-                config_data.resources[res_name].extents.temporal.begin = None
-
-            if is_valid_string(dialog.lineEditResExtentsTemporalEnd.text()):
-                config_data.resources[res_name].extents.temporal.end = (
-                    datetime.strptime(
-                        dialog.lineEditResExtentsTemporalEnd.text(),
-                        "%Y-%m-%dT%H:%M:%SZ",
-                    )
-                )
-            else:
-                config_data.resources[res_name].extents.temporal.end = None
-
-            if is_valid_string(dialog.lineEditResExtentsTemporalTrs.text()):
-                config_data.resources[res_name].extents.temporal.trs = (
-                    dialog.lineEditResExtentsTemporalTrs.text()
-                )
-            else:
-                config_data.resources[res_name].extents.temporal.trs = None
+            )
 
         # links
         config_data.resources[res_name].links = []
