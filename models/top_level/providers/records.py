@@ -7,6 +7,15 @@ class ProviderTypes(Enum):
     TILE = "tile"
 
 
+class Languages(Enum):
+    NONE = ""
+    EN_US = "en-US"
+    EN_GB = "en-GB"
+    FR_CA = "fr-CA"
+    FR_FR = "fr-FR"
+    PT_PT = "pt-PT"
+
+
 class CrsAuthorities(Enum):
     OGC13 = "OGC/1.3"
     OGC0 = "OGC/0"

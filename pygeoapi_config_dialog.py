@@ -299,7 +299,7 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
 
     def add_res_link(self):
         """Called from .ui file."""
-        self.ui_setter.add_listwidget_element_from_multi_lineedit(
+        self.ui_setter.add_listwidget_element_from_multi_widgets(
             line_widgets_mandatory=[
                 self.addResLinksTypeLineEdit,
                 self.addResLinksRelLineEdit,
@@ -307,7 +307,7 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
             ],
             line_widgets_optional=[
                 self.addResLinksTitleLineEdit,
-                self.addResLinkshreflangLineEdit,
+                self.addResLinkshreflangComboBox,
                 self.addResLinksLengthLineEdit,
             ],
             list_widget=self.listWidgetResLinks,

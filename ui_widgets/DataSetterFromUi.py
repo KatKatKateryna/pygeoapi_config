@@ -25,7 +25,7 @@ from ..models.top_level.providers import (
     ProviderPostgresql,
     ProviderWmsFacade,
 )
-from ..models.top_level.providers.records import ProviderTypes
+from ..models.top_level.providers.records import Languages, ProviderTypes
 
 from ..models.top_level.utils import (
     InlineList,
@@ -279,7 +279,10 @@ class DataSetterFromUi:
             if is_valid_string(link[3]):
                 new_link.title = link[3]
             if is_valid_string(link[4]):
-                new_link.hreflang = link[4]
+                new_link.hreflang = get_enum_value_from_string(
+                    Languages,
+                    link[4],
+                )
             if is_valid_string(link[5]):
                 new_link.length = int(link[5])
 

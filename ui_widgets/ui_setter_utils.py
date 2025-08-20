@@ -130,8 +130,10 @@ def pack_list_data_into_list_widget(data: list[list], list_widget):
             # convert all values to strings and joint with SEPARATOR symbol
             if d:
                 if isinstance(d, list):
-                    # convert list to a string without brackets
+                    # convert list to a string without brackets (e.g. for bbox)
                     all_elements.append(",".join(d))
+                elif isinstance(d, Enum):  # e.g. Languages Enum
+                    all_elements.append(str(d.value))
                 else:
                     all_elements.append(str(d))
             else:

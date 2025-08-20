@@ -5,6 +5,7 @@ from enum import Enum
 from .providers import ProviderPostgresql, ProviderMvtProxy, ProviderWmsFacade
 from .utils import InlineList, get_enum_value_from_string, is_valid_string
 from .providers.records import CrsAuthorities
+from .providers.records import Languages
 
 
 # records
@@ -30,7 +31,7 @@ class ResourceLinkTemplate:
 
     # optional
     title: str | None = None
-    hreflang: str | None = None
+    hreflang: Languages | None = None
     length: int | None = None
 
 

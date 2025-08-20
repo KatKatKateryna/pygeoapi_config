@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING
 
 from ..models.top_level import ResourceConfigTemplate
 from ..models.top_level.ResourceConfigTemplate import ResourceVisibilityEnum
-from ..models.top_level.providers.records import ProviderTypes
+from ..models.top_level.providers.records import Languages, ProviderTypes
 
 from ..models.top_level.providers import (
     ProviderMvtProxy,
@@ -31,7 +31,7 @@ from PyQt5.QtCore import (
     QRegularExpression,
     Qt,
 )
-from PyQt5.QtWidgets import QMessageBox
+from PyQt5.QtWidgets import QWidget, QComboBox, QLineEdit, QMessageBox
 
 from qgis.gui import QgsMapCanvas
 from qgis.core import (
@@ -486,6 +486,7 @@ class UiSetter:
                 break
 
     def setup_resouce_loaded_ui(self, res_data: ResourceConfigTemplate):
+        """Assign dropdown values to select from."""
         dialog = self.dialog
 
         fill_combo_box(
@@ -504,6 +505,11 @@ class UiSetter:
         fill_combo_box(
             dialog.comboBoxResProviderType,
             ProviderTypes.FEATURE,  # mock value if we don't yet have an object to get the value from
+        )
+
+        fill_combo_box(
+            self.dialog.addResLinkshreflangComboBox,
+            Languages.NONE,  # mock value, as default is None. Only for setting data - not actual resource value
         )
 
     def _lang_entry_exists_in_list_widget(self, list_widget, locale) -> bool:
@@ -553,7 +559,7 @@ class UiSetter:
             if sort:
                 list_widget.model().sort(0)
 
-    def add_listwidget_element_from_multi_lineedit(
+    def add_listwidget_element_from_multi_widgets(
         self,
         *,
         line_widgets_mandatory: list,
@@ -564,9 +570,13 @@ class UiSetter:
         dialog = self.dialog
 
         final_text = ""
-        for line_edit_widget in line_widgets_mandatory:
-            text = line_edit_widget.text().strip()
-            if not text:
+        mandatory_fields_count = len(line_widgets_mandatory)
+        for i, widget in enumerate(line_widgets_mandatory + line_widgets_optional):
+            print(widget)
+            text = self._get_widget_text_value(widget)
+
+            # check if the field is in a 'mandatory' list and empty
+            if i < mandatory_fields_count and not text:
                 QMessageBox.warning(dialog, "Warning", "Mandatory field is empty")
                 return
 
@@ -574,22 +584,29 @@ class UiSetter:
             if len(final_text) > 0:
                 final_text += STRING_SEPARATOR
             final_text += text
-            line_edit_widget.clear()
-
-        for line_edit_widget in line_widgets_optional:
-            text = line_edit_widget.text().strip()
-
-            # add separator if not the first value
-            if len(final_text) > 0:
-                final_text += STRING_SEPARATOR
-            final_text += text
-            line_edit_widget.clear()
+            self._reset_widget(widget)
 
         list_widget.addItem(final_text)
 
         # sort the content
         if sort:
             list_widget.model().sort(0)
+
+    def _reset_widget(self, widget):
+        if isinstance(widget, QLineEdit):
+            return widget.clear()
+        elif isinstance(widget, QComboBox):
+            return widget.setCurrentIndex(0)
+        else:
+            raise TypeError(f"Unsupported widget type: {type(widget)}")
+
+    def _get_widget_text_value(self, widget):
+        if isinstance(widget, QLineEdit):
+            return widget.text().strip()
+        elif isinstance(widget, QComboBox):
+            return widget.currentText().strip()
+        else:
+            raise TypeError(f"Unsupported widget type: {type(widget)}")
 
     def delete_list_widget_selected_item(self, list_widget):
         """Delete selected List item from widget."""
