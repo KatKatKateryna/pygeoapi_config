@@ -37,6 +37,9 @@ class ProviderMvtProxy(ProviderTemplate):
     options: MvtProxyOptions = field(default_factory=lambda: MvtProxyOptions())
     format: MvtProxyFormat = field(default_factory=lambda: MvtProxyFormat())
 
+    def assign_ui_dict_to_provider_data(self, values: dict):
+        pass
+
     def get_invalid_properties(self):
         """Checks the values of mandatory fields."""
         all_invalid_fields = []

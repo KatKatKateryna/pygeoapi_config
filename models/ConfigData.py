@@ -9,7 +9,7 @@ from .top_level import (
     ResourceConfigTemplate,
 )
 from .top_level.utils import InlineList
-from .top_level.providers import ProviderPostgresql
+from .top_level.providers import ProviderTemplate
 from .top_level.providers.records import ProviderTypes
 
 
@@ -152,39 +152,21 @@ class ConfigData:
         if dialog.current_res_name in self.resources:
             self.resources.pop(dialog.current_res_name)
 
-    def set_new_provider_data(
+    def set_validate_new_provider_data(
         self, values: dict, res_name: str, provider_type: ProviderTypes
     ):
         """Adds a provider data to the resource. Called on Save click from New Providere window."""
 
-        if provider_type == ProviderTypes.FEATURE:
-            new_provider = ProviderPostgresql()
+        # initialize provider; assign ui_dict data to the provider instance
+        new_provider = ProviderTemplate.init_provider_from_type(provider_type)
+        new_provider.assign_ui_dict_to_provider_data(values)
+
+        # if incomplete data, remove Provider from ConfigData and show Warning
+        invalid_props = new_provider.get_invalid_properties()
+        if len(invalid_props) == 0:
             self.resources[res_name].providers.append(new_provider)
 
-            # adjust structure to match the class structure
-            values["data"] = {}
-            for k, v in values.items():
-                if k in ["host", "port", "dbname", "user", "password", "search_path"]:
-                    values["data"][k] = v
-                # custom change
-            values["data"]["search_path"] = values["search_path"].split(",")
-
-            update_dataclass_from_dict(new_provider, values, "ProviderPostgresql")
-
-            # if incomplete data, remove Provider from ConfigData and show Warning
-            invalid_props = new_provider.get_invalid_properties()
-            if len(invalid_props) > 0:
-                self.resources[res_name].providers.pop(-1)
-                return invalid_props
-
-        elif provider_type == ProviderTypes.MAP:
-            pass
-
-        elif provider_type == ProviderTypes.TILE:
-            pass
-
-        # set value to the provider widget
-        return []
+        return invalid_props
 
     def validate_config_data(self) -> int:
         """Validate mandatory fields (e.g. before saving to file)."""

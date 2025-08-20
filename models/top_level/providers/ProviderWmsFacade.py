@@ -32,6 +32,9 @@ class ProviderWmsFacade(ProviderTemplate):
     options: WmsFacadeOptions = field(default_factory=lambda: WmsFacadeOptions())
     format: WmsFacadeFormat = field(default_factory=lambda: WmsFacadeFormat())
 
+    def assign_ui_dict_to_provider_data(self, values: dict):
+        pass
+
     def get_invalid_properties(self):
         """Checks the values of mandatory fields."""
         all_invalid_fields = []
