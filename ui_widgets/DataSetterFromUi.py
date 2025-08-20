@@ -3,11 +3,13 @@ from typing import TYPE_CHECKING
 
 from datetime import datetime
 
+from .utils import get_widget_text_value
+
 from .data_from_ui_setter_utils import (
-    bbox_from_string,
     unpack_locales_values_list_to_dict,
     unpack_listwidget_values_to_sublists,
 )
+from ..models.top_level.utils import bbox_from_list
 
 from ..models.top_level import (
     ResourceLinkTemplate,
@@ -212,10 +214,18 @@ class DataSetterFromUi:
             config_data.resources[res_name].visibility = None
 
         # spatial bbox
-        raw_bbox_str = dialog.lineEditResExtentsSpatialBbox.text()
+        raw_bbox_list = [
+            get_widget_text_value(x)
+            for x in [
+                dialog.lineEditResExtentsSpatialXMin,
+                dialog.lineEditResExtentsSpatialYMin,
+                dialog.lineEditResExtentsSpatialXMax,
+                dialog.lineEditResExtentsSpatialYMax,
+            ]
+        ]
         # this loop is to not add empty decimals unnecessarily
         config_data.resources[res_name].extents.spatial.bbox = InlineList(
-            bbox_from_string(raw_bbox_str)
+            bbox_from_list(raw_bbox_list)
         )
 
         # spatial crs
@@ -372,8 +382,16 @@ class DataSetterFromUi:
             invalid_fields.append("keywords")
 
         try:
-            raw_bbox_str = dialog.lineEditResExtentsSpatialBbox.text()
-            bbox_from_string(raw_bbox_str)
+            raw_bbox_list = [
+                get_widget_text_value(x)
+                for x in [
+                    dialog.lineEditResExtentsSpatialXMin,
+                    dialog.lineEditResExtentsSpatialYMin,
+                    dialog.lineEditResExtentsSpatialXMax,
+                    dialog.lineEditResExtentsSpatialYMax,
+                ]
+            ]
+            bbox_from_list(raw_bbox_list)
         except Exception as e:
             invalid_fields.append("spatial extents (bbox)")
 

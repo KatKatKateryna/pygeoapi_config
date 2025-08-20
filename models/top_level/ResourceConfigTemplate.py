@@ -3,7 +3,12 @@ from datetime import datetime
 from enum import Enum
 
 from .providers import ProviderPostgresql, ProviderMvtProxy, ProviderWmsFacade
-from .utils import InlineList, get_enum_value_from_string, is_valid_string
+from .utils import (
+    InlineList,
+    bbox_from_list,
+    get_enum_value_from_string,
+    is_valid_string,
+)
 from .providers.records import CrsAuthorities
 from .providers.records import Languages
 
@@ -153,6 +158,15 @@ class ResourceConfigTemplate:
     @property
     def instance_name(self):
         return self._instance_name
+
+    def validate_reassign_bbox(self) -> bool:
+        """Validates the bbox values and converts to int/float if needed."""
+        try:
+            self.extents.spatial.bbox = bbox_from_list(self.extents.spatial.bbox)
+            return True
+        except ValueError:
+            self.extents.spatial.bbox = InlineList([-180, -90, 180, 90])
+            return False
 
     def get_invalid_properties(self):
         """Checks the values of mandatory fields: identification (title, description, keywords)."""

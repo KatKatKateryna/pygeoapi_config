@@ -8,7 +8,7 @@ from .top_level import (
     MetadataConfig,
     ResourceConfigTemplate,
 )
-from .top_level.utils import InlineList
+from .top_level.utils import InlineList, bbox_from_list
 from .top_level.providers import ProviderTemplate
 from .top_level.providers.records import ProviderTypes
 
@@ -83,6 +83,12 @@ class ConfigData:
                 default_fields.extend(defaults_resource)
                 wrong_types.extend(wrong_types_resource)
                 all_missing_props.extend(all_missing_props_resource)
+
+                # Exceptional check: verify that all list items of BBox are integers, and len(list)=4 or 6
+                if not new_resource_item.validate_reassign_bbox():
+                    wrong_types.append(
+                        f"resources.{resource_instance_name}.extents.spatial.bbox"
+                    )
 
                 self.resources[resource_instance_name] = new_resource_item
 

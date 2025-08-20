@@ -31,6 +31,7 @@ from .ui_setter_utils import (
     pack_list_data_into_list_widget,
     select_list_widget_items_by_texts,
 )
+from .utils import get_widget_text_value, reset_widget
 
 
 from PyQt5.QtGui import QRegularExpressionValidator, QIntValidator
@@ -38,7 +39,7 @@ from PyQt5.QtCore import (
     QRegularExpression,
     Qt,
 )
-from PyQt5.QtWidgets import QWidget, QComboBox, QLineEdit, QMessageBox
+from PyQt5.QtWidgets import QMessageBox
 
 from qgis.gui import QgsMapCanvas
 from qgis.core import (
@@ -278,13 +279,18 @@ class UiSetter:
         )
 
         # spatial bbox
-        bbox_str = (
-            str(res_data.extents.spatial.bbox)
-            .replace("[", "")
-            .replace("]", "")
-            .replace(" ", "")
+        dialog.lineEditResExtentsSpatialXMin.setText(
+            str(res_data.extents.spatial.bbox[0])
         )
-        dialog.lineEditResExtentsSpatialBbox.setText(bbox_str)
+        dialog.lineEditResExtentsSpatialYMin.setText(
+            str(res_data.extents.spatial.bbox[1])
+        )
+        dialog.lineEditResExtentsSpatialXMax.setText(
+            str(res_data.extents.spatial.bbox[2])
+        )
+        dialog.lineEditResExtentsSpatialYMax.setText(
+            str(res_data.extents.spatial.bbox[3])
+        )
 
         # spatial CRS authority
         set_combo_box_value_from_data(
@@ -429,11 +435,13 @@ class UiSetter:
 
         # set validators for some fields
         # resource bbox
-        regex_bbox = QRegularExpression(
-            r"-?\d+(\.\d+)?,-?\d+(\.\d+)?,-?\d+(\.\d+)?,-?\d+(\.\d+)?"
-        )
-        validator_bbox = QRegularExpressionValidator(regex_bbox)
-        self.dialog.lineEditResExtentsSpatialBbox.setValidator(validator_bbox)
+        self.dialog.lineEditResExtentsSpatialXMin.setValidator(QIntValidator())
+        self.dialog.lineEditResExtentsSpatialYMin.setValidator(QIntValidator())
+        self.dialog.lineEditResExtentsSpatialXMax.setValidator(QIntValidator())
+        self.dialog.lineEditResExtentsSpatialYMax.setValidator(QIntValidator())
+        # regex_bbox = QRegularExpression(r"-?\d+(\.\d+)?,-?\d+(\.\d+)?,-?\d+(\.\d+)?,-?\d+(\.\d+)?")
+        # validator_bbox = QRegularExpressionValidator(regex_bbox)
+        # self.dialog.lineEditResExtentsSpatialBbox.setValidator(validator_bbox)
 
         # resource content size
         self.dialog.addResLinksLengthLineEdit.setValidator(QIntValidator())
@@ -575,8 +583,7 @@ class UiSetter:
         final_text = ""
         mandatory_fields_count = len(line_widgets_mandatory)
         for i, widget in enumerate(line_widgets_mandatory + line_widgets_optional):
-            print(widget)
-            text = self._get_widget_text_value(widget)
+            text = get_widget_text_value(widget)
 
             # check if the field is in a 'mandatory' list and empty
             if i < mandatory_fields_count and not text:
@@ -587,29 +594,13 @@ class UiSetter:
             if len(final_text) > 0:
                 final_text += STRING_SEPARATOR
             final_text += text
-            self._reset_widget(widget)
+            reset_widget(widget)
 
         list_widget.addItem(final_text)
 
         # sort the content
         if sort:
             list_widget.model().sort(0)
-
-    def _reset_widget(self, widget):
-        if isinstance(widget, QLineEdit):
-            return widget.clear()
-        elif isinstance(widget, QComboBox):
-            return widget.setCurrentIndex(0)
-        else:
-            raise TypeError(f"Unsupported widget type: {type(widget)}")
-
-    def _get_widget_text_value(self, widget):
-        if isinstance(widget, QLineEdit):
-            return widget.text().strip()
-        elif isinstance(widget, QComboBox):
-            return widget.currentText().strip()
-        else:
-            raise TypeError(f"Unsupported widget type: {type(widget)}")
 
     def delete_list_widget_selected_item(self, list_widget):
         """Delete selected List item from widget."""

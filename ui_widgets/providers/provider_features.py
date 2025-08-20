@@ -13,9 +13,9 @@ def create_feature_provider_window(group_layout: QGridLayout):
         ("user", "", ""),
         ("password", "", ""),
         ("search_path", "", "e.g. 'osm, public'"),
-        ("id_field", "", "(optional)"),
-        ("table", "", "(optional)"),
-        ("geom_field", "", "(optional)"),
+        ("id_field", "", ""),
+        ("table", "", ""),
+        ("geom_field", "", ""),
     ]
 
     all_lineedits = {}

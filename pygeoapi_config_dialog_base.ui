@@ -1620,7 +1620,7 @@
               </item>
 
 
-              <item row="4" column="0">
+              <item row="4" column="0" rowspan="2">
               
                 <widget class="QGroupBox">
                   <property name="title">
@@ -1628,6 +1628,7 @@
                   </property>
 
                   <layout class="QGridLayout">
+                  
                     <item row="0" column="0">
                       <widget class="QLabel">
                         <property name="text">
@@ -1635,13 +1636,86 @@
                         </property>
                       </widget>
                     </item>
-                    <item row="0" column="1" columnspan="2">
-                      <widget class="QLineEdit" name="lineEditResExtentsSpatialBbox">
-                        <property name="placeholderText">
-                          <string>-180,-90,180,90</string>
-                        </property>
-                      </widget>
+
+                    <item row="0" column="1">
+                      <layout class="QGridLayout">
+                        
+                        <item row="0" column="0">
+                          <layout class="QHBoxLayout">
+                            <item>
+                              <widget class="QLabel">
+                                <property name="text">
+                                <string>XMin</string>
+                                </property>
+                              </widget>
+                            </item>
+                            <item>
+                              <widget class="QLineEdit" name="lineEditResExtentsSpatialXMin">
+                                <property name="placeholderText">
+                                  <string>-180</string>
+                                </property>
+                              </widget>
+                            </item>
+                          </layout>
+                        </item>
+                        <item row="0" column="1">
+                          <layout class="QHBoxLayout">
+                            <item>
+                              <widget class="QLabel">
+                                <property name="text">
+                                <string>YMin</string>
+                                </property>
+                              </widget>
+                            </item>
+                            <item>
+                              <widget class="QLineEdit" name="lineEditResExtentsSpatialYMin">
+                                <property name="placeholderText">
+                                  <string>-90</string>
+                                </property>
+                              </widget>
+                            </item>
+                          </layout>
+                        </item>
+                        <item row="0" column="2">
+                          <layout class="QHBoxLayout">
+                            <item>
+                              <widget class="QLabel">
+                                <property name="text">
+                                <string>XMax</string>
+                                </property>
+                              </widget>
+                            </item>
+                            <item>
+                              <widget class="QLineEdit" name="lineEditResExtentsSpatialXMax">
+                                <property name="placeholderText">
+                                  <string>180</string>
+                                </property>
+                              </widget>
+                            </item>
+                          </layout>
+                        </item>
+                        <item row="0" column="3">
+                          <layout class="QHBoxLayout">
+                            <item>
+                              <widget class="QLabel">
+                                <property name="text">
+                                <string>YMax</string>
+                                </property>
+                              </widget>
+                            </item>
+                            <item>
+                              <widget class="QLineEdit" name="lineEditResExtentsSpatialYMax">
+                                <property name="placeholderText">
+                                  <string>90</string>
+                                </property>
+                              </widget>
+                            </item>
+                          </layout>
+                        </item>
+
+                      </layout>
                     </item>
+
                     <item row="1" column="0">
                       <widget class="QLabel">
                         <property name="text">
