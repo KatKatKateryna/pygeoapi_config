@@ -249,6 +249,24 @@ class UiSetter:
         """Set values for Resource UI from resource data."""
         dialog = self.dialog
 
+        # first, reset some fields to defaults (e.g. for data setting, or optional - they might not have a new value to overwrite it)
+        # data entry fields
+        dialog.addResTitleLineEdit.setText("")
+        dialog.addResDescriptionLineEdit.setText("")
+        dialog.addResKeywordsLineEdit.setText("")
+
+        dialog.addResLinksTypeLineEdit.setText("")
+        dialog.addResLinksRelLineEdit.setText("")
+        dialog.addResLinksHrefLineEdit.setText("")
+        dialog.addResLinksTitleLineEdit.setText("")
+        dialog.addResLinkshreflangComboBox.setCurrentIndex(0)
+        dialog.addResLinksLengthLineEdit.setText("")
+
+        # optional temporal extents
+        dialog.lineEditResExtentsTemporalBegin.setText("")
+        dialog.lineEditResExtentsTemporalEnd.setText("")
+        dialog.comboBoxResExtentsTemporalTrs.setCurrentIndex(0)
+
         # alias
         dialog.lineEditResAlias.setText(dialog.current_res_name)
 
