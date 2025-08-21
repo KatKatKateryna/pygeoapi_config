@@ -37,8 +37,34 @@ class ProviderMvtProxy(ProviderTemplate):
     options: MvtProxyOptions = field(default_factory=lambda: MvtProxyOptions())
     format: MvtProxyFormat = field(default_factory=lambda: MvtProxyFormat())
 
-    def assign_ui_dict_to_provider_data(self, values: dict):
+    def assign_ui_dict_to_provider_data(self, values: dict[str, str]):
         pass
+
+    def pack_data_to_list(self):
+        return [
+            self.type.value,
+            self.name,
+            self.crs,
+            self.data,
+            self.options.zoom.min,
+            self.options.zoom.max,
+            self.format.name,
+            self.format.mimetype,
+        ]
+
+    def assign_value_list_to_provider_data(self, values: list):
+        if len(values) != 8:
+            raise ValueError(
+                f"Unexpected number of value to unpack: {len(values)}. Expected: 8"
+            )
+
+        self.name = values[1]
+        self.crs = values[2]
+        self.data = values[3]
+        self.options.zoom.min = int(values[4])
+        self.options.zoom.max = int(values[5])
+        self.format.name = values[6]
+        self.format.mimetype = values[7]
 
     def get_invalid_properties(self):
         """Checks the values of mandatory fields."""

@@ -32,8 +32,36 @@ class ProviderWmsFacade(ProviderTemplate):
     options: WmsFacadeOptions = field(default_factory=lambda: WmsFacadeOptions())
     format: WmsFacadeFormat = field(default_factory=lambda: WmsFacadeFormat())
 
-    def assign_ui_dict_to_provider_data(self, values: dict):
+    def assign_ui_dict_to_provider_data(self, values: dict[str, str]):
         pass
+
+    def pack_data_to_list(self):
+        return [
+            self.type.value,
+            self.name,
+            self.crs,
+            self.data,
+            self.options.layer,
+            self.options.style,
+            self.options.version,
+            self.format.name,
+            self.format.mimetype,
+        ]
+
+    def assign_value_list_to_provider_data(self, values: list):
+        if len(values) != 9:
+            raise ValueError(
+                f"Unexpected number of value to unpack: {len(values)}. Expected: 9"
+            )
+
+        self.name = values[1]
+        self.crs = values[2]
+        self.data = values[3]
+        self.options.layer = values[4]
+        self.options.style = values[5]
+        self.options.version = values[6]
+        self.format.name = values[7]
+        self.format.mimetype = values[8]
 
     def get_invalid_properties(self):
         """Checks the values of mandatory fields."""

@@ -7,6 +7,7 @@ def create_feature_provider_window(group_layout: QGridLayout):
     rows = [
         ("name", "PostgreSQL", ""),
         ("crs", "http://www.opengis.net/def/crs/OGC/1.3/CRS84", ""),
+        ("storage_crs", "", "(optional) http://www.opengis.net/def/crs/OGC/1.3/CRS84"),
         ("host", "", ""),
         ("port", "", ""),
         ("dbname", "", ""),

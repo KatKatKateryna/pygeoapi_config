@@ -13,12 +13,6 @@ from ..models.top_level.providers.records import (
     TrsAuthorities,
 )
 
-from ..models.top_level.providers import (
-    ProviderMvtProxy,
-    ProviderPostgresql,
-    ProviderWmsFacade,
-)
-
 from ..models.top_level.utils import (
     STRING_SEPARATOR,
 )
@@ -364,45 +358,7 @@ class UiSetter:
 
         data_lists = []
         for p in res_data.providers:
-            if isinstance(p, ProviderPostgresql):
-                data_chunk = [
-                    p.type.value,
-                    p.name,
-                    p.crs,
-                    p.data.host,
-                    p.data.port,
-                    p.data.dbname,
-                    p.data.user,
-                    p.data.password,
-                    p.data.search_path,
-                    p.id_field,
-                    p.table,
-                    p.geom_field,
-                ]
-            elif isinstance(p, ProviderWmsFacade):
-                data_chunk = [
-                    p.type.value,
-                    p.name,
-                    p.crs,
-                    p.data,
-                    p.options.layer,
-                    p.options.style,
-                    p.options.version,
-                    p.format.name,
-                    p.format.mimetype,
-                ]
-            elif isinstance(p, ProviderMvtProxy):
-                data_chunk = [
-                    p.type.value,
-                    p.name,
-                    p.crs,
-                    p.data,
-                    p.options.zoom.min,
-                    p.options.zoom.max,
-                    p.format.name,
-                    p.format.mimetype,
-                ]
-
+            data_chunk: list = p.pack_data_to_list()
             data_lists.append(data_chunk)
 
         pack_list_data_into_list_widget(

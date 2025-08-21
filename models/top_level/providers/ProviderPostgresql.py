@@ -31,17 +31,63 @@ class ProviderPostgresql(ProviderTemplate):
     table: str = ""
     geom_field: str = ""
 
-    def assign_ui_dict_to_provider_data(self, values: dict):
+    def assign_ui_dict_to_provider_data(self, values: dict[str, str]):
 
         # adjust structure to match the class structure
         values["data"] = {}
         for k, v in values.items():
             if k in ["host", "port", "dbname", "user", "password", "search_path"]:
                 values["data"][k] = v
-            # custom change
-        values["data"]["search_path"] = values["search_path"].split(",")
+        # custom change
+        values["data"]["search_path"] = (
+            values["search_path"].split(",")
+            if is_valid_string(values["search_path"])
+            else []
+        )
 
         update_dataclass_from_dict(self, values, "ProviderPostgresql")
+
+    def pack_data_to_list(self):
+        return [
+            self.type.value,
+            self.name,
+            self.crs,
+            self.storage_crs,
+            self.data.host,
+            self.data.port,
+            self.data.dbname,
+            self.data.user,
+            self.data.password,
+            self.data.search_path,
+            self.id_field,
+            self.table,
+            self.geom_field,
+        ]
+
+    def assign_value_list_to_provider_data(self, values: list):
+        if len(values) != 13:
+            raise ValueError(
+                f"Unexpected number of value to unpack: {len(values)}. Expected: 13"
+            )
+
+        # self.type = get_enum_value_from_string(ProviderTypes, pr[0])
+
+        self.name = values[1]
+        self.crs = values[2]
+        self.storage_crs = values[3]
+        self.data.host = values[4]
+        self.data.port = values[5]
+        self.data.dbname = values[6]
+        self.data.user = values[7]
+        self.data.password = values[8]
+        self.data.search_path = (
+            InlineList(values[9].split(","))
+            if is_valid_string(values[9])
+            else InlineList([])
+        )
+        self.id_field = values[10]
+        self.table = values[11]
+        self.geom_field = values[12]
 
     def get_invalid_properties(self):
         """Checks the values of mandatory fields."""

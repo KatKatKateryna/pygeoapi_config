@@ -22,11 +22,7 @@ from ..models.top_level import (
     ServerOnExceedEnum,
     ServerTemplatesConfig,
 )
-from ..models.top_level.providers import (
-    ProviderMvtProxy,
-    ProviderPostgresql,
-    ProviderWmsFacade,
-)
+from ..models.top_level.providers import ProviderTemplate
 from ..models.top_level.providers.records import (
     Languages,
     ProviderTypes,
@@ -294,61 +290,11 @@ class DataSetterFromUi:
         )
 
         for pr in providers_data_lists:
-            if len(pr) == 0:
-                # unknown/failed provider
-                continue
+            provider_type = get_enum_value_from_string(ProviderTypes, pr[0])
+            new_pr = ProviderTemplate.init_provider_from_type(provider_type)
+            new_pr.assign_value_list_to_provider_data(pr)
 
-            if len(pr) == 12 and pr[0] == ProviderTypes.FEATURE.value:
-
-                new_pr = ProviderPostgresql()
-                new_pr.type = get_enum_value_from_string(ProviderTypes, pr[0])
-                new_pr.name = pr[1]
-                new_pr.crs = pr[2]
-                new_pr.data.host = pr[3]
-                new_pr.data.port = pr[4]
-                new_pr.data.dbname = pr[5]
-                new_pr.data.user = pr[6]
-                new_pr.data.password = pr[7]
-                new_pr.data.search_path = InlineList(pr[8].split(","))
-
-                if is_valid_string(pr[9]):
-                    new_pr.id_field = pr[9]
-                if is_valid_string(pr[10]):
-                    new_pr.table = pr[10]
-                if is_valid_string(pr[11]):
-                    new_pr.geom_field = pr[11]
-
-                config_data.resources[res_name].providers.append(new_pr)
-
-            elif len(pr) == 9 and pr[0] == ProviderTypes.MAP.value:
-                new_pr = ProviderWmsFacade()
-                new_pr.type = get_enum_value_from_string(ProviderTypes, pr[0])
-                new_pr.name = pr[1]
-                new_pr.crs = pr[2]
-                new_pr.data = pr[3]
-                new_pr.options.layer = pr[4]
-                new_pr.options.style = pr[5]
-                new_pr.options.version = pr[6]
-                new_pr.format.name = pr[7]
-                new_pr.format.mimetype = pr[8]
-
-                config_data.resources[res_name].providers.append(new_pr)
-
-            elif len(pr) == 8 and pr[0] == ProviderTypes.TILE.value:
-                new_pr = ProviderMvtProxy()
-                new_pr.type = get_enum_value_from_string(ProviderTypes, pr[0])
-                new_pr.name = pr[1]
-                new_pr.crs = pr[2]
-                new_pr.data = pr[3]
-                new_pr.options.zoom.min = int(pr[4])
-                new_pr.options.zoom.max = int(pr[5])
-                new_pr.format.name = pr[6]
-                new_pr.format.mimetype = pr[7]
-
-                config_data.resources[res_name].providers.append(new_pr)
-            else:
-                # unknown provider
-                continue
+            config_data.resources[res_name].providers.append(new_pr)
 
         # change resource key to a new alias
         new_alias = dialog.lineEditResAlias.text()
