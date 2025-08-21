@@ -25,8 +25,10 @@
 import os
 import yaml
 
+
 from .models.top_level.providers.records import ProviderTypes
 from .ui_widgets.providers.NewProviderWindow import NewProviderWindow
+from .ui_widgets.WarningDialog import ReadOnlyTextDialog
 
 from .ui_widgets import DataSetterFromUi, UiSetter
 from .models.ConfigData import ConfigData
@@ -118,11 +120,11 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
                 QgsMessageLog.logMessage(
                     f"Properties are missing or have invalid values: {invalid_props}"
                 )
-                QMessageBox.warning(
+                ReadOnlyTextDialog(
                     self,
                     "Warning",
                     f"Properties are missing or have invalid values: {invalid_props}",
-                )
+                ).exec_()
                 return
 
         except Exception as e:
@@ -162,7 +164,7 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
             return
 
         try:
-            QApplication.setOverrideCursor(Qt.WaitCursor)
+            # QApplication.setOverrideCursor(Qt.WaitCursor)
             with open(file_name, "r", encoding="utf-8") as file:
                 file_content = file.read()
 
@@ -185,18 +187,17 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
                 QgsMessageLog.logMessage(
                     f"All missing or replaced properties: {self.config_data.all_missing_props}"
                 )
-
                 if len(all_missing_props) > 0:
-                    QMessageBox.warning(
+                    ReadOnlyTextDialog(
                         self,
                         "Warning",
                         f"All missing or replaced properties (check logs for more details): {self.config_data.all_missing_props}",
-                    )
+                    ).exec_()
 
         except Exception as e:
             QMessageBox.warning(self, "Error", f"Cannot open file:\n{str(e)}")
-        finally:
-            QApplication.restoreOverrideCursor()
+        # finally:
+        #     QApplication.restoreOverrideCursor()
 
     def on_button_clicked(self, button):
 
