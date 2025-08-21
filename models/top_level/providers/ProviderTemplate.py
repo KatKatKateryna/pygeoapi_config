@@ -18,6 +18,9 @@ class ProviderTemplate(ABC):
     # optional, but with assumed default value:
     crs: str = field(default="http://www.opengis.net/def/crs/OGC/1.3/CRS84")
 
+    # optional
+    storage_crs: str | None = None
+
     @staticmethod
     def init_provider_from_type(provider_type: ProviderTypes):
         """Return empty instance of the subclass, based on the requested type.
