@@ -234,10 +234,7 @@ class DataSetterFromUi:
 
         # spatial crs
         config_data.resources[res_name].extents.spatial.crs = (
-            "http://www.opengis.net/def/crs/"
-            + dialog.comboBoxResExtentsSpatialCrsType.currentText()
-            + "/"
-            + dialog.lineEditResExtentsSpatialCrs.text()
+            self.get_extents_crs_from_ui(dialog)
         )
 
         # temporal: only initialize if any of the values are present, otherwise leave as default None
@@ -357,6 +354,14 @@ class DataSetterFromUi:
         new_alias = dialog.lineEditResAlias.text()
         if res_name in config_data.resources:
             config_data.resources[new_alias] = config_data.resources.pop(res_name)
+
+    def get_extents_crs_from_ui(self, dialog):
+        return (
+            "http://www.opengis.net/def/crs/"
+            + get_widget_text_value(dialog.comboBoxResExtentsSpatialCrsType)
+            + "/"
+            + get_widget_text_value(dialog.lineEditResExtentsSpatialCrs)
+        )
 
     def get_invalid_resource_ui_fields(self) -> list[str]:
         """Get list of invalid UI values in Resource UI."""

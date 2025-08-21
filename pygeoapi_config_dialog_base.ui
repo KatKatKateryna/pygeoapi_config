@@ -1732,11 +1732,22 @@
                         </widget>
                       </item>
                       <item>
-                        <widget class="QLineEdit" name="lineEditResExtentsSpatialCrs">
-                          <property name="placeholderText">
-                            <string>CRS84</string>
-                          </property>
-                        </widget>
+                        <layout class = "QHBoxLayout">
+                          <item>
+                            <widget class="QLineEdit" name="lineEditResExtentsSpatialCrs">
+                              <property name="placeholderText">
+                                <string>CRS84</string>
+                              </property>
+                            </widget>
+                          </item>
+                          <item>
+                            <widget class="QPushButton" name="validateResExtentsCrsButton">
+                              <property name="text">
+                                <string>Validate</string>
+                              </property>
+                            </widget>
+                          </item>
+                        </layout>
                       </item>
                     </layout>
                     </item>
@@ -2522,6 +2533,23 @@
    <signal>clicked()</signal>
    <receiver>PygeoapiConfigDialogBase</receiver>
    <slot>exit_resource_edit()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>434</x>
+     <y>160</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>434</x>
+     <y>244</y>
+    </hint>
+   </hints>
+  </connection>
+  
+  <connection>
+   <sender>validateResExtentsCrsButton</sender>
+   <signal>clicked()</signal>
+   <receiver>PygeoapiConfigDialogBase</receiver>
+   <slot>validate_res_extents_crs()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>434</x>

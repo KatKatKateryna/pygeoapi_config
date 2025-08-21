@@ -1,4 +1,8 @@
 from enum import Enum
+import gzip
+import requests
+from urllib.parse import urlparse
+from urllib3.response import HTTPResponse
 
 STRING_SEPARATOR = " | "
 
@@ -44,3 +48,29 @@ def bbox_from_list(raw_bbox_list: list):
         )
 
     return InlineList(list_bbox_val)
+
+
+def is_url_responsive(url: str, detect_exceptions_in_successful_response=False) -> bool:
+
+    parsed_url = urlparse(url)
+    if not all([parsed_url.scheme, parsed_url.netloc]):
+        return False
+
+    try:
+        if detect_exceptions_in_successful_response:
+            # Detect OGC ExceptionReport (invalid request)
+            response = requests.get(url, allow_redirects=True, timeout=5)
+            if response.status_code != 200:
+                return False
+            else:
+                text = response.text
+                if "ExceptionReport" in text or "ExceptionText" in text:
+                    return False
+                return True
+
+        else:  # lighter request (if content is not needed)
+            response = requests.head(url, allow_redirects=True, timeout=5)
+            return response.status_code == 200
+
+    except requests.RequestException:
+        return False

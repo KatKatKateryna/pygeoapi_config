@@ -1,6 +1,5 @@
 from dataclasses import dataclass, field
 from enum import Enum
-from urllib.parse import urlparse
 
 from .utils import is_valid_string
 

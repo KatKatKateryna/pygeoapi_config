@@ -30,7 +30,11 @@ from .ui_widgets.providers.NewProviderWindow import NewProviderWindow
 
 from .ui_widgets import DataSetterFromUi, UiSetter
 from .models.ConfigData import ConfigData
-from .models.top_level.utils import InlineList, get_enum_value_from_string
+from .models.top_level.utils import (
+    InlineList,
+    get_enum_value_from_string,
+    is_url_responsive,
+)
 
 from PyQt5.QtWidgets import (
     QMainWindow,
@@ -341,6 +345,22 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
                 self,
                 "Warning",
                 f"Invalid Provider values: {invalid_fields}",
+            )
+
+    def validate_res_extents_crs(self):
+        """Called from .ui file."""
+        url = self.data_from_ui_setter.get_extents_crs_from_ui(self)
+        if is_url_responsive(url, True):
+            QMessageBox.information(
+                self,
+                "Information",
+                f"Valid CRS URL: {url}",
+            )
+        else:
+            QMessageBox.warning(
+                self,
+                "Warning",
+                f"Invalid CRS URL: {url}",
             )
 
     def delete_metadata_id_title(self):
