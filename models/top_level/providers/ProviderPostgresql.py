@@ -31,13 +31,14 @@ class ProviderPostgresql(ProviderTemplate):
     table: str = ""
     geom_field: str = ""
 
-    def assign_ui_dict_to_provider_data(self, values: dict[str, str | list]):
+    def assign_ui_dict_to_provider_data(self, values: dict[str, str | list | int]):
 
         # adjust structure to match the class structure
         values["data"] = {}
         for k, v in values.items():
-            if k in ["host", "port", "dbname", "user", "password", "search_path"]:
+            if k in ["host", "port", "dbname", "user", "password"]:
                 values["data"][k] = v
+
         # custom change
         values["data"]["search_path"] = (
             values["search_path"].split(",")

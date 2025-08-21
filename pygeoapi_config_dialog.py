@@ -349,6 +349,8 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
                 "Warning",
                 f"Invalid Provider values: {invalid_fields}",
             )
+        else:
+            self.provider_window.signal_provider_close.emit()
 
     def validate_res_extents_crs(self):
         """Called from .ui file."""

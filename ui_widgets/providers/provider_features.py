@@ -1,8 +1,8 @@
 from PyQt5.QtWidgets import QGridLayout
-from .utils import create_label_lineedit_pair, create_list_widget
+from .utils import add_widgets_to_grid_by_specs
 
 
-def create_feature_provider_window(group_layout: QGridLayout):
+def create_feature_provider_window(grid_layout: QGridLayout):
 
     rows = [
         ("name", str, "PostgreSQL", ""),
@@ -24,24 +24,4 @@ def create_feature_provider_window(group_layout: QGridLayout):
         ("geom_field", str, "", ""),
     ]
 
-    all_lineedits = {}
-
-    for row_idx, (label, data_type, default, placeholder) in enumerate(rows):
-
-        if data_type is str:
-            label_widget, line_edit_widget = create_label_lineedit_pair(
-                label, default, placeholder
-            )
-            group_layout.addWidget(label_widget, row_idx, 0)
-            group_layout.addWidget(line_edit_widget, row_idx, 1)
-            all_lineedits[label] = line_edit_widget
-
-        elif data_type is list:
-            list_widget = create_list_widget(
-                label, "http://www.opengis.net/def/crs/OGC/1.3/CRS84"
-            )
-            group_layout.addWidget(list_widget.label, row_idx, 0)
-            group_layout.addWidget(list_widget, row_idx, 1)
-            all_lineedits[label] = list_widget
-
-    return all_lineedits
+    return add_widgets_to_grid_by_specs(rows, grid_layout)

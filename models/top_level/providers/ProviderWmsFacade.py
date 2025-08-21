@@ -3,6 +3,7 @@ from dataclasses import dataclass, field
 from .records import ProviderTypes
 from ..providers import ProviderTemplate
 from ..utils import is_valid_string
+from ...utils import update_dataclass_from_dict
 
 
 @dataclass(kw_only=True)
@@ -32,8 +33,21 @@ class ProviderWmsFacade(ProviderTemplate):
     options: WmsFacadeOptions = field(default_factory=lambda: WmsFacadeOptions())
     format: WmsFacadeFormat = field(default_factory=lambda: WmsFacadeFormat())
 
-    def assign_ui_dict_to_provider_data(self, values: dict[str, str | list]):
-        pass
+    def assign_ui_dict_to_provider_data(self, values: dict[str, str | list | int]):
+
+        # adjust structure to match the class structure
+        values["options"] = {}
+        values["format"] = {}
+
+        # custom change
+        for k, v in values.items():
+            if k in ["layer", "style", "version"]:
+                values["options"][k] = v
+
+        values["format"]["name"] = values["format.name"]
+        values["format"]["mimetype"] = values["format.mimetype"]
+
+        update_dataclass_from_dict(self, values, "ProviderWmsFacade")
 
     def pack_data_to_list(self):
         return [

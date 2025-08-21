@@ -37,7 +37,7 @@ class ProviderTemplate(ABC):
             return ProviderMvtProxy()
 
     @abstractmethod
-    def assign_ui_dict_to_provider_data(self, values: dict[str, str | list]):
+    def assign_ui_dict_to_provider_data(self, values: dict[str, str | list | int]):
         """Takes the dictionary of values specific to provider type, and assigns them to the class instance."""
         pass
 

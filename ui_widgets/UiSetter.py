@@ -29,7 +29,7 @@ from .ui_setter_utils import (
 from .utils import get_widget_text_value, reset_widget
 
 
-from PyQt5.QtGui import QRegularExpressionValidator, QIntValidator
+from PyQt5.QtGui import QIntValidator
 from PyQt5.QtCore import (
     QRegularExpression,
     Qt,

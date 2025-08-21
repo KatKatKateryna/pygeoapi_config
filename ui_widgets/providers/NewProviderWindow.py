@@ -11,10 +11,13 @@ from PyQt5.QtWidgets import (
     QDialog,
 )
 from PyQt5.QtCore import pyqtSignal, Qt
+from PyQt5.QtGui import QIntValidator
 
 from ..data_from_ui_setter_utils import unpack_listwidget_values_to_sublists
 from ...models.top_level.providers.records import ProviderTypes
 from .provider_features import create_feature_provider_window
+from .provider_map import create_map_provider_window
+from .provider_tile import create_tile_provider_window
 from .StringListWidget import StringListWidget
 
 
@@ -22,11 +25,14 @@ class NewProviderWindow(QDialog):
 
     elements_with_values: dict
     signal_provider_values = pyqtSignal(object, dict)
+    signal_provider_close = pyqtSignal()
 
     def __init__(
         self, comboBoxResProviderType: QComboBox, provider_type: ProviderTypes
     ):
         super().__init__()
+        self.signal_provider_close.connect(self.close)
+
         value = comboBoxResProviderType.currentText().lower()
         self.setWindowTitle(f"{value.title()} Provider Configuration")
 
@@ -47,10 +53,10 @@ class NewProviderWindow(QDialog):
             self.elements_with_values = create_feature_provider_window(group_layout)
 
         elif value == provider_type.MAP.value:
-            pass
+            self.elements_with_values = create_map_provider_window(group_layout)
 
         elif value == provider_type.TILE.value:
-            pass
+            self.elements_with_values = create_tile_provider_window(group_layout)
 
         # Add buttons at the bottom
         self.btn_add = QPushButton("Save")
@@ -85,6 +91,12 @@ class NewProviderWindow(QDialog):
     def extract_value_from_ui(self, element):
 
         if isinstance(element, QLineEdit):
-            return element.text()
+
+            validator = element.validator()
+            if isinstance(validator, QIntValidator):
+                return int(element.text())
+            else:
+                return element.text()
+
         elif isinstance(element, StringListWidget):
             return element.values_to_list()
