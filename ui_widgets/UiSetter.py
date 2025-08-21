@@ -556,6 +556,7 @@ class UiSetter:
         list_widget,
         sort=False,
     ):
+        """Add new QListWidget entry from combined data from several widgets (e.g. Providers, Links)."""
         dialog = self.dialog
 
         final_text = ""

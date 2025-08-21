@@ -21,7 +21,7 @@ from .StringListWidget import StringListWidget
 class NewProviderWindow(QDialog):
 
     elements_with_values: dict
-    signal_provider_values = pyqtSignal(dict)
+    signal_provider_values = pyqtSignal(object, dict)
 
     def __init__(
         self, comboBoxResProviderType: QComboBox, provider_type: ProviderTypes
@@ -77,10 +77,10 @@ class NewProviderWindow(QDialog):
             values[key] = self.extract_value_from_ui(element)
 
         # emit values to the parent widget
-        self.signal_provider_values.emit(values)
+        self.signal_provider_values.emit(self, values)
 
         # Close the window
-        self.close()
+        # self.close()
 
     def extract_value_from_ui(self, element):
 

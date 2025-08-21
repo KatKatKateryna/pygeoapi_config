@@ -328,10 +328,12 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
         )
         # set new provider data to ConfigData when user clicks 'Add'
         self.provider_window.signal_provider_values.connect(
-            lambda values: self._validate_and_add_res_provider(values, provider_type)
+            lambda provider_window, values: self._validate_and_add_res_provider(
+                provider_window, values, provider_type
+            )
         )
 
-    def _validate_and_add_res_provider(self, values, provider_type):
+    def _validate_and_add_res_provider(self, provider_window, values, provider_type):
         """Calls the Provider validation method and displays a warning if data is invalid."""
         invalid_fields = self.config_data.set_validate_new_provider_data(
             values, self.current_res_name, provider_type
@@ -342,7 +344,7 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
         )
         if len(invalid_fields) > 0:
             QMessageBox.warning(
-                self,
+                provider_window,
                 "Warning",
                 f"Invalid Provider values: {invalid_fields}",
             )
