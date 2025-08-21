@@ -8,14 +8,15 @@ from PyQt5.QtWidgets import (
     QGroupBox,
     QMainWindow,
     QGridLayout,
+    QDialog,
 )
-from PyQt5.QtCore import pyqtSignal
+from PyQt5.QtCore import pyqtSignal, Qt
 
 from ...models.top_level.providers.records import ProviderTypes
 from .provider_features import create_feature_provider_window
 
 
-class NewProviderWindow(QMainWindow):
+class NewProviderWindow(QDialog):
 
     elements_with_values: dict
     signal_provider_values = pyqtSignal(dict)
@@ -27,11 +28,10 @@ class NewProviderWindow(QMainWindow):
         value = comboBoxResProviderType.currentText().lower()
         self.setWindowTitle(f"{value.title()} Provider Configuration")
 
-        # Create the main window
-        central_widget = QWidget()
-        self.setCentralWidget(central_widget)
-        self.main_layout = QVBoxLayout()
-        central_widget.setLayout(self.main_layout)
+        self.setWindowFlag(Qt.WindowStaysOnTopHint)  # always on top
+        self.setModal(True)  # parent becomes unclickable
+
+        self.main_layout = QVBoxLayout(self)
 
         # Create group box
         group_box = QGroupBox(f"{value.title()} Provider")
