@@ -29,7 +29,6 @@ import yaml
 from .models.top_level.providers.records import ProviderTypes
 from .ui_widgets.providers.NewProviderWindow import NewProviderWindow
 from .ui_widgets.WarningDialog import ReadOnlyTextDialog
-
 from .ui_widgets import DataSetterFromUi, UiSetter
 from .models.ConfigData import ConfigData
 from .models.top_level.utils import (
@@ -37,6 +36,7 @@ from .models.top_level.utils import (
     get_enum_value_from_string,
     is_url_responsive,
 )
+from .models.top_level.utils import STRING_SEPARATOR
 
 from PyQt5.QtWidgets import (
     QMainWindow,
@@ -319,25 +319,59 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
             sort=False,
         )
 
-    def try_add_res_provider(self):
-        """Called from .ui file."""
+    def try_add_res_provider(self, provider_index=None, data: list[str] | None = None):
+        """Called from .ui file, and from this class."""
         provider_type: ProviderTypes = get_enum_value_from_string(
-            ProviderTypes, self.comboBoxResProviderType.currentText()
+            ProviderTypes, self.comboBoxResProviderType.currentText().lower()
         )
-        self.provider_window = NewProviderWindow(
-            self.comboBoxResProviderType, provider_type
-        )
-        # set new provider data to ConfigData when user clicks 'Add'
-        self.provider_window.signal_provider_values.connect(
-            lambda provider_window, values: self._validate_and_add_res_provider(
-                provider_window, values, provider_type
+
+        if not data:
+            self.provider_window = NewProviderWindow(provider_type)
+
+            # set new provider data to ConfigData when user clicks 'Add'
+            self.provider_window.signal_provider_values.connect(
+                lambda provider_window, values: self._validate_and_add_res_provider(
+                    provider_window, values, provider_type
+                )
             )
-        )
+
+        else:
+            # if the window is triggered for editing, ignore widget provider type and read it from data instead
+
+            provider_type = get_enum_value_from_string(ProviderTypes, data[0])
+            self.provider_window = NewProviderWindow(provider_type, data[1:])
+
+            # replace provider data to ConfigData when user clicks 'Add'
+            self.provider_window.signal_provider_values.connect(
+                lambda provider_window, values: self._validate_and_replace_res_provider(
+                    provider_window, values, provider_type, provider_index
+                )
+            )
 
     def _validate_and_add_res_provider(self, provider_window, values, provider_type):
         """Calls the Provider validation method and displays a warning if data is invalid."""
         invalid_fields = self.config_data.set_validate_new_provider_data(
             values, self.current_res_name, provider_type
+        )
+
+        self.ui_setter.set_providers_ui_from_data(
+            self.config_data.resources[self.current_res_name]
+        )
+        if len(invalid_fields) > 0:
+            QMessageBox.warning(
+                provider_window,
+                "Warning",
+                f"Invalid Provider values: {invalid_fields}",
+            )
+        else:
+            self.provider_window.signal_provider_close.emit()
+
+    def _validate_and_replace_res_provider(
+        self, provider_window, values, provider_type, provider_index: int
+    ):
+        """Calls the Provider validation method and displays a warning if data is invalid."""
+        invalid_fields = self.config_data.set_validate_new_provider_data(
+            values, self.current_res_name, provider_type, provider_index
         )
 
         self.ui_setter.set_providers_ui_from_data(
@@ -399,6 +433,14 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
     def delete_res_link(self):
         """Called from .ui file."""
         self.ui_setter.delete_list_widget_selected_item(self.listWidgetResLinks)
+
+    def edit_res_provider(self):
+        """Called from .ui file."""
+        selected_items = self.listWidgetResProvider.selectedItems()
+        if selected_items:
+            item = selected_items[0]  # get the first (and only) selected item
+            data_list = item.text().split(STRING_SEPARATOR)
+            self.try_add_res_provider(self.listWidgetResProvider.row(item), data_list)
 
     def delete_res_provider(self):
         """Called from .ui file."""

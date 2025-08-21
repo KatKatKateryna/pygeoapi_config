@@ -19,31 +19,46 @@ def create_list_widget(label_text: str, default_new_string: str = ""):
 
 
 def add_widgets_to_grid_by_specs(
-    specs_list: list[tuple], group_layout: QGridLayout
+    specs_list: list[tuple],
+    group_layout: QGridLayout,
+    data_list: list[str] | None = None,
 ) -> dict:
 
     all_data_widgets = {}
 
-    for row_idx, row_specs in enumerate(specs_list):
+    for i, row_specs in enumerate(specs_list):
         label, data_type, default, placeholder = row_specs
 
         if data_type is str or data_type is int:
-            label_widget, line_edit_widget = create_label_lineedit_pair(
+            label_widget, data_widget = create_label_lineedit_pair(
                 label, default, placeholder
             )
-            group_layout.addWidget(label_widget, row_idx, 0)
-            group_layout.addWidget(line_edit_widget, row_idx, 1)
-            all_data_widgets[label] = line_edit_widget
+            group_layout.addWidget(label_widget, i, 0)
+            group_layout.addWidget(data_widget, i, 1)
 
             if data_type is int:
-                line_edit_widget.setValidator(QIntValidator())
+                data_widget.setValidator(QIntValidator())
 
         elif data_type is list:
-            list_widget = create_list_widget(
+            data_widget = create_list_widget(
                 label, "http://www.opengis.net/def/crs/OGC/1.3/CRS84"
             )
-            group_layout.addWidget(list_widget.label, row_idx, 0)
-            group_layout.addWidget(list_widget, row_idx, 1)
-            all_data_widgets[label] = list_widget
+            group_layout.addWidget(data_widget.label, i, 0)
+            group_layout.addWidget(data_widget, i, 1)
+
+        # add to list of data widgets and fill with data if available
+        all_data_widgets[label] = data_widget
+        if data_list:
+            assign_value_to_field(data_widget, data_list[i])
 
     return all_data_widgets
+
+
+def assign_value_to_field(widget, text_data):
+    if isinstance(widget, QLineEdit):
+        widget.setText(text_data)
+    if isinstance(widget, StringListWidget):
+        widget.list_widget.clear()
+        if len(text_data) > 0:
+            for item in text_data.split(","):
+                widget.list_widget.addItem(item)

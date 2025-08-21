@@ -1985,13 +1985,26 @@
                             </property>
                             </widget>
                           </item>
+
                           <item>
-                            <widget class="QPushButton" name="deleteResProviderButton">
-                            <property name="text">
-                              <string>Delete Selected</string>
-                            </property>
-                            </widget>
+                            <layout class = "QHBoxLayout">
+                              <item>
+                                <widget class="QPushButton" name="editResProviderButton">
+                                <property name="text">
+                                  <string>Edit Selected</string>
+                                </property>
+                                </widget>
+                              </item>
+                              <item>
+                                <widget class="QPushButton" name="deleteResProviderButton">
+                                <property name="text">
+                                  <string>Delete Selected</string>
+                                </property>
+                                </widget>
+                              </item>
+                            </layout>
                           </item>
+
                         </layout>
                       </item>
                     </layout>
@@ -2367,6 +2380,23 @@
    <signal>clicked()</signal>
    <receiver>PygeoapiConfigDialogBase</receiver>
    <slot>delete_res_link()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>822</x>
+     <y>406</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>434</x>
+     <y>244</y>
+    </hint>
+   </hints>
+  </connection>
+
+  <connection>
+   <sender>editResProviderButton</sender>
+   <signal>clicked()</signal>
+   <receiver>PygeoapiConfigDialogBase</receiver>
+   <slot>edit_res_provider()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>822</x>

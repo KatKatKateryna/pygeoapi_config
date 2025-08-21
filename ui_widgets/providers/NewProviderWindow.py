@@ -15,6 +15,7 @@ from PyQt5.QtGui import QIntValidator
 
 from ..data_from_ui_setter_utils import unpack_listwidget_values_to_sublists
 from ...models.top_level.providers.records import ProviderTypes
+from ...models.top_level.utils import get_enum_value_from_string
 from .provider_features import create_feature_provider_window
 from .provider_map import create_map_provider_window
 from .provider_tile import create_tile_provider_window
@@ -28,13 +29,14 @@ class NewProviderWindow(QDialog):
     signal_provider_close = pyqtSignal()
 
     def __init__(
-        self, comboBoxResProviderType: QComboBox, provider_type: ProviderTypes
+        self,
+        provider_type: ProviderTypes,
+        data_list: list[str] | None = None,
     ):
         super().__init__()
         self.signal_provider_close.connect(self.close)
 
-        value = comboBoxResProviderType.currentText().lower()
-        self.setWindowTitle(f"{value.title()} Provider Configuration")
+        self.setWindowTitle(f"{provider_type.value.title()} Provider Configuration")
 
         self.setWindowFlag(Qt.WindowStaysOnTopHint)  # always on top
         self.setModal(True)  # parent becomes unclickable
@@ -42,21 +44,27 @@ class NewProviderWindow(QDialog):
         self.main_layout = QVBoxLayout(self)
 
         # Create group box
-        group_box = QGroupBox(f"{value.title()} Provider")
+        group_box = QGroupBox(f"{provider_type.value.title()} Provider")
         group_layout = QGridLayout()
         group_box.setLayout(group_layout)
         self.main_layout.addWidget(group_box)
 
         # fill the box depending on the provider type
         self.elements_with_values = {}
-        if value == provider_type.FEATURE.value:
-            self.elements_with_values = create_feature_provider_window(group_layout)
+        if provider_type == ProviderTypes.FEATURE:
+            self.elements_with_values = create_feature_provider_window(
+                group_layout, data_list
+            )
 
-        elif value == provider_type.MAP.value:
-            self.elements_with_values = create_map_provider_window(group_layout)
+        elif provider_type == ProviderTypes.MAP:
+            self.elements_with_values = create_map_provider_window(
+                group_layout, data_list
+            )
 
-        elif value == provider_type.TILE.value:
-            self.elements_with_values = create_tile_provider_window(group_layout)
+        elif provider_type == ProviderTypes.TILE:
+            self.elements_with_values = create_tile_provider_window(
+                group_layout, data_list
+            )
 
         # Add buttons at the bottom
         self.btn_add = QPushButton("Save")

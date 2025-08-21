@@ -163,6 +163,7 @@ class ConfigData:
         values: dict[str, str | list | int],
         res_name: str,
         provider_type: ProviderTypes,
+        provider_index: int | None = None,
     ):
         """Adds a provider data to the resource. Called on Save click from New Providere window."""
 
@@ -173,7 +174,10 @@ class ConfigData:
         # if incomplete data, remove Provider from ConfigData and show Warning
         invalid_props = new_provider.get_invalid_properties()
         if len(invalid_props) == 0:
-            self.resources[res_name].providers.append(new_provider)
+            if provider_index is None:
+                self.resources[res_name].providers.append(new_provider)
+            else:
+                self.resources[res_name].providers[provider_index] = new_provider
 
         return invalid_props
 
