@@ -16,7 +16,7 @@ class ProviderTemplate(ABC):
     data: Any
 
     # optional, but with assumed default value:
-    crs: str = field(default="http://www.opengis.net/def/crs/OGC/1.3/CRS84")
+    crs: list | None = None
 
     # optional
     storage_crs: str | None = None
@@ -37,7 +37,7 @@ class ProviderTemplate(ABC):
             return ProviderMvtProxy()
 
     @abstractmethod
-    def assign_ui_dict_to_provider_data(self, values: dict[str, str]):
+    def assign_ui_dict_to_provider_data(self, values: dict[str, str | list]):
         """Takes the dictionary of values specific to provider type, and assigns them to the class instance."""
         pass
 

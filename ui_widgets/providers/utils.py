@@ -1,4 +1,10 @@
-from PyQt5.QtWidgets import QHBoxLayout, QLabel, QLineEdit
+from PyQt5.QtWidgets import (
+    QHBoxLayout,
+    QInputDialog,
+    QLabel,
+    QLineEdit,
+)
+from .StringListWidget import StringListWidget
 
 
 def create_label_lineedit_pair(
@@ -9,3 +15,7 @@ def create_label_lineedit_pair(
     line_edit.setPlaceholderText(placeholder)
 
     return label, line_edit
+
+
+def create_list_widget(label_text: str, default_new_string: str = ""):
+    return StringListWidget(label_text, default_new_string)

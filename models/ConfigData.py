@@ -159,7 +159,7 @@ class ConfigData:
             self.resources.pop(dialog.current_res_name)
 
     def set_validate_new_provider_data(
-        self, values: dict[str, str], res_name: str, provider_type: ProviderTypes
+        self, values: dict[str, str | list], res_name: str, provider_type: ProviderTypes
     ):
         """Adds a provider data to the resource. Called on Save click from New Providere window."""
 

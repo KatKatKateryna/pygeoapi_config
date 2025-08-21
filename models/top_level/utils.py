@@ -1,8 +1,6 @@
 from enum import Enum
-import gzip
 import requests
 from urllib.parse import urlparse
-from urllib3.response import HTTPResponse
 
 STRING_SEPARATOR = " | "
 

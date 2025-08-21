@@ -12,8 +12,10 @@ from PyQt5.QtWidgets import (
 )
 from PyQt5.QtCore import pyqtSignal, Qt
 
+from ..data_from_ui_setter_utils import unpack_listwidget_values_to_sublists
 from ...models.top_level.providers.records import ProviderTypes
 from .provider_features import create_feature_provider_window
+from .StringListWidget import StringListWidget
 
 
 class NewProviderWindow(QDialog):
@@ -84,3 +86,5 @@ class NewProviderWindow(QDialog):
 
         if isinstance(element, QLineEdit):
             return element.text()
+        elif isinstance(element, StringListWidget):
+            return element.values_to_list()

@@ -31,7 +31,7 @@ class ProviderPostgresql(ProviderTemplate):
     table: str = ""
     geom_field: str = ""
 
-    def assign_ui_dict_to_provider_data(self, values: dict[str, str]):
+    def assign_ui_dict_to_provider_data(self, values: dict[str, str | list]):
 
         # adjust structure to match the class structure
         values["data"] = {}
@@ -73,7 +73,7 @@ class ProviderPostgresql(ProviderTemplate):
         # self.type = get_enum_value_from_string(ProviderTypes, pr[0])
 
         self.name = values[1]
-        self.crs = values[2]
+        self.crs = values[2].split(",") if is_valid_string(values[2]) else None
         self.storage_crs = values[3]
         self.data.host = values[4]
         self.data.port = values[5]

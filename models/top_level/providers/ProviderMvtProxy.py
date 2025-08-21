@@ -37,7 +37,7 @@ class ProviderMvtProxy(ProviderTemplate):
     options: MvtProxyOptions = field(default_factory=lambda: MvtProxyOptions())
     format: MvtProxyFormat = field(default_factory=lambda: MvtProxyFormat())
 
-    def assign_ui_dict_to_provider_data(self, values: dict[str, str]):
+    def assign_ui_dict_to_provider_data(self, values: dict[str, str | list]):
         pass
 
     def pack_data_to_list(self):
