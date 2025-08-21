@@ -8,11 +8,11 @@ def create_tile_provider_window(
 
     rows = [
         ("name", str, "MVT-proxy", ""),
-        ("crs", str, "", ""),
+        ("crs", list, "", ""),
         ("data", str, "", ""),
-        ("zoom min", int, "", ""),
-        ("zoom max", int, "", ""),
-        ("schemes", list, "", ""),
+        ("options.zoom.min", int, "", ""),
+        ("options.zoom.max", int, "", ""),
+        ("options.schemes", list, "", ""),
         ("format.name", str, "", ""),
         ("format.mimetype", str, "", ""),
     ]

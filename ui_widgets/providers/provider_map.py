@@ -8,11 +8,11 @@ def create_map_provider_window(
 
     rows = [
         ("name", str, "WMSFacade", ""),
-        ("crs", str, "", ""),
+        ("crs", list, "", ""),
         ("data", str, "", ""),
-        ("layer", str, "", ""),
-        ("style", str, "", ""),
-        ("version", str, "", ""),
+        ("options.layer", str, "", ""),
+        ("options.style", str, "", ""),
+        ("options.version", str, "", ""),
         ("format.name", str, "", ""),
         ("format.mimetype", str, "", ""),
     ]

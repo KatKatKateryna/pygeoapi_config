@@ -46,14 +46,21 @@ class ProviderMvtProxy(ProviderTemplate):
         values["format"] = {}
 
         # custom change
-        values["options"]["zoom"]["min"] = values["zoom min"]
-        values["options"]["zoom"]["max"] = values["zoom max"]
-        values["options"]["schemes"] = values["schemes"]  # already list
+        values["options"]["zoom"]["min"] = values["options.zoom.min"]
+        values["options"]["zoom"]["max"] = values["options.zoom.max"]
+        values["options"]["schemes"] = values["options.schemes"]  # already list
 
         values["format"]["name"] = values["format.name"]
         values["format"]["mimetype"] = values["format.mimetype"]
 
         update_dataclass_from_dict(self, values, "ProviderMvtProxy")
+
+        # Exception: if Zoom values are empty (e.g. missing in the UI), they will not overwrite the class attributes
+        # This happens because if new value is abcent, there is nothing we can replace a default 'int' with. Manual overwrite:
+        if values["options.zoom.min"] is None:
+            self.options.zoom.min = None
+        if values["options.zoom.max"] is None:
+            self.options.zoom.max = None
 
     def pack_data_to_list(self):
         return [
@@ -93,7 +100,7 @@ class ProviderMvtProxy(ProviderTemplate):
             all_invalid_fields.append("type")
         if not is_valid_string(self.name):
             all_invalid_fields.append("name")
-        if not is_valid_string(self.crs):
+        if not self.crs or not is_valid_string(self.crs):
             all_invalid_fields.append("crs")
         if not is_valid_string(self.data):
             all_invalid_fields.append("data")

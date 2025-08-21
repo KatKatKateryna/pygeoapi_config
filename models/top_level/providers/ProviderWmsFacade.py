@@ -40,9 +40,9 @@ class ProviderWmsFacade(ProviderTemplate):
         values["format"] = {}
 
         # custom change
-        for k, v in values.items():
-            if k in ["layer", "style", "version"]:
-                values["options"][k] = v
+        values["options"]["layer"] = values["options.layer"]
+        values["options"]["style"] = values["options.style"]
+        values["options"]["version"] = values["options.version"]
 
         values["format"]["name"] = values["format.name"]
         values["format"]["mimetype"] = values["format.mimetype"]
@@ -85,7 +85,7 @@ class ProviderWmsFacade(ProviderTemplate):
             all_invalid_fields.append("type")
         if not is_valid_string(self.name):
             all_invalid_fields.append("name")
-        if not is_valid_string(self.crs):
+        if not self.crs or not is_valid_string(self.crs):
             all_invalid_fields.append("crs")
         if not is_valid_string(self.data):
             all_invalid_fields.append("data")

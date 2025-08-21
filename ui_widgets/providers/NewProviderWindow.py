@@ -13,9 +13,7 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtCore import pyqtSignal, Qt
 from PyQt5.QtGui import QIntValidator
 
-from ..data_from_ui_setter_utils import unpack_listwidget_values_to_sublists
 from ...models.top_level.providers.records import ProviderTypes
-from ...models.top_level.utils import get_enum_value_from_string
 from .provider_features import create_feature_provider_window
 from .provider_map import create_map_provider_window
 from .provider_tile import create_tile_provider_window
@@ -102,7 +100,10 @@ class NewProviderWindow(QDialog):
 
             validator = element.validator()
             if isinstance(validator, QIntValidator):
-                return int(element.text())
+                try:
+                    return int(element.text())
+                except ValueError:  # e.g. if the field is empty
+                    return None
             else:
                 return element.text()
 

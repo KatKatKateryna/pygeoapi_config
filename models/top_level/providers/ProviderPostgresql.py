@@ -36,13 +36,19 @@ class ProviderPostgresql(ProviderTemplate):
         # adjust structure to match the class structure
         values["data"] = {}
         for k, v in values.items():
-            if k in ["host", "port", "dbname", "user", "password"]:
-                values["data"][k] = v
+            if k in [
+                "data.host",
+                "data.port",
+                "data.dbname",
+                "data.user",
+                "data.password",
+            ]:
+                values["data"][k.split(".")[1]] = v
 
         # custom change
         values["data"]["search_path"] = (
-            values["search_path"].split(",")
-            if is_valid_string(values["search_path"])
+            values["data.search_path"].split(",")
+            if is_valid_string(values["data.search_path"])
             else []
         )
 
@@ -98,7 +104,7 @@ class ProviderPostgresql(ProviderTemplate):
             all_invalid_fields.append("type")
         if not is_valid_string(self.name):
             all_invalid_fields.append("name")
-        if not is_valid_string(self.crs):
+        if not self.crs or not is_valid_string(self.crs):
             all_invalid_fields.append("crs")
 
         if not is_valid_string(self.data.host):

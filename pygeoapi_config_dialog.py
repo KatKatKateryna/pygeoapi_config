@@ -327,47 +327,22 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
 
         if not data:
             self.provider_window = NewProviderWindow(provider_type)
-
-            # set new provider data to ConfigData when user clicks 'Add'
-            self.provider_window.signal_provider_values.connect(
-                lambda provider_window, values: self._validate_and_add_res_provider(
-                    provider_window, values, provider_type
-                )
-            )
+            provider_index = None
 
         else:
             # if the window is triggered for editing, ignore widget provider type and read it from data instead
-
             provider_type = get_enum_value_from_string(ProviderTypes, data[0])
             self.provider_window = NewProviderWindow(provider_type, data[1:])
 
-            # replace provider data to ConfigData when user clicks 'Add'
-            self.provider_window.signal_provider_values.connect(
-                lambda provider_window, values: self._validate_and_replace_res_provider(
-                    provider_window, values, provider_type, provider_index
-                )
+        # add or replace provider data to ConfigData when user clicks 'Add'
+        self.provider_window.signal_provider_values.connect(
+            lambda provider_window, values: self._validate_and_add_res_provider(
+                provider_window, values, provider_type, provider_index
             )
-
-    def _validate_and_add_res_provider(self, provider_window, values, provider_type):
-        """Calls the Provider validation method and displays a warning if data is invalid."""
-        invalid_fields = self.config_data.set_validate_new_provider_data(
-            values, self.current_res_name, provider_type
         )
 
-        self.ui_setter.set_providers_ui_from_data(
-            self.config_data.resources[self.current_res_name]
-        )
-        if len(invalid_fields) > 0:
-            QMessageBox.warning(
-                provider_window,
-                "Warning",
-                f"Invalid Provider values: {invalid_fields}",
-            )
-        else:
-            self.provider_window.signal_provider_close.emit()
-
-    def _validate_and_replace_res_provider(
-        self, provider_window, values, provider_type, provider_index: int
+    def _validate_and_add_res_provider(
+        self, provider_window, values, provider_type, provider_index: int | None = None
     ):
         """Calls the Provider validation method and displays a warning if data is invalid."""
         invalid_fields = self.config_data.set_validate_new_provider_data(

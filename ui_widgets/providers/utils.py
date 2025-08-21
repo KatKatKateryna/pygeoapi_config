@@ -40,9 +40,11 @@ def add_widgets_to_grid_by_specs(
                 data_widget.setValidator(QIntValidator())
 
         elif data_type is list:
-            data_widget = create_list_widget(
-                label, "http://www.opengis.net/def/crs/OGC/1.3/CRS84"
-            )
+            default_list_entry = ""
+            if label.endswith("crs"):
+                default_list_entry = "http://www.opengis.net/def/crs/OGC/1.3/CRS84"
+
+            data_widget = create_list_widget(label, default_list_entry)
             group_layout.addWidget(data_widget.label, i, 0)
             group_layout.addWidget(data_widget, i, 1)
 
