@@ -8,6 +8,8 @@ from PyQt5.QtWidgets import (
     QLabel,
     QLineEdit,
     QMessageBox,
+    QDialog,
+    QDialogButtonBox,
 )
 from PyQt5.QtGui import QFontMetrics
 
@@ -16,7 +18,9 @@ class StringListWidget(QWidget):
     label: QLabel
     default_new_string: str = ""
 
-    def __init__(self, label_text: str, default_new_string: str = ""):
+    def __init__(
+        self, label_text: str, default_new_string: str = "", validation_callback=None
+    ):
         super().__init__()
         # self.setWindowTitle(label_text)
 
@@ -36,14 +40,14 @@ class StringListWidget(QWidget):
         layout.addLayout(button_layout)
 
         self.add_button = QPushButton("Add")
-        self.add_button.clicked.connect(self.add_item)
+        self.add_button.clicked.connect(lambda: self.add_item(validation_callback))
         button_layout.addWidget(self.add_button)
 
         self.remove_button = QPushButton("Remove")
         self.remove_button.clicked.connect(self.remove_item)
         button_layout.addWidget(self.remove_button)
 
-    def add_item(self):
+    def add_item(self, validation_callback):
         # short option, but the dialog window is too narrow
         r"""
         text, ok = QInputDialog.getText(
@@ -54,22 +58,11 @@ class StringListWidget(QWidget):
         """
 
         # longer option
-
-        # create the dialog instance
-        dialog = QInputDialog(self)
-        dialog.setWindowTitle("Add Item")
-        dialog.setLabelText("Enter new item:")
-        dialog.setTextValue(self.default_new_string)
-
-        # auto-size based on text width
-        fm = QFontMetrics(dialog.font())
-        width = (
-            fm.horizontalAdvance(self.default_new_string) + 150
-        )  # extra space for padding/buttons
-        dialog.resize(width, dialog.height())
-
-        if dialog.exec_() == QInputDialog.Accepted:
-            text = dialog.textValue().strip()
+        dialog = InputWithValidateDialog(
+            self.default_new_string, validation_callback, self
+        )
+        if dialog.exec_() == QDialog.Accepted:
+            text = dialog.line_edit.text().strip()
             if text:
                 self.list_widget.addItem(text)
 
@@ -90,3 +83,42 @@ class StringListWidget(QWidget):
             all_values.append(value)
 
         return all_values
+
+
+class InputWithValidateDialog(QDialog):
+    def __init__(self, default_text="", validation_callback=None, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("Add Item")
+
+        layout = QVBoxLayout(self)
+
+        # Label + input row
+        label = QLabel("Enter new item:")
+        layout.addWidget(label)
+
+        input_row = QHBoxLayout()
+        self.line_edit = QLineEdit(default_text)
+        input_row.addWidget(self.line_edit)
+
+        # Add validate button if requested
+        if validation_callback is not None:
+            self.validate_btn = QPushButton("Validate")
+            self.validate_btn.clicked.connect(
+                lambda: validation_callback(self.line_edit.text().strip(), self)
+            )
+            input_row.addWidget(self.validate_btn)
+
+        layout.addLayout(input_row)
+
+        # Standard OK/Cancel buttons
+        self.button_box = QDialogButtonBox(
+            QDialogButtonBox.Ok | QDialogButtonBox.Cancel
+        )
+        self.button_box.accepted.connect(self.accept)
+        self.button_box.rejected.connect(self.reject)
+        layout.addWidget(self.button_box)
+
+        # Auto-size based on default text
+        fm = QFontMetrics(self.font())
+        width = fm.horizontalAdvance(default_text) + 150
+        self.resize(width, self.height())

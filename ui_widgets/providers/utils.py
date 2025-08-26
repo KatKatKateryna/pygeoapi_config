@@ -1,18 +1,25 @@
-from PyQt5.QtWidgets import QHBoxLayout, QLabel, QLineEdit, QGridLayout, QComboBox
+from PyQt5.QtWidgets import (
+    QHBoxLayout,
+    QLabel,
+    QLineEdit,
+    QGridLayout,
+    QComboBox,
+    QPushButton,
+)
 from PyQt5.QtGui import QIntValidator
 
 from .StringListWidget import StringListWidget
-from ..utils import set_combo_box_value_from_data
+from ..utils import get_url_status, set_combo_box_value_from_data
 
 
 def create_label_lineedit_pair(
-    label_text: str, default_value="", placeholder: str = ""
+    label_text: str, default_value="", placeholder: str = "", validation_callback=None
 ) -> QHBoxLayout:
     label = QLabel(label_text)
     line_edit = QLineEdit(default_value)
     line_edit.setPlaceholderText(placeholder)
 
-    return label, line_edit
+    return {"label": label, "line_edit": line_edit}
 
 
 def create_label_dropdown_pair(label_text: str, all_values: list) -> QHBoxLayout:
@@ -25,8 +32,10 @@ def create_label_dropdown_pair(label_text: str, all_values: list) -> QHBoxLayout
     return label, dropdown
 
 
-def create_list_widget(label_text: str, default_new_string: str = ""):
-    return StringListWidget(label_text, default_new_string)
+def create_list_widget(
+    label_text: str, default_new_string: str = "", validation_callback=None
+):
+    return StringListWidget(label_text, default_new_string, validation_callback)
 
 
 def add_widgets_to_grid_by_specs(
@@ -42,22 +51,31 @@ def add_widgets_to_grid_by_specs(
 
         # if regular widget (QLineEdit for str and int; QListWIdget for list)
         if not special_widget_type:
+
+            # set up defaults
+            default_list_entry = ""
+            validation_callback = None
+
+            if label.endswith("crs"):
+                default_list_entry = "http://www.opengis.net/def/crs/OGC/1.3/CRS84"
+                validation_callback = lambda url, parent: get_url_status(url, parent)
+
+            # check data types and create corresponding widgets
             if data_type is str or data_type is int:
-                label_widget, data_widget = create_label_lineedit_pair(
-                    label, default, placeholder
+                new_widgets = create_label_lineedit_pair(
+                    label, default, placeholder, validation_callback
                 )
-                group_layout.addWidget(label_widget, i, 0)
-                group_layout.addWidget(data_widget, i, 1)
+                group_layout.addWidget(new_widgets["label"], i, 0)
+                group_layout.addWidget(new_widgets["line_edit"], i, 1)
 
                 if data_type is int:
-                    data_widget.setValidator(QIntValidator())
+                    new_widgets["line_edit"].setValidator(QIntValidator())
 
             elif data_type is list:
-                default_list_entry = ""
-                if label.endswith("crs"):
-                    default_list_entry = "http://www.opengis.net/def/crs/OGC/1.3/CRS84"
 
-                data_widget = create_list_widget(label, default_list_entry)
+                data_widget = create_list_widget(
+                    label, default_list_entry, validation_callback
+                )
                 group_layout.addWidget(data_widget.label, i, 0)
                 group_layout.addWidget(data_widget, i, 1)
 

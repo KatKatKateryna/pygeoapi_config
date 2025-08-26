@@ -25,6 +25,8 @@
 import os
 import yaml
 
+from .ui_widgets.utils import get_url_status
+
 
 from .models.top_level.providers.records import ProviderTypes
 from .ui_widgets.providers.NewProviderWindow import NewProviderWindow
@@ -34,7 +36,6 @@ from .models.ConfigData import ConfigData
 from .models.top_level.utils import (
     InlineList,
     get_enum_value_from_string,
-    is_url_responsive,
 )
 from .models.top_level.utils import STRING_SEPARATOR
 
@@ -364,19 +365,7 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
     def validate_res_extents_crs(self):
         """Called from .ui file."""
         url = self.data_from_ui_setter.get_extents_crs_from_ui(self)
-        response = is_url_responsive(url)
-        if response[0]:
-            QMessageBox.information(
-                self,
-                "Information",
-                f"{response[1]}",
-            )
-        else:
-            QMessageBox.warning(
-                self,
-                "Warning",
-                f"{response[1]}",
-            )
+        get_url_status(url, self)
 
     def delete_metadata_id_title(self):
         """Delete keyword from metadata, called from .ui file."""
