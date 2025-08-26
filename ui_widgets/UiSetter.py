@@ -595,6 +595,6 @@ class UiSetter:
 
     def delete_list_widget_selected_item(self, list_widget):
         """Delete selected List item from widget."""
-        selected_item = list_widget.currentRow()
-        if selected_item >= 0:
-            list_widget.takeItem(selected_item)
+        selected_index = list_widget.currentRow()
+        if selected_index >= 0:
+            list_widget.takeItem(selected_index)

@@ -420,6 +420,12 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
 
     def delete_res_provider(self):
         """Called from .ui file."""
+
+        # first, get selected item text and delete matching provider from Resource providers
+        self.data_from_ui_setter.delete_selected_provider_type_and_name(
+            self.listWidgetResProvider
+        )
+        # then, remove the item from the list widget
         self.ui_setter.delete_list_widget_selected_item(self.listWidgetResProvider)
 
     def filterResources(self, filter):
