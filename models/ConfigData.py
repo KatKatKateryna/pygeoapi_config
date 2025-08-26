@@ -90,6 +90,10 @@ class ConfigData:
                         f"resources.{resource_instance_name}.extents.spatial.bbox"
                     )
 
+                # reorder providers to move read-only to the end of the list
+                # this is needed to not accidentally match read-only providers when deleting a provider
+                new_resource_item.providers.sort(key=lambda x: isinstance(x, dict))
+
                 self.resources[resource_instance_name] = new_resource_item
 
             else:

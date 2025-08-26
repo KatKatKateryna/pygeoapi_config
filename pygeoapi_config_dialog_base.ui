@@ -2031,8 +2031,8 @@
                               <height>80</height>
                               </size>
                             </property>
-                            <property name="enabled">
-                              <bool>false</bool>
+                            <property name="editTriggers">
+                              <set>QAbstractItemView::NoEditTriggers</set>
                             </property>
                             </widget>
                           </item>
