@@ -17,11 +17,12 @@ from ..models.top_level.utils import (
     STRING_SEPARATOR,
 )
 
+from .utils import set_combo_box_value_from_data
+
 from .ui_setter_utils import (
     clear_layout,
     create_rect_layer_from_bbox,
     fill_combo_box,
-    set_combo_box_value_from_data,
     pack_locales_data_into_list,
     pack_list_data_into_list_widget,
     select_list_widget_items_by_texts,

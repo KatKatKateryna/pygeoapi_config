@@ -107,5 +107,8 @@ class NewProviderWindow(QDialog):
             else:
                 return element.text()
 
+        elif isinstance(element, QComboBox):
+            return element.currentText()
+
         elif isinstance(element, StringListWidget):
             return element.values_to_list()
