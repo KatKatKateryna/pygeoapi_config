@@ -128,7 +128,7 @@ def pack_list_data_into_list_widget(data: list[list], list_widget):
         all_elements = []
         for d in line_data:
             # convert all values to strings and joint with SEPARATOR symbol
-            if d:
+            if d is not None:
                 if isinstance(d, list):
                     # convert list to a string without brackets (e.g. for bbox)
                     all_elements.append(",".join(d))
