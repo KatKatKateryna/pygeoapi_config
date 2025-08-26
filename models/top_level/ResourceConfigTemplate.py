@@ -7,7 +7,6 @@ from .utils import (
     InlineList,
     bbox_from_list,
     get_enum_value_from_string,
-    is_url_responsive,
     is_valid_string,
 )
 from .providers.records import CrsAuthorities
@@ -166,10 +165,6 @@ class ResourceConfigTemplate:
         except ValueError:
             self.extents.spatial.bbox = InlineList([-180, -90, 180, 90])
             return False
-
-    def validate_extents_crs(self):
-        # not currently used, as we don't enforce data validation that requires internet access
-        return is_url_responsive(self.extents.spatial.crs, True)
 
     def get_invalid_properties(self):
         """Checks the values of mandatory fields: identification (title, description, keywords)."""

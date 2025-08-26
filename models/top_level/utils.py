@@ -48,27 +48,29 @@ def bbox_from_list(raw_bbox_list: list):
     return InlineList(list_bbox_val)
 
 
-def is_url_responsive(url: str, detect_exceptions_in_successful_response=False) -> bool:
+def is_url_responsive(url: str) -> bool:
 
     parsed_url = urlparse(url)
     if not all([parsed_url.scheme, parsed_url.netloc]):
-        return False
+        return False, "Invalid URL"
 
     try:
-        if detect_exceptions_in_successful_response:
-            # Detect OGC ExceptionReport (invalid request)
-            response = requests.get(url, allow_redirects=True, timeout=5)
-            if response.status_code != 200:
-                return False
-            else:
-                text = response.text
-                if "ExceptionReport" in text or "ExceptionText" in text:
-                    return False
-                return True
+        # Detect OGC ExceptionReport (invalid request)
+        response = requests.get(url, allow_redirects=True, timeout=5)
+        if response.status_code != 200:
+            return False, f"HTTP response status code: {response.status_code}"
+        else:
+            text = response.text
+            if "ExceptionReport" in text or "ExceptionText" in text:
+                return False, "Invalid CRS URL"
+            return True, "Valid CRS URL"
 
-        else:  # lighter request (if content is not needed)
-            response = requests.head(url, allow_redirects=True, timeout=5)
-            return response.status_code == 200
+    except requests.ConnectionError:
+        # No internet or server unreachable
+        return False, "No internet connection or cannot reach server."
+
+    except requests.Timeout:
+        return False, "Request timed out."
 
     except requests.RequestException:
-        return False
+        return False, "Something went wrong with the request :("

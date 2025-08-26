@@ -364,17 +364,18 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
     def validate_res_extents_crs(self):
         """Called from .ui file."""
         url = self.data_from_ui_setter.get_extents_crs_from_ui(self)
-        if is_url_responsive(url, True):
+        response = is_url_responsive(url)
+        if response[0]:
             QMessageBox.information(
                 self,
                 "Information",
-                f"Valid CRS URL: {url}",
+                f"{response[1]}",
             )
         else:
             QMessageBox.warning(
                 self,
                 "Warning",
-                f"Invalid CRS URL: {url}",
+                f"{response[1]}",
             )
 
     def delete_metadata_id_title(self):
