@@ -15,7 +15,7 @@ class ReadOnlyTextDialog(QDialog):
         text_edit = QTextEdit()
         text_edit.setReadOnly(True)
         text_edit.setPlainText(text)
-        text_edit.setMinimumSize(400, 200)  # adjust size as needed
+        text_edit.setMinimumSize(200, 200)  # adjust size as needed
         layout.addWidget(text_edit)
 
         # Close button

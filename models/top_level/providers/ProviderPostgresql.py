@@ -104,9 +104,6 @@ class ProviderPostgresql(ProviderTemplate):
             all_invalid_fields.append("type")
         if not is_valid_string(self.name):
             all_invalid_fields.append("name")
-        if not self.crs or not is_valid_string(self.crs):
-            all_invalid_fields.append("crs")
-
         if not is_valid_string(self.data.host):
             all_invalid_fields.append("data.host")
         if not is_valid_string(self.data.port):

@@ -69,7 +69,7 @@ class ProviderWmsFacade(ProviderTemplate):
             )
 
         self.name = values[1]
-        self.crs = values[2]
+        self.crs = values[2].split(",") if is_valid_string(values[2]) else None
         self.data = values[3]
         self.options.layer = values[4]
         self.options.style = values[5]
@@ -85,8 +85,6 @@ class ProviderWmsFacade(ProviderTemplate):
             all_invalid_fields.append("type")
         if not is_valid_string(self.name):
             all_invalid_fields.append("name")
-        if not self.crs or not is_valid_string(self.crs):
-            all_invalid_fields.append("crs")
         if not is_valid_string(self.data):
             all_invalid_fields.append("data")
         if not is_valid_string(self.format.name):
