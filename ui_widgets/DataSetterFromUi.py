@@ -1,4 +1,5 @@
 from __future__ import annotations
+import json
 from typing import TYPE_CHECKING
 
 from datetime import datetime
@@ -285,7 +286,9 @@ class DataSetterFromUi:
 
         # providers
         config_data.resources[res_name].providers = []
-        providers_data_lists = unpack_listwidget_values_to_sublists(
+
+        # add editable providers from a widget
+        providers_data_lists: list[list] = unpack_listwidget_values_to_sublists(
             dialog.listWidgetResProvider
         )
 
@@ -295,6 +298,16 @@ class DataSetterFromUi:
             new_pr.assign_value_list_to_provider_data(pr)
 
             config_data.resources[res_name].providers.append(new_pr)
+
+        # add read-only providers from another widget
+        read_only_providers_data_lists: list[list] = (
+            unpack_listwidget_values_to_sublists(
+                dialog.listWidgetResReadOnlyProviders, 1
+            )
+        )
+        for read_pr in read_only_providers_data_lists:
+            new_read_pr = read_pr[0]
+            config_data.resources[res_name].providers.append(json.loads(new_read_pr))
 
         # change resource key to a new alias
         new_alias = dialog.lineEditResAlias.text()

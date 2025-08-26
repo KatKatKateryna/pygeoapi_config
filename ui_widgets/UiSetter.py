@@ -1,4 +1,5 @@
 from __future__ import annotations
+import json
 from typing import TYPE_CHECKING
 
 from ..models.top_level import ResourceConfigTemplate
@@ -358,13 +359,23 @@ class UiSetter:
         dialog = self.dialog
 
         data_lists = []
+        read_only_data_lists = []
         for p in res_data.providers:
-            data_chunk: list = p.pack_data_to_list()
-            data_lists.append(data_chunk)
+
+            if isinstance(p, dict):  # provider type not supported yet
+                read_only_data_lists.append(str(json.dumps(p)))
+            else:
+
+                data_chunk: list = p.pack_data_to_list()
+                data_lists.append(data_chunk)
 
         pack_list_data_into_list_widget(
             data_lists,
             dialog.listWidgetResProvider,
+        )
+        pack_list_data_into_list_widget(
+            read_only_data_lists,
+            dialog.listWidgetResReadOnlyProviders,
         )
 
     def customize_ui_on_launch(self):

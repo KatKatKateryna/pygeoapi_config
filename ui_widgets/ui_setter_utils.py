@@ -100,23 +100,28 @@ def pack_locales_data_into_list(data, list_widget):
                 list_widget.addItem(value)
 
 
-def pack_list_data_into_list_widget(data: list[list], list_widget):
+def pack_list_data_into_list_widget(data: list[list | str], list_widget):
     list_widget.clear()
 
     for line_data in data:
         all_elements = []
-        for d in line_data:
-            # convert all values to strings and joint with SEPARATOR symbol
-            if d is not None:
-                if isinstance(d, list):
-                    # convert list to a string without brackets (e.g. for bbox)
-                    all_elements.append(",".join(d))
-                elif isinstance(d, Enum):  # e.g. Languages Enum
-                    all_elements.append(str(d.value))
+
+        if isinstance(line_data, str):  # if Provider type not supported yet
+            all_elements.append(line_data)
+
+        else:
+            for d in line_data:
+                # convert all values to strings and joint with SEPARATOR symbol
+                if d is not None:
+                    if isinstance(d, list):
+                        # convert list to a string without brackets (e.g. for bbox)
+                        all_elements.append(",".join(d))
+                    elif isinstance(d, Enum):  # e.g. Languages Enum
+                        all_elements.append(str(d.value))
+                    else:
+                        all_elements.append(str(d))
                 else:
-                    all_elements.append(str(d))
-            else:
-                all_elements.append("")
+                    all_elements.append("")
 
         text_entry = STRING_SEPARATOR.join(all_elements)
         list_widget.addItem(text_entry)

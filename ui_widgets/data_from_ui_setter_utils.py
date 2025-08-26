@@ -1,4 +1,3 @@
-from .utils import get_widget_text_value
 from ..models.top_level.utils import STRING_SEPARATOR
 
 
@@ -23,7 +22,7 @@ def unpack_locales_values_list_to_dict(list_widget, allow_list_per_locale: bool)
 
 def unpack_listwidget_values_to_sublists(
     list_widget, expected_members: int | None = None
-):
+) -> list[list]:
 
     all_sublists = []
     for i in range(list_widget.count()):

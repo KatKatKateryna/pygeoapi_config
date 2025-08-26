@@ -99,9 +99,9 @@ class ResourceConfigTemplate:
         default_factory=lambda: ResourceExtentsConfig()
     )
     # for providers, the types have to be explicitly listed so they are picked up on deserialization
-    providers: list[ProviderPostgresql | ProviderMvtProxy | ProviderWmsFacade] = field(
-        default_factory=lambda: []
-    )
+    providers: list[
+        ProviderPostgresql | ProviderMvtProxy | ProviderWmsFacade | dict
+    ] = field(default_factory=lambda: [])
 
     # optional
     visibility: ResourceVisibilityEnum | None = None
