@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 from enum import Enum
 
 STRING_SEPARATOR = " | "
@@ -44,3 +45,17 @@ def bbox_from_list(raw_bbox_list: list):
         )
 
     return InlineList(list_bbox_val)
+
+
+def to_iso8601(dt: datetime) -> str:
+    """
+    Convert datetime to UTC ISO 8601 string, for both naive and aware datetimes.
+    """
+    if dt.tzinfo is None:
+        # Treat naive datetime as UTC
+        dt = dt.replace(tzinfo=timezone.utc)
+    else:
+        # Convert to UTC
+        dt = dt.astimezone(timezone.utc)
+
+    return dt.strftime("%Y-%m-%dT%H:%M:%SZ")
