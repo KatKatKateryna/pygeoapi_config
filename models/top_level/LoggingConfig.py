@@ -14,7 +14,7 @@ class LoggingLevel(Enum):
 
 # data classes
 @dataclass(kw_only=True)
-class RotationConfig:
+class LoggingRotationConfig:
     # Not currently used in the UI
     mode: str | None = None
     when: str | None = None
@@ -29,10 +29,10 @@ class LoggingConfig:
 
     # fields with default values:
     level: LoggingLevel = field(default_factory=lambda: LoggingLevel.ERROR)
-    logfile: str = field(default="")
 
     # optional fields:
+    logfile: str | None = None
     logformat: str | None = None
     dateformat: str | None = None
     # TODO: Not currently used in the UI
-    # rotation: RotationConfig | None = None
+    # rotation: LoggingRotationConfig | None = None

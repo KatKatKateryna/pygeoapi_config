@@ -1,32 +1,33 @@
 from dataclasses import dataclass, field
 from enum import Enum
-from urllib.parse import urlparse
 
 from .utils import is_valid_string
 
 
 # records
-class OnExceed(Enum):
+class ServerOnExceedEnum(Enum):
     THROTTLE = "throttle"
     ERROR = "error"
 
 
 # data classes
 @dataclass(kw_only=True)
-class BindConfig:
+class ServerBindConfig:
     host: str = field(default="0.0.0.0")
     port: int = field(default=5000)
 
 
 @dataclass(kw_only=True)
-class LimitsConfig:
+class ServerLimitsConfig:
     default_items: int = field(default=20)
     max_items: int = field(default=50)
-    on_exceed: OnExceed = field(default_factory=lambda: OnExceed.THROTTLE)
+    on_exceed: ServerOnExceedEnum = field(
+        default_factory=lambda: ServerOnExceedEnum.THROTTLE
+    )
 
 
 @dataclass(kw_only=True)
-class MapConfig:
+class ServerMapConfig:
     url: str = field(default="https://tile.openstreetmap.org/{z}/{x}/{y}.png")
     attribution: str = field(
         default='&copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap contributors</a>'
@@ -34,13 +35,13 @@ class MapConfig:
 
 
 @dataclass(kw_only=True)
-class TemplatesConfig:
+class ServerTemplatesConfig:
     path: str = field(default="")
     static: str = field(default="")
 
 
 @dataclass(kw_only=True)
-class ApiRulesConfig:
+class ServerApiRulesConfig:
     # Not currently used in the UI
     api_version: str = field(default="1.2.3")
     strict_slashes: bool = field(default=True)
@@ -52,22 +53,23 @@ class ApiRulesConfig:
 class ServerConfig:
     """Placeholder class for Server configuration data."""
 
-    bind: BindConfig = field(default_factory=lambda: BindConfig())
+    bind: ServerBindConfig = field(default_factory=lambda: ServerBindConfig())
     url: str = field(default="http://localhost:5000")
     mimetype: str = field(default="application/json; charset=UTF-8")
     encoding: str = field(default="utf-8")
+    map: ServerMapConfig = field(default_factory=lambda: ServerMapConfig())
+
+    # optional fields:
     gzip: bool = field(default=False)
     languages: list = field(default_factory=lambda: ["en-US"])  # to format with " - "
     cors: bool = field(default=False)
     pretty_print: bool = field(default=False)
-    limits: LimitsConfig = field(default_factory=lambda: LimitsConfig())
-    map: MapConfig = field(default_factory=lambda: MapConfig())
+    limits: ServerLimitsConfig = field(default_factory=lambda: ServerLimitsConfig())
     admin: bool = field(default=False)
-    templates: TemplatesConfig = field(default_factory=lambda: TemplatesConfig())
+    templates: ServerTemplatesConfig | None = None
 
-    # optional fields:
-    # TODO: Not currently used in the UI
-    # api_rules: ApiRulesConfig | None = None
+    # Not currently used in the UI
+    # api_rules: ServerApiRulesConfig | None = None
 
     def get_invalid_properties(self):
         """Checks the values of mandatory fields: bind (host), url, languages."""

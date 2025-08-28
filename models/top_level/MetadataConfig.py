@@ -4,7 +4,7 @@ from urllib.parse import urlparse
 
 
 # records
-class KeywordType(Enum):
+class MetadataKeywordTypeEnum(Enum):
     DISCIPLINE = "discipline"
     TEMPORAL = "temporal"
     PLACE = "place"
@@ -12,7 +12,7 @@ class KeywordType(Enum):
     STRATUM = "stratum"
 
 
-class Role(Enum):
+class MetadataRoleEnum(Enum):
     AUTHOR = "author"
     COAUTHOR = "coAuthor"
     COLLABORATOR = "collaborator"
@@ -37,11 +37,13 @@ class Role(Enum):
 
 # data classes
 @dataclass(kw_only=True)
-class IdentificationConfig:
+class MetadataIdentificationConfig:
     title: str | dict = field(default_factory=lambda: "")
     description: str | dict = field(default_factory=lambda: "")
     keywords: list | dict = field(default_factory=lambda: [])
-    keywords_type: KeywordType = field(default_factory=lambda: KeywordType.THEME)
+    keywords_type: MetadataKeywordTypeEnum = field(
+        default_factory=lambda: MetadataKeywordTypeEnum.THEME
+    )
     terms_of_service: str = field(
         default="https://creativecommons.org/licenses/by/4.0/"
     )
@@ -49,19 +51,19 @@ class IdentificationConfig:
 
 
 @dataclass(kw_only=True)
-class LicenseConfig:
+class MetadataLicenseConfig:
     name: str = field(default="CC-BY 4.0 license")
     url: str = field(default="https://creativecommons.org/licenses/by/4.0/")
 
 
 @dataclass(kw_only=True)
-class ProviderConfig:
+class MetadataProviderConfig:
     name: str = field(default="Organization Name")
     url: str = field(default="https://pygeoapi.io")
 
 
 @dataclass(kw_only=True)
-class ContactConfig:
+class MetadataContactConfig:
     name: str = field(default="Lastname, Firstname")
     position: str = field(default="Position Title")
     address: str = field(default="Mailing Address")
@@ -75,19 +77,27 @@ class ContactConfig:
     url: str = field(default="Contact URL")
     hours: str = field(default="Mo-Fr 08:00-17:00")
     instructions: str = field(default="During hours of service. Off on weekends.")
-    role: Role = field(default_factory=lambda: Role.POINTOFCONTACT)
+    role: MetadataRoleEnum = field(
+        default_factory=lambda: MetadataRoleEnum.POINTOFCONTACT
+    )
 
 
 @dataclass(kw_only=True)
 class MetadataConfig:
     """Placeholder class for Metadata configuration data."""
 
-    identification: IdentificationConfig = field(
-        default_factory=lambda: IdentificationConfig()
+    identification: MetadataIdentificationConfig = field(
+        default_factory=lambda: MetadataIdentificationConfig()
     )
-    license: LicenseConfig = field(default_factory=lambda: LicenseConfig())
-    provider: ProviderConfig = field(default_factory=lambda: ProviderConfig())
-    contact: ContactConfig = field(default_factory=lambda: ContactConfig())
+    license: MetadataLicenseConfig = field(
+        default_factory=lambda: MetadataLicenseConfig()
+    )
+    provider: MetadataProviderConfig = field(
+        default_factory=lambda: MetadataProviderConfig()
+    )
+    contact: MetadataContactConfig = field(
+        default_factory=lambda: MetadataContactConfig()
+    )
 
     def get_invalid_properties(self):
         """Checks the values of mandatory fields: identification (title, description, keywords)."""

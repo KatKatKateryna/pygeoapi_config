@@ -25,27 +25,44 @@
 import os
 import yaml
 
-from dataclasses import asdict
-from .models.top_level import InlineList
+from .ui_widgets.utils import get_url_status
 
-from qgis.PyQt import uic
-from qgis.core import QgsMessageLog
-from qgis.PyQt import QtWidgets
+
+from .models.top_level.providers.records import ProviderTypes
+from .ui_widgets.providers.NewProviderWindow import NewProviderWindow
+from .ui_widgets.WarningDialog import ReadOnlyTextDialog
+from .ui_widgets import DataSetterFromUi, UiSetter
+from .models.ConfigData import ConfigData
+from .models.top_level.utils import (
+    InlineList,
+    get_enum_value_from_string,
+)
+from .models.top_level.utils import STRING_SEPARATOR
+
 from PyQt5.QtWidgets import (
+    QMainWindow,
     QFileDialog,
     QMessageBox,
     QDialogButtonBox,
     QApplication,
 )  # or PyQt6.QtWidgets
+
 from PyQt5.QtCore import (
-    QFile,
-    QTextStream,
     Qt,
+    QModelIndex,
     QStringListModel,
     QSortFilterProxyModel,
 )  # Not strictly needed, can use Python file API instead
 
-from .models.ConfigData import ConfigData
+from qgis.core import (
+    QgsMessageLog,
+    QgsRasterLayer,
+    QgsVectorLayer,
+)
+
+from qgis.gui import QgsMapCanvas
+from qgis.PyQt import QtWidgets, uic
+
 
 # This loads your .ui file so that PyQt can populate your plugin with the elements from Qt Designer
 FORM_CLASS, _ = uic.loadUiType(
@@ -55,8 +72,16 @@ FORM_CLASS, _ = uic.loadUiType(
 
 class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
 
-    config_data = ConfigData()
-    cur_col_name = ""
+    config_data: ConfigData
+    ui_setter: UiSetter
+    data_from_ui_setter: DataSetterFromUi
+    current_res_name = ""
+
+    # these need to be class properties, otherwise, without constant reference, they are not displayed in a widget
+    provider_window: QMainWindow
+    bbox_map_canvas: QgsMapCanvas
+    bbox_base_layer: QgsRasterLayer
+    bbox_extents_layer: QgsVectorLayer
 
     def __init__(self, parent=None):
         """Constructor."""
@@ -67,6 +92,9 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
         # http://qt-project.org/doc/qt-4.8/designer-using-a-ui-file.html
         # #widgets-and-dialogs-with-auto-connect
         self.setupUi(self)
+        self.config_data = ConfigData()
+        self.ui_setter = UiSetter(self)
+        self.data_from_ui_setter = DataSetterFromUi(self)
 
         # make sure InlineList is represented as a YAML sequence (e.g. for 'bbox')
         yaml.add_representer(
@@ -80,21 +108,97 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
         self.model = QStringListModel()
         self.proxy = QSortFilterProxyModel()
 
-        # add default values to the UI
-        self.fill_combo_box(self.comboBoxExceed, self.config_data.server.limits.on_exceed)
-        self.fill_combo_box(self.comboBoxLog, self.config_data.logging.level)
-        self.fill_combo_box(self.comboBoxMetadataIdKeywordsType, self.config_data.metadata.identification.keywords_type)
-        self.fill_combo_box(self.comboBoxMetadataContactRole, self.config_data.metadata.contact.role)
+        self.ui_setter.customize_ui_on_launch()
+        self.ui_setter.set_ui_from_data()
+        self.ui_setter.setup_map_widget()
 
-        self.config_data.set_ui_from_data(self)
+    def save_to_file(self):
+        # Set and validate data from UI
+        try:
+            self.data_from_ui_setter.set_data_from_ui()
+            invalid_props = self.config_data.validate_config_data()
+            if len(invalid_props) > 0:
+                QgsMessageLog.logMessage(
+                    f"Properties are missing or have invalid values: {invalid_props}"
+                )
+                ReadOnlyTextDialog(
+                    self,
+                    "Warning",
+                    f"Properties are missing or have invalid values: {invalid_props}",
+                ).exec_()
+                return
 
-    def fill_combo_box(self, combo_box, enum_class):
-        """Set values to dropdown ComboBox, based on the values expected by the corresponding class."""
+        except Exception as e:
+            QgsMessageLog.logMessage(f"Error deserializing: {e}")
+            QMessageBox.warning(f"Error deserializing: {e}")
+            return
 
-        combo_box.clear()
-        for item in type(enum_class):
-            combo_box.addItem(item.value)
+        # Open dialog to set file path
+        file_path, _ = QFileDialog.getSaveFileName(
+            self, "Save File", "", "YAML Files (*.yml);;All Files (*)"
+        )
 
+        if file_path:
+            QApplication.setOverrideCursor(Qt.WaitCursor)
+            try:
+                with open(file_path, "w", encoding="utf-8") as file:
+                    yaml.dump(
+                        self.config_data.asdict_enum_safe(self.config_data),
+                        file,
+                        default_flow_style=False,
+                        sort_keys=False,
+                        allow_unicode=True,
+                        indent=4,
+                    )
+                QgsMessageLog.logMessage(f"File saved to: {file_path}")
+            except Exception as e:
+                QgsMessageLog.logMessage(f"Error saving file: {e}")
+            finally:
+                QApplication.restoreOverrideCursor()
+
+    def open_file(self):
+        file_name, _ = QFileDialog.getOpenFileName(
+            self, "Open File", "", "YAML Files (*.yml);;All Files (*)"
+        )
+
+        if not file_name:
+            return
+
+        try:
+            # QApplication.setOverrideCursor(Qt.WaitCursor)
+            with open(file_name, "r", encoding="utf-8") as file:
+                file_content = file.read()
+
+                # reset data
+                self.config_data = ConfigData()
+                self.config_data.set_data_from_yaml(yaml.safe_load(file_content))
+                self.ui_setter.set_ui_from_data()
+
+                # log messages about missing or mistyped values during deserialization
+                QgsMessageLog.logMessage(
+                    f"Errors during deserialization: {self.config_data.error_message}"
+                )
+                QgsMessageLog.logMessage(
+                    f"Default values used for missing YAML fields: {self.config_data.defaults_message}"
+                )
+
+                # summarize all properties missing/overwitten with defaults
+                # atm, warning with the full list of properties
+                all_missing_props = self.config_data.all_missing_props
+                QgsMessageLog.logMessage(
+                    f"All missing or replaced properties: {self.config_data.all_missing_props}"
+                )
+                if len(all_missing_props) > 0:
+                    ReadOnlyTextDialog(
+                        self,
+                        "Warning",
+                        f"All missing or replaced properties (check logs for more details): {self.config_data.all_missing_props}",
+                    ).exec_()
+
+        except Exception as e:
+            QMessageBox.warning(self, "Error", f"Cannot open file:\n{str(e)}")
+        # finally:
+        #     QApplication.restoreOverrideCursor()
 
     def on_button_clicked(self, button):
 
@@ -135,203 +239,254 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
         if logFile:
             self.lineEditLogfile.setText(logFile[0])
 
-    def _throw_if_language_entry_exists_in_list_widget(self, list_widget, locale):
-        for i in range(list_widget.count()):
-            print(list_widget.item(i).text())
-            print(f"{locale}: ")
-            if list_widget.item(i).text().startswith(f"{locale}: "):
-                QMessageBox.warning(
-                    self,
-                    "Message",
-                    f"Data entry in selected language already exists: {locale}",
-                )
+    #################################################################
+    ################## methods that are called from .ui file:
+    #################################################################
 
     def add_metadata_id_title(self):
         """Add title to metadata, called from .ui file."""
-
-        locale = self.comboBoxIdTitleLocale.currentText()
-        text = self.addMetadataIdTitleLineEdit.text().strip()
-        if text:
-            self._throw_if_language_entry_exists_in_list_widget(
-                self.listWidgetMetadataIdTitle, locale
-            )
-            self.listWidgetMetadataIdTitle.addItem(f"{locale}: {text}")
-            self.addMetadataIdTitleLineEdit.clear()
-
-        # sort the content
-        self.listWidgetMetadataIdTitle.model().sort(0)
+        self.ui_setter.add_listwidget_element_from_lineedit(
+            line_edit_widget=self.addMetadataIdTitleLineEdit,
+            list_widget=self.listWidgetMetadataIdTitle,
+            locale_combobox=self.comboBoxIdTitleLocale,
+            allow_repeated_locale=False,
+            sort=True,
+        )
 
     def add_metadata_id_description(self):
         """Add description to metadata, called from .ui file."""
-
-        locale = self.comboBoxIdDescriptionLocale.currentText()
-        text = self.addMetadataIdDescriptionLineEdit.text().strip()
-        if text:
-            self._throw_if_language_entry_exists_in_list_widget(
-                self.listWidgetMetadataIdDescription, locale
-            )
-            self.listWidgetMetadataIdDescription.addItem(f"{locale}: {text}")
-            self.addMetadataIdDescriptionLineEdit.clear()
-
-        # sort the content
-        self.listWidgetMetadataIdDescription.model().sort(0)
+        self.ui_setter.add_listwidget_element_from_lineedit(
+            line_edit_widget=self.addMetadataIdDescriptionLineEdit,
+            list_widget=self.listWidgetMetadataIdDescription,
+            locale_combobox=self.comboBoxIdDescriptionLocale,
+            allow_repeated_locale=False,
+            sort=True,
+        )
 
     def add_metadata_keyword(self):
         """Add keyword to metadata, called from .ui file."""
+        self.ui_setter.add_listwidget_element_from_lineedit(
+            line_edit_widget=self.addMetadataKeywordLineEdit,
+            list_widget=self.listWidgetMetadataIdKeywords,
+            locale_combobox=self.comboBoxKeywordsLocale,
+            allow_repeated_locale=True,
+            sort=True,
+        )
 
-        locale = self.comboBoxKeywordsLocale.currentText()
-        text = self.addMetadataKeywordLineEdit.text().strip()
-        if text:
-            self.listWidgetMetadataIdKeywords.addItem(f"{locale}: {text}")
-            self.addMetadataKeywordLineEdit.clear()
-            # self.comboBoxKeywordsLocale.setCurrentIndex(0)
+    def add_res_title(self):
+        """Called from .ui file."""
+        self.ui_setter.add_listwidget_element_from_lineedit(
+            line_edit_widget=self.addResTitleLineEdit,
+            list_widget=self.listWidgetResTitle,
+            locale_combobox=self.comboBoxResTitleLocale,
+            allow_repeated_locale=False,
+            sort=True,
+        )
 
-        # sort the content
-        self.listWidgetMetadataIdKeywords.model().sort(0)
+    def add_res_description(self):
+        """Called from .ui file."""
+        self.ui_setter.add_listwidget_element_from_lineedit(
+            line_edit_widget=self.addResDescriptionLineEdit,
+            list_widget=self.listWidgetResDescription,
+            locale_combobox=self.comboBoxResDescriptionLocale,
+            allow_repeated_locale=False,
+            sort=True,
+        )
+
+    def add_res_keyword(self):
+        """Called from .ui file."""
+        self.ui_setter.add_listwidget_element_from_lineedit(
+            line_edit_widget=self.addResKeywordsLineEdit,
+            list_widget=self.listWidgetResKeywords,
+            locale_combobox=self.comboBoxResKeywordsLocale,
+            allow_repeated_locale=True,
+            sort=True,
+        )
+
+    def add_res_link(self):
+        """Called from .ui file."""
+        self.ui_setter.add_listwidget_element_from_multi_widgets(
+            line_widgets_mandatory=[
+                self.addResLinksTypeLineEdit,
+                self.addResLinksRelLineEdit,
+                self.addResLinksHrefLineEdit,
+            ],
+            line_widgets_optional=[
+                self.addResLinksTitleLineEdit,
+                self.addResLinkshreflangComboBox,
+                self.addResLinksLengthLineEdit,
+            ],
+            list_widget=self.listWidgetResLinks,
+            sort=False,
+        )
+
+    def try_add_res_provider(self, provider_index=None, data: list[str] | None = None):
+        """Called from .ui file, and from this class."""
+        provider_type: ProviderTypes = get_enum_value_from_string(
+            ProviderTypes, self.comboBoxResProviderType.currentText().lower()
+        )
+
+        if not data:
+            self.provider_window = NewProviderWindow(provider_type)
+            provider_index = None
+
+        else:
+            # if the window is triggered for editing, ignore widget provider type and read it from data instead
+            provider_type = get_enum_value_from_string(ProviderTypes, data[0])
+            self.provider_window = NewProviderWindow(provider_type, data[1:])
+
+        # add or replace provider data to ConfigData when user clicks 'Add'
+        self.provider_window.signal_provider_values.connect(
+            lambda provider_window, values: self._validate_and_add_res_provider(
+                provider_window, values, provider_type, provider_index
+            )
+        )
+
+    def _validate_and_add_res_provider(
+        self, provider_window, values, provider_type, provider_index: int | None = None
+    ):
+        """Calls the Provider validation method and displays a warning if data is invalid."""
+        invalid_fields = self.config_data.set_validate_new_provider_data(
+            values, self.current_res_name, provider_type, provider_index
+        )
+
+        self.ui_setter.set_providers_ui_from_data(
+            self.config_data.resources[self.current_res_name]
+        )
+        if len(invalid_fields) > 0:
+            QMessageBox.warning(
+                provider_window,
+                "Warning",
+                f"Invalid Provider values: {invalid_fields}",
+            )
+        else:
+            self.provider_window.signal_provider_close.emit()
+
+    def validate_res_extents_crs(self):
+        """Called from .ui file."""
+        url = self.data_from_ui_setter.get_extents_crs_from_ui(self)
+        get_url_status(url, self)
 
     def delete_metadata_id_title(self):
         """Delete keyword from metadata, called from .ui file."""
-
-        selected_item = self.listWidgetMetadataIdTitle.currentRow()
-        if selected_item >= 0:
-            self.listWidgetMetadataIdTitle.takeItem(selected_item)
+        self.ui_setter.delete_list_widget_selected_item(self.listWidgetMetadataIdTitle)
 
     def delete_metadata_id_description(self):
         """Delete keyword from metadata, called from .ui file."""
-
-        selected_item = self.listWidgetMetadataIdDescription.currentRow()
-        if selected_item >= 0:
-            self.listWidgetMetadataIdDescription.takeItem(selected_item)
+        self.ui_setter.delete_list_widget_selected_item(
+            self.listWidgetMetadataIdDescription
+        )
 
     def delete_metadata_keyword(self):
         """Delete keyword from metadata, called from .ui file."""
-
-        selected_item = self.listWidgetMetadataIdKeywords.currentRow()
-        if selected_item >= 0:
-            self.listWidgetMetadataIdKeywords.takeItem(selected_item)
-
-    def save_to_file(self):
-
-        # Set and validate data from UI
-        try:
-            self.config_data.set_data_from_ui(self)
-
-            # validate mandatory fields before saving to file
-            invalid_props = []
-            invalid_props.extend(
-                self.config_data.server.get_invalid_properties()
-            )
-            invalid_props.extend(
-                self.config_data.metadata.get_invalid_properties()
-            )
-
-            if len(invalid_props) > 0:
-                QgsMessageLog.logMessage(
-                    f"Properties are missing or have invalid values: {invalid_props}"
-                )
-                QMessageBox.warning(
-                    self,
-                    "Warning",
-                    f"Properties are missing or have invalid values: {invalid_props}",
-                )
-                return
-
-        except Exception as e:
-            QgsMessageLog.logMessage(f"Error deserializing: {e}")
-            QMessageBox.warning(f"Error deserializing: {e}")
-            return
-
-        # Open dialog to set file path
-        file_path, _ = QFileDialog.getSaveFileName(
-            self, "Save File", "", "YAML Files (*.yml);;All Files (*)"
+        self.ui_setter.delete_list_widget_selected_item(
+            self.listWidgetMetadataIdKeywords
         )
 
-        if file_path:
-            QApplication.setOverrideCursor(Qt.WaitCursor)
-            try:
-                with open(file_path, "w", encoding="utf-8") as file:
-                    yaml.dump(
-                        asdict(self.config_data),
-                        file,
-                        default_flow_style=False,
-                        sort_keys=False,
-                        allow_unicode=True,
-                    )
-                QgsMessageLog.logMessage(f"File saved to: {file_path}")
-            except Exception as e:
-                QgsMessageLog.logMessage(f"Error saving file: {e}")
-            finally:
-                QApplication.restoreOverrideCursor()
+    def delete_res_title(self):
+        """Called from .ui file."""
+        self.ui_setter.delete_list_widget_selected_item(self.listWidgetResTitle)
 
-    def open_file(self):
-        file_name, _ = QFileDialog.getOpenFileName(
-            self, "Open File", "", "YAML Files (*.yml);;All Files (*)"
+    def delete_res_description(self):
+        """Called from .ui file."""
+        self.ui_setter.delete_list_widget_selected_item(self.listWidgetResDescription)
+
+    def delete_res_keyword(self):
+        """Called from .ui file."""
+        self.ui_setter.delete_list_widget_selected_item(self.listWidgetResKeywords)
+
+    def delete_res_link(self):
+        """Called from .ui file."""
+        self.ui_setter.delete_list_widget_selected_item(self.listWidgetResLinks)
+
+    def edit_res_provider(self):
+        """Called from .ui file."""
+        selected_items = self.listWidgetResProvider.selectedItems()
+        if selected_items:
+            item = selected_items[0]  # get the first (and only) selected item
+            data_list = item.text().split(STRING_SEPARATOR)
+            self.try_add_res_provider(self.listWidgetResProvider.row(item), data_list)
+
+    def delete_res_provider(self):
+        """Called from .ui file."""
+
+        # first, get selected item text and delete matching provider from Resource providers
+        self.data_from_ui_setter.delete_selected_provider_type_and_name(
+            self.listWidgetResProvider
         )
-
-        if not file_name:
-            return
-
-        try:
-            QApplication.setOverrideCursor(Qt.WaitCursor)
-            with open(file_name, "r", encoding="utf-8") as file:
-                file_content = file.read()
-
-                # reset data
-                self.config_data = ConfigData()
-                self.config_data.set_data_from_yaml(yaml.safe_load(file_content))
-                self.config_data.set_ui_from_data(self)
-
-                # log messages about missing or mistyped values during deserialization
-                QgsMessageLog.logMessage(
-                    f"Errors during deserialization: {self.config_data.error_message}"
-                )
-                QgsMessageLog.logMessage(
-                    f"Default values used for missing YAML fields: {self.config_data.defaults_message}"
-                )
-
-                # summarize all properties missing/overwitten with defaults
-                # TODO: opportunity to match against the list of absolutely crucial properties
-                # atm, warning with the full list of properties
-                all_missing_props = self.config_data.all_missing_props
-                QgsMessageLog.logMessage(
-                    f"All missing or replaced properties: {self.config_data.all_missing_props}"
-                )
-
-                if len(all_missing_props) > 0:
-                    QMessageBox.warning(
-                        self,
-                        "Warning",
-                        f"All missing or replaced properties (check logs for more details): {self.config_data.all_missing_props}",
-                    )
-
-        except Exception as e:
-            QMessageBox.warning(self, "Error", f"Cannot open file:\n{str(e)}")
-        finally:
-            QApplication.restoreOverrideCursor()
+        # then, remove the item from the list widget
+        self.ui_setter.delete_list_widget_selected_item(self.listWidgetResProvider)
 
     def filterResources(self, filter):
+        """Called from .ui."""
         self.proxy.setDynamicSortFilter(True)
         self.proxy.setFilterFixedString(filter)
 
-    def loadCollection(self, index: "QModelIndex"):
-        self.cur_col_name = index.data()
+    def exit_resource_edit(self):
+        """Switch widgets to Preview, reset selected resource. Called from .ui and from this class too."""
+        # hide detailed collection UI, show preview
+        self.groupBoxCollectionLoaded.hide()
+        self.groupBoxCollectionSelect.show()
+        self.groupBoxCollectionPreview.show()
+        self.ui_setter.refresh_resources_list_ui()
 
-        # If title is a dictionary, use the first (default) value
-        title = self.config_data.resources[self.cur_col_name].title
-        if isinstance(title, dict):
-            title = next(iter(title.values()), "")
-        self.lineEditTitle.setText(title)
+    def save_resource_edit_and_preview(self):
+        """Save current changes to the resource data, reset widgets to Preview. Called from .ui."""
 
-        # If description is a dictionary, use the first (default) value
-        description = self.config_data.resources[self.cur_col_name].description
-        if isinstance(description, dict):
-            description = next(iter(description.values()), "")
-        self.lineEditDescription.setText(description)
+        invalid_fields = self.data_from_ui_setter.get_invalid_resource_ui_fields()
+        if len(invalid_fields) > 0:
+            QMessageBox.warning(
+                self,
+                "Warning",
+                f"Invalid fields' values: {invalid_fields}",
+            )
+            return
 
-    def editCollectionTitle(self, value):
-        QgsMessageLog.logMessage(f"Current collection - title: {self.cur_col_name}")
-        self.config_data.resources[self.cur_col_name].title = value
+        self.data_from_ui_setter.set_resource_data_from_ui()
 
-    def editCollectionDescription(self, value):
-        QgsMessageLog.logMessage(f"Current collection - desc: {self.cur_col_name}")
-        self.config_data.resources[self.cur_col_name].description = value
+        # reset the current resource name, refresh UI list
+        self.current_res_name = self.lineEditResAlias.text()
+        self.exit_resource_edit()
+
+    def preview_resource(self, model_index: QModelIndex = None):
+        """Display basic Resource info, called from .ui."""
+        self.ui_setter.preview_resource(model_index)
+
+    def delete_resource(self):
+        """Delete selected resource. Called from .ui."""
+        # hide detailed collection UI, show preview
+        self.config_data.delete_resource(self)
+        self.ui_setter.preview_resource()
+        self.ui_setter.refresh_resources_list_ui()
+        self.current_res_name = ""
+
+    def new_resource(self):
+        """Called from .ui."""
+        # add resource and reload UI
+        new_name = self.config_data.add_new_resource()
+        self.ui_setter.refresh_resources_list_ui()
+
+        # visually select new resource
+        self.ui_setter.select_listcollection_item_by_text(new_name)
+
+        # set new resource as current and load details
+        self.current_res_name = new_name
+        self.load_resource()
+
+    def load_resource(self):
+        """Called from .ui and from this class too."""
+
+        # if no resource selected, do nothing
+        if self.current_res_name == "":
+            return
+
+        # hide preview collection UI, show detailed UI
+        self.groupBoxCollectionPreview.hide()
+        self.groupBoxCollectionSelect.hide()
+        self.groupBoxCollectionLoaded.show()
+
+        res_data = self.config_data.resources[self.current_res_name]
+        # self.ui_setter.setup_resouce_loaded_ui(res_data)
+
+        # set the values to UI widgets
+        self.ui_setter.set_resource_ui_from_data(res_data)

@@ -1,4 +1,4 @@
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, fields, is_dataclass
 from enum import Enum
 
 from .utils import update_dataclass_from_dict
@@ -8,7 +8,9 @@ from .top_level import (
     MetadataConfig,
     ResourceConfigTemplate,
 )
-from .top_level.utils import is_valid_string
+from .top_level.utils import InlineList, bbox_from_list
+from .top_level.providers import ProviderTemplate
+from .top_level.providers.records import ProviderTypes
 
 
 @dataclass(kw_only=True)
@@ -82,6 +84,16 @@ class ConfigData:
                 wrong_types.extend(wrong_types_resource)
                 all_missing_props.extend(all_missing_props_resource)
 
+                # Exceptional check: verify that all list items of BBox are integers, and len(list)=4 or 6
+                if not new_resource_item.validate_reassign_bbox():
+                    wrong_types.append(
+                        f"resources.{resource_instance_name}.extents.spatial.bbox"
+                    )
+
+                # reorder providers to move read-only to the end of the list
+                # this is needed to not accidentally match read-only providers when deleting a provider
+                new_resource_item.providers.sort(key=lambda x: isinstance(x, dict))
+
                 self.resources[resource_instance_name] = new_resource_item
 
             else:
@@ -117,304 +129,72 @@ class ConfigData:
             return self._all_missing_props
         return []
 
-    def set_data_from_ui(self, dialog):
-
-        # bind
-        self.server.bind.host = dialog.lineEditHost.text()
-        self.server.bind.port = dialog.spinBoxPort.value()
-
-        # gzip
-        self.server.gzip = dialog.checkBoxGzip.isChecked()
-
-        # pretty print
-        self.server.pretty_print = dialog.checkBoxPretty.isChecked()
-
-        # admin
-        self.server.admin = dialog.checkBoxAdmin.isChecked()
-
-        # cors
-        self.server.cors = dialog.checkBoxCors.isChecked()
-
-        # templates
-        self.server.templates.path = dialog.lineEditTemplatesPath.text()
-        self.server.templates.static = dialog.lineEditTemplatesStatic.text()
-
-        # map
-        self.server.map.url = dialog.lineEditMapUrl.text()
-        self.server.map.attribution = dialog.lineEditAttribution.text()
-
-        # url
-        self.server.url = dialog.lineEditUrl.text()
-
-        # language
-        self.server.languages = []
-        for i in range(dialog.listWidgetLang.count()):
-            item = dialog.listWidgetLang.item(i)
-            if item.isSelected():
-                self.server.languages.append(item.text())
-
-        # limits
-        self.server.limits.default_items = dialog.spinBoxDefault.value()
-        self.server.limits.max_items = dialog.spinBoxMax.value()
-
-        self.server.limits.on_exceed = dialog.comboBoxExceed.currentText()
-
-        # logging
-        self.logging.level = dialog.comboBoxLog.currentText()
-        self.logging.logfile = dialog.lineEditLogfile.text()
-        self.logging.logformat = dialog.lineEditLogformat.text()
-        self.logging.dateformat = dialog.lineEditDateformat.text()
-
-        # metadata identification
-        self.metadata.identification.title = self._unpack_locales_values_list_to_dict(
-            dialog.listWidgetMetadataIdTitle
-        )
-        self.metadata.identification.description = (
-            self._unpack_locales_values_list_to_dict(
-                dialog.listWidgetMetadataIdDescription
-            )
-        )
-        self.metadata.identification.keywords = (
-            self._unpack_locales_values_list_to_dict(
-                dialog.listWidgetMetadataIdKeywords
-            )
-        )
-
-        self.metadata.identification.keywords_type = (
-            dialog.comboBoxMetadataIdKeywordsType.currentText()
-        )
-        self.metadata.identification.terms_of_service = (
-            dialog.lineEditMetadataIdTerms.text()
-        )
-        self.metadata.identification.url = dialog.lineEditMetadataIdUrl.text()
-
-        # metadata license
-        self.metadata.license.name = dialog.lineEditMetadataLicenseName.text()
-        self.metadata.license.url = dialog.lineEditMetadataLicenseUrl.text()
-
-        # metadata provider
-        self.metadata.provider.name = dialog.lineEditMetadataProviderName.text()
-        self.metadata.provider.url = dialog.lineEditMetadataProviderUrl.text()
-
-        # metadata contact
-        self.metadata.contact.name = dialog.lineEditMetadataContactName.text()
-        self.metadata.contact.position = dialog.lineEditMetadataContactPosition.text()
-        self.metadata.contact.address = dialog.lineEditMetadataContactAddress.text()
-        self.metadata.contact.city = dialog.lineEditMetadataContactCity.text()
-        self.metadata.contact.stateorprovince = (
-            dialog.lineEditMetadataContactState.text()
-        )
-        self.metadata.contact.postalcode = dialog.lineEditMetadataContactPostal.text()
-        self.metadata.contact.country = dialog.lineEditMetadataContactCountry.text()
-        self.metadata.contact.phone = dialog.lineEditMetadataContactPhone.text()
-        self.metadata.contact.fax = dialog.lineEditMetadataContactFax.text()
-        self.metadata.contact.email = dialog.lineEditMetadataContactEmail.text()
-        self.metadata.contact.url = dialog.lineEditMetadataContactUrl.text()
-        self.metadata.contact.hours = dialog.lineEditMetadataContactHours.text()
-        self.metadata.contact.instructions = (
-            dialog.lineEditMetadataContactInstructions.text()
-        )
-        self.metadata.contact.role = dialog.comboBoxMetadataContactRole.currentText()
-
-    def set_ui_from_data(self, dialog):
-
-        # bind
-        dialog.lineEditHost.setText(self.server.bind.host)
-        dialog.spinBoxPort.setValue(self.server.bind.port)
-
-        # gzip
-        dialog.checkBoxGzip.setChecked(self.server.gzip)
-
-        # mimetype
-        self._set_combo_box_value_from_data(
-            combo_box=dialog.comboBoxMime,
-            value=self.server.mimetype,
-        )
-
-        # encoding
-        self._set_combo_box_value_from_data(
-            combo_box=dialog.comboBoxEncoding,
-            value=self.server.encoding,
-        )
-
-        # pretty print
-        dialog.checkBoxPretty.setChecked(self.server.pretty_print)
-
-        # admin
-        dialog.checkBoxAdmin.setChecked(self.server.admin)
-
-        # cors
-        dialog.checkBoxCors.setChecked(self.server.cors)
-
-        # templates
-        dialog.lineEditTemplatesPath.setText(self.server.templates.path)
-        dialog.lineEditTemplatesStatic.setText(self.server.templates.static)
-
-        # map
-        dialog.lineEditMapUrl.setText(self.server.map.url)
-        dialog.lineEditAttribution.setText(self.server.map.attribution)
-
-        dialog.lineEditUrl.setText(self.server.url)
-
-        # language
-        self._select_list_widget_items_by_texts(
-            list_widget=dialog.listWidgetLang, texts_to_select=self.server.languages
-        )
-
-        # limits
-        dialog.spinBoxDefault.setValue(self.server.limits.default_items)
-        dialog.spinBoxMax.setValue(self.server.limits.max_items)
-
-        self._set_combo_box_value_from_data(
-            combo_box=dialog.comboBoxExceed,
-            value=self.server.limits.on_exceed,
-        )
-
-        # logging
-        self._set_combo_box_value_from_data(
-            combo_box=dialog.comboBoxLog,
-            value=self.logging.level,
-        )
-
-        dialog.lineEditLogfile.setText(self.logging.logfile)
-        dialog.lineEditLogformat.setText(self.logging.logformat)
-        dialog.lineEditDateformat.setText(self.logging.dateformat)
-
-        # metadata identification
-
-        # DATA WITH LOCALES
-        # incoming type: possible list of strings or dictionary
-        # limitation: even if YAML had just a list of strings, it will be interpreted here as "en" locale by default
-
-        # title
-        self._pack_locales_data_into_list(
-            self.metadata.identification.title,
-            dialog.listWidgetMetadataIdTitle,
-        )
-
-        # description
-        self._pack_locales_data_into_list(
-            self.metadata.identification.description,
-            dialog.listWidgetMetadataIdDescription,
-        )
-
-        # keywords
-        self._pack_locales_data_into_list(
-            self.metadata.identification.keywords, dialog.listWidgetMetadataIdKeywords
-        )
-        self._set_combo_box_value_from_data(
-            combo_box=dialog.comboBoxMetadataIdKeywordsType,
-            value=self.metadata.identification.keywords_type,
-        )
-        dialog.lineEditMetadataIdTerms.setText(
-            self.metadata.identification.terms_of_service
-        )
-        dialog.lineEditMetadataIdUrl.setText(self.metadata.identification.url)
-
-        # metadata license
-        dialog.lineEditMetadataLicenseName.setText(self.metadata.license.name)
-        dialog.lineEditMetadataLicenseUrl.setText(self.metadata.license.url)
-
-        # metadata provider
-        dialog.lineEditMetadataProviderName.setText(self.metadata.provider.name)
-        dialog.lineEditMetadataProviderUrl.setText(self.metadata.provider.url)
-
-        # metadata contact
-        dialog.lineEditMetadataContactName.setText(self.metadata.contact.name)
-        dialog.lineEditMetadataContactPosition.setText(self.metadata.contact.position)
-        dialog.lineEditMetadataContactAddress.setText(self.metadata.contact.address)
-        dialog.lineEditMetadataContactCity.setText(self.metadata.contact.city)
-        dialog.lineEditMetadataContactState.setText(
-            self.metadata.contact.stateorprovince
-        )
-        dialog.lineEditMetadataContactPostal.setText(self.metadata.contact.postalcode)
-        dialog.lineEditMetadataContactCountry.setText(self.metadata.contact.country)
-        dialog.lineEditMetadataContactPhone.setText(self.metadata.contact.phone)
-        dialog.lineEditMetadataContactFax.setText(self.metadata.contact.fax)
-        dialog.lineEditMetadataContactEmail.setText(self.metadata.contact.email)
-        dialog.lineEditMetadataContactUrl.setText(self.metadata.contact.url)
-        dialog.lineEditMetadataContactHours.setText(self.metadata.contact.hours)
-        dialog.lineEditMetadataContactInstructions.setText(
-            self.metadata.contact.instructions
-        )
-        self._set_combo_box_value_from_data(
-            combo_box=dialog.comboBoxMetadataContactRole,
-            value=self.metadata.contact.role,
-        )
-
-        # collections
-        dialog.model.setStringList([k for k, _ in self.resources.items()])
-
-        dialog.proxy.setSourceModel(dialog.model)
-        dialog.listViewCollection.setModel(dialog.proxy)
-
-    def _select_list_widget_items_by_texts(self, *, list_widget, texts_to_select):
-        for i in range(list_widget.count()):
-            item = list_widget.item(i)
-            if item.text() in texts_to_select:
-                item.setSelected(True)
-            else:
-                item.setSelected(False)
-
-    def _set_combo_box_value_from_data(self, *, combo_box, value):
-        """Set the combo box value based on the available choice and provided value."""
-
-        for i in range(combo_box.count()):
-            if isinstance(value, str):
-                if combo_box.itemText(i) == value:
-                    combo_box.setCurrentIndex(i)
-                    return
-
-            if isinstance(value, Enum):
-                if combo_box.itemText(i) == value.value:
-                    combo_box.setCurrentIndex(i)
-                    return
-
-        # If the value is not found, set to the first item or clear it
-        if combo_box.count() > 0:
-            combo_box.setCurrentIndex(0)
+    def asdict_enum_safe(self, obj):
+        """Overwriting dataclass 'asdict' fuction to replace Enums with strings."""
+        if is_dataclass(obj):
+            result = {}
+            for f in fields(obj):
+                value = getattr(obj, f.name)
+                if value is not None:
+                    result[f.name] = self.asdict_enum_safe(value)
+            return result
+        elif isinstance(obj, Enum):
+            return obj.value
+        elif isinstance(obj, InlineList):
+            return obj
+        elif isinstance(obj, list):
+            return [self.asdict_enum_safe(v) for v in obj]
+        elif isinstance(obj, dict):
+            return {
+                self.asdict_enum_safe(k): self.asdict_enum_safe(v)
+                for k, v in obj.items()
+            }
         else:
-            combo_box.clear()
+            return obj
 
-    def _unpack_locales_values_list_to_dict(self, list_widget):
-        # unpack string values with locales
+    def add_new_resource(self) -> str:
+        """Add a placeholder resource."""
+        new_name = "new_resource"
+        self.resources[new_name] = ResourceConfigTemplate(instance_name=new_name)
+        return new_name
 
-        all_locales_dict = {}
-        for i in range(list_widget.count()):
-            full_line_text = list_widget.item(i).text()
-            locale = full_line_text.split(": ", 1)[0]
-            value = full_line_text.split(": ", 1)[1]
+    def delete_resource(self, dialog):
+        if dialog.current_res_name in self.resources:
+            self.resources.pop(dialog.current_res_name)
 
-            if locale not in all_locales_dict:
-                all_locales_dict[locale] = []
-            all_locales_dict[locale].append(value)
+    def set_validate_new_provider_data(
+        self,
+        values: dict[str, str | list | int],
+        res_name: str,
+        provider_type: ProviderTypes,
+        provider_index: int | None = None,
+    ):
+        """Adds a provider data to the resource. Called on Save click from New Providere window."""
 
-        return all_locales_dict
+        # initialize provider; assign ui_dict data to the provider instance
+        new_provider = ProviderTemplate.init_provider_from_type(provider_type)
+        new_provider.assign_ui_dict_to_provider_data(values)
 
-    def _pack_locales_data_into_list(self, data, list_widget):
-        """Use ConfigData (list of strings, dict with strings, or a single string) to fill the UI widget list."""
-        list_widget.clear()
+        # if incomplete data, remove Provider from ConfigData and show Warning
+        invalid_props = new_provider.get_invalid_properties()
+        if len(invalid_props) == 0:
+            if provider_index is None:
+                self.resources[res_name].providers.append(new_provider)
+            else:
+                self.resources[res_name].providers[provider_index] = new_provider
 
-        # data can be string, list or dict (for properties like title, description, keywords)
-        if isinstance(data, str):
-            if is_valid_string(data):
-                value = f"en: {data}"
-                list_widget.addItem(value)
-                return
+        return invalid_props
 
-        for key in data:
-            if isinstance(data, dict):
-                local_key_content = data[key]
-                if isinstance(local_key_content, str):
-                    if is_valid_string(local_key_content):
-                        value = f"{key}: {local_key_content}"
-                        list_widget.addItem(value)
-                else:  # list
-                    for local_key in local_key_content:
-                        if is_valid_string(local_key):
-                            value = f"{key}: {local_key}"
-                            list_widget.addItem(value)
-            elif isinstance(data, list):  # list of strings
-                if is_valid_string(key):
-                    value = f"en: {key}"
-                    list_widget.addItem(value)
+    def validate_config_data(self) -> int:
+        """Validate mandatory fields (e.g. before saving to file)."""
+
+        invalid_props = []
+        invalid_props.extend(self.server.get_invalid_properties())
+        invalid_props.extend(self.metadata.get_invalid_properties())
+        for key, resource in self.resources.items():
+            invalid_res_props = [
+                f"resources.{key}.{prop}" for prop in resource.get_invalid_properties()
+            ]
+            invalid_props.extend(invalid_res_props)
+
+        return invalid_props
