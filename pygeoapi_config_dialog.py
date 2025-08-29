@@ -22,6 +22,7 @@
  ***************************************************************************/
 """
 
+from datetime import datetime, timezone
 import os
 import yaml
 
@@ -96,13 +97,30 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
         self.ui_setter = UiSetter(self)
         self.data_from_ui_setter = DataSetterFromUi(self)
 
+        class CustomDumper(yaml.SafeDumper):
+            pass
+
+        self.dumper = CustomDumper
+
         # make sure InlineList is represented as a YAML sequence (e.g. for 'bbox')
-        yaml.add_representer(
+        self.dumper.add_representer(
             InlineList,
             lambda dumper, data: dumper.represent_sequence(
                 "tag:yaml.org,2002:seq", data, flow_style=True
             ),
         )
+
+        def represent_datetime_as_timestamp(dumper, data: datetime):
+            # normalize to UTC and format with Z
+            if data.tzinfo is None:
+                data = data.replace(tzinfo=timezone.utc)
+            else:
+                data = data.astimezone(timezone.utc)
+            value = data.strftime("%Y-%m-%dT%H:%M:%SZ")
+            # emit as YAML timestamp → plain scalar, no quotes
+            return dumper.represent_scalar("tag:yaml.org,2002:timestamp", value)
+
+        self.dumper.add_representer(datetime, represent_datetime_as_timestamp)
 
         # custom assignments
         self.model = QStringListModel()
@@ -145,6 +163,7 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
                     yaml.dump(
                         self.config_data.asdict_enum_safe(self.config_data),
                         file,
+                        Dumper=self.dumper,
                         default_flow_style=False,
                         sort_keys=False,
                         allow_unicode=True,
