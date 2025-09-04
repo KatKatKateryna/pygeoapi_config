@@ -25,4 +25,4 @@ jobs:
         env:
           QT_QPA_PLATFORM: offscreen
         run: |
-          python -m pytest --import-mode=importlib -q
+          python -m pytest -s --import-mode=importlib -q
