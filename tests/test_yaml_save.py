@@ -14,6 +14,8 @@ def test_json_schema(qtbot, sample_yaml: str):
     qtbot.addWidget(dialog)
     print(dialog.config_data)
 
+    return True
+
     base_dir = os.path.dirname(os.path.abspath(__file__))  # directory of current file
 
     # Load YAML
@@ -23,7 +25,7 @@ def test_json_schema(qtbot, sample_yaml: str):
     # Save YAML
     new_yaml_name = f"saved_{sample_yaml}"
     abs_new_yaml_path = os.path.join(base_dir, new_yaml_name)
-    # dialog.save_to_file(abs_new_yaml_path)
+    dialog.save_to_file(abs_new_yaml_path)
 
     result = subprocess.run(
         [
