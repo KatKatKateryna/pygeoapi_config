@@ -130,31 +130,7 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
         self.ui_setter.set_ui_from_data()
         self.ui_setter.setup_map_widget()
 
-    def save_to_file(self):
-        # Set and validate data from UI
-        try:
-            self.data_from_ui_setter.set_data_from_ui()
-            invalid_props = self.config_data.validate_config_data()
-            if len(invalid_props) > 0:
-                QgsMessageLog.logMessage(
-                    f"Properties are missing or have invalid values: {invalid_props}"
-                )
-                ReadOnlyTextDialog(
-                    self,
-                    "Warning",
-                    f"Properties are missing or have invalid values: {invalid_props}",
-                ).exec_()
-                return
-
-        except Exception as e:
-            QgsMessageLog.logMessage(f"Error deserializing: {e}")
-            QMessageBox.warning(f"Error deserializing: {e}")
-            return
-
-        # Open dialog to set file path
-        file_path, _ = QFileDialog.getSaveFileName(
-            self, "Save File", "", "YAML Files (*.yml);;All Files (*)"
-        )
+    def save_to_file(self, file_path):
 
         if file_path:
             QApplication.setOverrideCursor(Qt.WaitCursor)
@@ -175,13 +151,13 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
             finally:
                 QApplication.restoreOverrideCursor()
 
-    def open_file(self):
-        file_name, _ = QFileDialog.getOpenFileName(
-            self, "Open File", "", "YAML Files (*.yml);;All Files (*)"
-        )
+    def open_file(self, file_name):
 
         if not file_name:
             return
+
+        # exit Resource view
+        self.exit_resource_edit()
 
         try:
             # QApplication.setOverrideCursor(Qt.WaitCursor)
@@ -226,11 +202,39 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
 
         # You can also check the standard button type
         if button == self.buttonBox.button(QDialogButtonBox.Save):
-            self.save_to_file()
+            self._validate_ui_data()
+            file_path, _ = QFileDialog.getSaveFileName(
+                self, "Save File", "", "YAML Files (*.yml);;All Files (*)"
+            )
+            self.save_to_file(file_path)
         elif button == self.buttonBox.button(QDialogButtonBox.Open):
-            self.open_file()
+            file_name, _ = QFileDialog.getOpenFileName(
+                self, "Open File", "", "YAML Files (*.yml);;All Files (*)"
+            )
+            self.open_file(file_name)
         elif button == self.buttonBox.button(QDialogButtonBox.Close):
             self.reject()
+
+    def _validate_ui_data(self):
+        # Set and validate data from UI
+        try:
+            self.data_from_ui_setter.set_data_from_ui()
+            invalid_props = self.config_data.validate_config_data()
+            if len(invalid_props) > 0:
+                QgsMessageLog.logMessage(
+                    f"Properties are missing or have invalid values: {invalid_props}"
+                )
+                ReadOnlyTextDialog(
+                    self,
+                    "Warning",
+                    f"Properties are missing or have invalid values: {invalid_props}",
+                ).exec_()
+                return
+
+        except Exception as e:
+            QgsMessageLog.logMessage(f"Error deserializing: {e}")
+            QMessageBox.warning(f"Error deserializing: {e}")
+            return
 
     def open_templates_path_dialog(self):
         """Defining Server.templates.path path, called from .ui file."""
