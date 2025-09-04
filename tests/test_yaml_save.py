@@ -3,7 +3,7 @@ import pytest
 from PyQt5.QtWidgets import QApplication
 import subprocess
 
-from ..pygeoapi_config_dialog import PygeoapiConfigDialog
+from pygeoapi_config_dialog import PygeoapiConfigDialog
 
 
 @pytest.fixture(scope="session")
@@ -13,6 +13,7 @@ def qapp():
     if app is None:
         app = QApplication([])
     return app
+
 
 @pytest.mark.parametrize("sample_yaml", ["docker.config.yml"])
 def test_json_schema(sample_yaml: str):
