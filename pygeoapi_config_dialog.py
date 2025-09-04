@@ -40,14 +40,13 @@ from .models.top_level.utils import (
 )
 from .models.top_level.utils import STRING_SEPARATOR
 
+from PyQt5 import QtWidgets, uic
 from PyQt5.QtWidgets import (
     QMainWindow,
     QFileDialog,
     QMessageBox,
     QDialogButtonBox,
     QApplication,
-    QtWidgets,
-    uic,
 )  # or PyQt6.QtWidgets
 
 from PyQt5.QtCore import (
