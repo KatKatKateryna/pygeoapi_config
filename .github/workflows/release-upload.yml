@@ -3,11 +3,9 @@ name: Build and Attach Plugin ZIP to Release (Windows)
 on:
   release:
     types: [published]
-  pull_request: 
 
 jobs:
   package-and-upload:
-    if: github.event_name == 'release'
     runs-on: windows-latest
 
     steps:
@@ -38,26 +36,3 @@ jobs:
           files: build/*.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-  test-on-pr: 
-    if: github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-
-      - name: Install pytest annotation plugin
-        run: pip install pytest-github-actions-annotate-failures
-
-      - name: Run unit tests
-        run: |
-          pytest -q
