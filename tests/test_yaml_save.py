@@ -9,19 +9,19 @@ from ..pygeoapi_config_dialog import PygeoapiConfigDialog
 def test_json_schema(qtbot, sample_yaml: str):
     """Validate YAML against schema.json after loading and saving."""
 
-    print("_______________PRINT MSG______________")
+    print("_______________PRINT MSG______________", flush=True)
     # Create the dialog widget and let qtbot manage it
     dialog = PygeoapiConfigDialog()
     qtbot.addWidget(dialog)
 
-    print(dialog.config_data.server.url)
+    print(dialog.config_data.server.url, flush=True)
 
     base_dir = os.path.dirname(os.path.abspath(__file__))  # directory of current file
 
     # Load YAML
     abs_yaml_path = os.path.join(base_dir, sample_yaml)
     dialog.open_file(abs_yaml_path)  # now dialog.config_data has the data stored
-    print(dialog.config_data)
+    print(dialog.config_data, flush=True)
     assert True
 
     # Save YAML
