@@ -22,26 +22,67 @@
  ***************************************************************************/
 """
 
+from datetime import datetime, timezone
 import os
 import yaml
 
-from qgis.PyQt import uic
-from qgis.core import QgsMessageLog
-from qgis.PyQt import QtWidgets
-from PyQt5.QtWidgets import QFileDialog, QMessageBox, QDialogButtonBox, QApplication  # or PyQt6.QtWidgets
-from PyQt5.QtCore import QFile, QTextStream, Qt, QStringListModel, QSortFilterProxyModel  # Not strictly needed, can use Python file API instead
+from .ui_widgets.utils import get_url_status
+
+
+from .models.top_level.providers.records import ProviderTypes
+from .ui_widgets.providers.NewProviderWindow import NewProviderWindow
+from .ui_widgets.WarningDialog import ReadOnlyTextDialog
+from .ui_widgets import DataSetterFromUi, UiSetter
+from .models.ConfigData import ConfigData
+from .models.top_level.utils import (
+    InlineList,
+    get_enum_value_from_string,
+)
+from .models.top_level.utils import STRING_SEPARATOR
+
+from PyQt5.QtWidgets import (
+    QMainWindow,
+    QFileDialog,
+    QMessageBox,
+    QDialogButtonBox,
+    QApplication,
+)  # or PyQt6.QtWidgets
+
+from PyQt5.QtCore import (
+    Qt,
+    QModelIndex,
+    QStringListModel,
+    QSortFilterProxyModel,
+)  # Not strictly needed, can use Python file API instead
+
+from qgis.core import (
+    QgsMessageLog,
+    QgsRasterLayer,
+    QgsVectorLayer,
+)
+
+from qgis.gui import QgsMapCanvas
+from qgis.PyQt import QtWidgets, uic
 
 
 # This loads your .ui file so that PyQt can populate your plugin with the elements from Qt Designer
-FORM_CLASS, _ = uic.loadUiType(os.path.join(
-    os.path.dirname(__file__), 'pygeoapi_config_dialog_base.ui'))
+FORM_CLASS, _ = uic.loadUiType(
+    os.path.join(os.path.dirname(__file__), "pygeoapi_config_dialog_base.ui")
+)
 
 
 class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
 
+    config_data: ConfigData
+    ui_setter: UiSetter
+    data_from_ui_setter: DataSetterFromUi
+    current_res_name = ""
 
-    yaml_str = ""
-    curCol = ""
+    # these need to be class properties, otherwise, without constant reference, they are not displayed in a widget
+    provider_window: QMainWindow
+    bbox_map_canvas: QgsMapCanvas
+    bbox_base_layer: QgsRasterLayer
+    bbox_extents_layer: QgsVectorLayer
 
     def __init__(self, parent=None):
         """Constructor."""
@@ -52,6 +93,131 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
         # http://qt-project.org/doc/qt-4.8/designer-using-a-ui-file.html
         # #widgets-and-dialogs-with-auto-connect
         self.setupUi(self)
+        self.config_data = ConfigData()
+        self.ui_setter = UiSetter(self)
+        self.data_from_ui_setter = DataSetterFromUi(self)
+
+        class CustomDumper(yaml.SafeDumper):
+            pass
+
+        self.dumper = CustomDumper
+
+        # make sure InlineList is represented as a YAML sequence (e.g. for 'bbox')
+        self.dumper.add_representer(
+            InlineList,
+            lambda dumper, data: dumper.represent_sequence(
+                "tag:yaml.org,2002:seq", data, flow_style=True
+            ),
+        )
+
+        def represent_datetime_as_timestamp(dumper, data: datetime):
+            # normalize to UTC and format with Z
+            if data.tzinfo is None:
+                data = data.replace(tzinfo=timezone.utc)
+            else:
+                data = data.astimezone(timezone.utc)
+            value = data.strftime("%Y-%m-%dT%H:%M:%SZ")
+            # emit as YAML timestamp → plain scalar, no quotes
+            return dumper.represent_scalar("tag:yaml.org,2002:timestamp", value)
+
+        self.dumper.add_representer(datetime, represent_datetime_as_timestamp)
+
+        # custom assignments
+        self.model = QStringListModel()
+        self.proxy = QSortFilterProxyModel()
+
+        self.ui_setter.customize_ui_on_launch()
+        self.ui_setter.set_ui_from_data()
+        self.ui_setter.setup_map_widget()
+
+    def save_to_file(self):
+        # Set and validate data from UI
+        try:
+            self.data_from_ui_setter.set_data_from_ui()
+            invalid_props = self.config_data.validate_config_data()
+            if len(invalid_props) > 0:
+                QgsMessageLog.logMessage(
+                    f"Properties are missing or have invalid values: {invalid_props}"
+                )
+                ReadOnlyTextDialog(
+                    self,
+                    "Warning",
+                    f"Properties are missing or have invalid values: {invalid_props}",
+                ).exec_()
+                return
+
+        except Exception as e:
+            QgsMessageLog.logMessage(f"Error deserializing: {e}")
+            QMessageBox.warning(f"Error deserializing: {e}")
+            return
+
+        # Open dialog to set file path
+        file_path, _ = QFileDialog.getSaveFileName(
+            self, "Save File", "", "YAML Files (*.yml);;All Files (*)"
+        )
+
+        if file_path:
+            QApplication.setOverrideCursor(Qt.WaitCursor)
+            try:
+                with open(file_path, "w", encoding="utf-8") as file:
+                    yaml.dump(
+                        self.config_data.asdict_enum_safe(self.config_data),
+                        file,
+                        Dumper=self.dumper,
+                        default_flow_style=False,
+                        sort_keys=False,
+                        allow_unicode=True,
+                        indent=4,
+                    )
+                QgsMessageLog.logMessage(f"File saved to: {file_path}")
+            except Exception as e:
+                QgsMessageLog.logMessage(f"Error saving file: {e}")
+            finally:
+                QApplication.restoreOverrideCursor()
+
+    def open_file(self):
+        file_name, _ = QFileDialog.getOpenFileName(
+            self, "Open File", "", "YAML Files (*.yml);;All Files (*)"
+        )
+
+        if not file_name:
+            return
+
+        try:
+            # QApplication.setOverrideCursor(Qt.WaitCursor)
+            with open(file_name, "r", encoding="utf-8") as file:
+                file_content = file.read()
+
+                # reset data
+                self.config_data = ConfigData()
+                self.config_data.set_data_from_yaml(yaml.safe_load(file_content))
+                self.ui_setter.set_ui_from_data()
+
+                # log messages about missing or mistyped values during deserialization
+                QgsMessageLog.logMessage(
+                    f"Errors during deserialization: {self.config_data.error_message}"
+                )
+                QgsMessageLog.logMessage(
+                    f"Default values used for missing YAML fields: {self.config_data.defaults_message}"
+                )
+
+                # summarize all properties missing/overwitten with defaults
+                # atm, warning with the full list of properties
+                all_missing_props = self.config_data.all_missing_props
+                QgsMessageLog.logMessage(
+                    f"All missing or replaced properties: {self.config_data.all_missing_props}"
+                )
+                if len(all_missing_props) > 0:
+                    ReadOnlyTextDialog(
+                        self,
+                        "Warning",
+                        f"All missing or replaced properties (check logs for more details): {self.config_data.all_missing_props}",
+                    ).exec_()
+
+        except Exception as e:
+            QMessageBox.warning(self, "Error", f"Cannot open file:\n{str(e)}")
+        # finally:
+        #     QApplication.restoreOverrideCursor()
 
     def on_button_clicked(self, button):
 
@@ -66,174 +232,280 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
         elif button == self.buttonBox.button(QDialogButtonBox.Close):
             self.reject()
 
+    def open_templates_path_dialog(self):
+        """Defining Server.templates.path path, called from .ui file."""
+
+        folder_path = QFileDialog.getExistingDirectory(None, "Select Folder")
+
+        if folder_path:
+            self.lineEditTemplatesPath.setText(folder_path)
+
+    def open_templates_static_dialog(self):
+        """Defining Server.templates.static path, called from .ui file."""
+
+        folder_path = QFileDialog.getExistingDirectory(None, "Select Folder")
+
+        if folder_path:
+            self.lineEditTemplatesStatic.setText(folder_path)
 
     def open_logfile_dialog(self):
+        """Defining Logging.logfile path, called from .ui file."""
 
-        logFile = QFileDialog.getSaveFileName(self, "Save Log","", "log Files (*.log);;All Files (*)")
+        logFile = QFileDialog.getSaveFileName(
+            self, "Save Log", "", "log Files (*.log);;All Files (*)"
+        )
 
         if logFile:
-             print(f"path: {logFile}")
-             self.lineEditLogfile.setText(logFile[0])
+            self.lineEditLogfile.setText(logFile[0])
 
-    def write_yaml(self):
+    #################################################################
+    ################## methods that are called from .ui file:
+    #################################################################
 
-        try:
+    def add_metadata_id_title(self):
+        """Add title to metadata, called from .ui file."""
+        self.ui_setter.add_listwidget_element_from_lineedit(
+            line_edit_widget=self.addMetadataIdTitleLineEdit,
+            list_widget=self.listWidgetMetadataIdTitle,
+            locale_combobox=self.comboBoxIdTitleLocale,
+            allow_repeated_locale=False,
+            sort=True,
+        )
 
-            # bind
-            self.yaml_str['server']['bind']['host'] = self.lineEditHost.text()
-            self.yaml_str['server']['bind']['port'] = self.spinBoxPort.value()
+    def add_metadata_id_description(self):
+        """Add description to metadata, called from .ui file."""
+        self.ui_setter.add_listwidget_element_from_lineedit(
+            line_edit_widget=self.addMetadataIdDescriptionLineEdit,
+            list_widget=self.listWidgetMetadataIdDescription,
+            locale_combobox=self.comboBoxIdDescriptionLocale,
+            allow_repeated_locale=False,
+            sort=True,
+        )
 
-            # gzip
-            self.yaml_str['server']['gzip'] = self.checkBoxGzip.isChecked()
+    def add_metadata_keyword(self):
+        """Add keyword to metadata, called from .ui file."""
+        self.ui_setter.add_listwidget_element_from_lineedit(
+            line_edit_widget=self.addMetadataKeywordLineEdit,
+            list_widget=self.listWidgetMetadataIdKeywords,
+            locale_combobox=self.comboBoxKeywordsLocale,
+            allow_repeated_locale=True,
+            sort=True,
+        )
 
-            # pretty print
-            self.yaml_str['server']['pretty_print'] = self.checkBoxPretty.isChecked()
-            
-            # admin
-            self.yaml_str['server']['admin']=self.checkBoxAdmin.isChecked()
+    def add_res_title(self):
+        """Called from .ui file."""
+        self.ui_setter.add_listwidget_element_from_lineedit(
+            line_edit_widget=self.addResTitleLineEdit,
+            list_widget=self.listWidgetResTitle,
+            locale_combobox=self.comboBoxResTitleLocale,
+            allow_repeated_locale=False,
+            sort=True,
+        )
 
-            # cors
-            self.yaml_str['server']['cors']=self.checkBoxCors.isChecked()
+    def add_res_description(self):
+        """Called from .ui file."""
+        self.ui_setter.add_listwidget_element_from_lineedit(
+            line_edit_widget=self.addResDescriptionLineEdit,
+            list_widget=self.listWidgetResDescription,
+            locale_combobox=self.comboBoxResDescriptionLocale,
+            allow_repeated_locale=False,
+            sort=True,
+        )
 
-            # map
-            self.yaml_str['server']['map']['url'] = self.lineEditMapUrl.text()
-            self.yaml_str['server']['map']['attribution'] = self.lineEditAttribution.text()
+    def add_res_keyword(self):
+        """Called from .ui file."""
+        self.ui_setter.add_listwidget_element_from_lineedit(
+            line_edit_widget=self.addResKeywordsLineEdit,
+            list_widget=self.listWidgetResKeywords,
+            locale_combobox=self.comboBoxResKeywordsLocale,
+            allow_repeated_locale=True,
+            sort=True,
+        )
 
-            # url
-            self.yaml_str['server']['url'] = self.lineEditUrl.text()
+    def add_res_link(self):
+        """Called from .ui file."""
+        self.ui_setter.add_listwidget_element_from_multi_widgets(
+            line_widgets_mandatory=[
+                self.addResLinksTypeLineEdit,
+                self.addResLinksRelLineEdit,
+                self.addResLinksHrefLineEdit,
+            ],
+            line_widgets_optional=[
+                self.addResLinksTitleLineEdit,
+                self.addResLinkshreflangComboBox,
+                self.addResLinksLengthLineEdit,
+            ],
+            list_widget=self.listWidgetResLinks,
+            sort=False,
+        )
 
-            # language
-            self.yaml_str['server']['languages']=[]
-            for i in range(self.listWidgetLang.count()):
-                item = self.listWidgetLang.item(i)
-                if item.isSelected():
-                    self.yaml_str['server']['languages'].append(item.text())
+    def try_add_res_provider(self, provider_index=None, data: list[str] | None = None):
+        """Called from .ui file, and from this class."""
+        provider_type: ProviderTypes = get_enum_value_from_string(
+            ProviderTypes, self.comboBoxResProviderType.currentText().lower()
+        )
 
-            # limits
-            self.yaml_str['server']['limits']['default_items'] = self.spinBoxDefault.value()
-            self.yaml_str['server']['limits']['max_items'] = self.spinBoxMax.value()
+        if not data:
+            self.provider_window = NewProviderWindow(provider_type)
+            provider_index = None
 
-            self.yaml_str['server']['limits']['on_exceed'] = self.comboBoxExceed.currentText()
+        else:
+            # if the window is triggered for editing, ignore widget provider type and read it from data instead
+            provider_type = get_enum_value_from_string(ProviderTypes, data[0])
+            self.provider_window = NewProviderWindow(provider_type, data[1:])
 
-            # logging
-            self.yaml_str['logging']['level'] = self.comboBoxLog.currentText()
-            self.yaml_str['logging']['logfile'] = self.lineEditLogfile.text()
+        # add or replace provider data to ConfigData when user clicks 'Add'
+        self.provider_window.signal_provider_values.connect(
+            lambda provider_window, values: self._validate_and_add_res_provider(
+                provider_window, values, provider_type, provider_index
+            )
+        )
 
-        except Exception as e:
-            QgsMessageLog.logMessage(f"Error deserializing: {e}")
+    def _validate_and_add_res_provider(
+        self, provider_window, values, provider_type, provider_index: int | None = None
+    ):
+        """Calls the Provider validation method and displays a warning if data is invalid."""
+        invalid_fields = self.config_data.set_validate_new_provider_data(
+            values, self.current_res_name, provider_type, provider_index
+        )
 
-    def save_to_file(self):
+        self.ui_setter.set_providers_ui_from_data(
+            self.config_data.resources[self.current_res_name]
+        )
+        if len(invalid_fields) > 0:
+            QMessageBox.warning(
+                provider_window,
+                "Warning",
+                f"Invalid Provider values: {invalid_fields}",
+            )
+        else:
+            self.provider_window.signal_provider_close.emit()
 
-        file_path, _ = QFileDialog.getSaveFileName(self, "Save File", "", "YAML Files (*.yml);;All Files (*)")
+    def validate_res_extents_crs(self):
+        """Called from .ui file."""
+        url = self.data_from_ui_setter.get_extents_crs_from_ui(self)
+        get_url_status(url, self)
 
-        if file_path:
-            QApplication.setOverrideCursor(Qt.WaitCursor)
-            try:
-                with open(file_path, 'w', encoding='utf-8') as file:
-                    self.write_yaml()
-                    yaml.dump(self.yaml_str, file)
-                QgsMessageLog.logMessage(f"File saved to: {file_path}")
-            except Exception as e:
-                QgsMessageLog.logMessage(f"Error saving file: {e}")
-            finally:
-                QApplication.restoreOverrideCursor()
+    def delete_metadata_id_title(self):
+        """Delete keyword from metadata, called from .ui file."""
+        self.ui_setter.delete_list_widget_selected_item(self.listWidgetMetadataIdTitle)
 
-    def open_file(self):
-        file_name, _ = QFileDialog.getOpenFileName(self, "Open File", "", "YAML Files (*.yml);;All Files (*)")
-        
-        if not file_name:
-            return
+    def delete_metadata_id_description(self):
+        """Delete keyword from metadata, called from .ui file."""
+        self.ui_setter.delete_list_widget_selected_item(
+            self.listWidgetMetadataIdDescription
+        )
 
-        try:
-            QApplication.setOverrideCursor(Qt.WaitCursor)
-            with open(file_name, 'r', encoding='utf-8') as file:
-                file_content = file.read()
-                self.yaml_str = yaml.safe_load(file_content)
+    def delete_metadata_keyword(self):
+        """Delete keyword from metadata, called from .ui file."""
+        self.ui_setter.delete_list_widget_selected_item(
+            self.listWidgetMetadataIdKeywords
+        )
 
-                self.read_yaml(self.yaml_str)
-                
-        except Exception as e:
-            QMessageBox.warning(self, "Error", f"Cannot open file:\n{str(e)}")
-        finally:
-            QApplication.restoreOverrideCursor()
+    def delete_res_title(self):
+        """Called from .ui file."""
+        self.ui_setter.delete_list_widget_selected_item(self.listWidgetResTitle)
 
-    def select_items_by_text(list_widget, texts_to_select):
-        for i in range(list_widget.count()):
-            item = list_widget.item(i)
-            if item.text() in texts_to_select:
-                item.setSelected(True)
+    def delete_res_description(self):
+        """Called from .ui file."""
+        self.ui_setter.delete_list_widget_selected_item(self.listWidgetResDescription)
 
-    def read_yaml(self, text):
+    def delete_res_keyword(self):
+        """Called from .ui file."""
+        self.ui_setter.delete_list_widget_selected_item(self.listWidgetResKeywords)
 
-        # bind
-        self.lineEditHost.setText(text['server']['bind']['host'])
-        self.spinBoxPort.setValue(text['server']['bind']['port'])
+    def delete_res_link(self):
+        """Called from .ui file."""
+        self.ui_setter.delete_list_widget_selected_item(self.listWidgetResLinks)
 
-        # gzip
-        self.checkBoxGzip.setChecked(text['server']['gzip'])
+    def edit_res_provider(self):
+        """Called from .ui file."""
+        selected_items = self.listWidgetResProvider.selectedItems()
+        if selected_items:
+            item = selected_items[0]  # get the first (and only) selected item
+            data_list = item.text().split(STRING_SEPARATOR)
+            self.try_add_res_provider(self.listWidgetResProvider.row(item), data_list)
 
-        # pretty print
-        self.checkBoxPretty.setChecked(text['server']['pretty_print'])
+    def delete_res_provider(self):
+        """Called from .ui file."""
 
-        # admin
-        self.checkBoxAdmin.setChecked(text['server']['admin'])
-
-        # cors
-        self.checkBoxCors.setChecked(text['server']['cors'])
-
-        # map
-        self.lineEditMapUrl.setText(text['server']['map']['url'])
-        self.lineEditAttribution.setText(text['server']['map']['attribution'])
-
-        self.lineEditUrl.setText(text['server']['url'])
-
-        # language
-        for i in range(self.listWidgetLang.count()):
-            item = self.listWidgetLang.item(i)
-            if item.text() in text['server']['languages']:
-                item.setSelected(True)
-
-        # limits
-        self.spinBoxDefault.setValue(text['server']['limits']['default_items'])
-        self.spinBoxMax.setValue(text['server']['limits']['max_items'])
-
-        for i in range(self.comboBoxExceed.count()):
-            if self.comboBoxExceed.itemText(i) == text['server']['limits']['on_exceed']:
-                self.comboBoxExceed.setCurrentText(text['server']['limits']['on_exceed'])
-                break
-
-        # logging
-        for i in range(self.comboBoxLog.count()):
-            if self.comboBoxLog.itemText(i) in text['logging']['level']:
-                self.comboBoxLog.setCurrentText(self.comboBoxLog.itemText(i))
-
-        self.lineEditLogfile.setText(text['logging']['logfile'])
-
-        # collections
-        self.model = QStringListModel()
-        self.model.setStringList(text['resources'])
-
-        self.proxy = QSortFilterProxyModel()
-        self.proxy.setSourceModel(self.model)
-        self.listViewCollection.setModel(self.proxy)
-
-        self.yaml_str = text
+        # first, get selected item text and delete matching provider from Resource providers
+        self.data_from_ui_setter.delete_selected_provider_type_and_name(
+            self.listWidgetResProvider
+        )
+        # then, remove the item from the list widget
+        self.ui_setter.delete_list_widget_selected_item(self.listWidgetResProvider)
 
     def filterResources(self, filter):
+        """Called from .ui."""
         self.proxy.setDynamicSortFilter(True)
         self.proxy.setFilterFixedString(filter)
 
-    def loadCollection(self, index):
-        self.lineEditTitle.setText(self.yaml_str['resources'][index.data()]['title'])
-        self.lineEditDescription.setText(self.yaml_str['resources'][index.data()]['description'])
-        self.curCol = index.data()
+    def exit_resource_edit(self):
+        """Switch widgets to Preview, reset selected resource. Called from .ui and from this class too."""
+        # hide detailed collection UI, show preview
+        self.groupBoxCollectionLoaded.hide()
+        self.groupBoxCollectionSelect.show()
+        self.groupBoxCollectionPreview.show()
+        self.ui_setter.refresh_resources_list_ui()
 
-    def editCollectionTitle(self,value):
-        QgsMessageLog.logMessage(f"Current collection - title: {self.curCol}")
-        self.yaml_str['resources'][self.curCol]['title'] = value
+    def save_resource_edit_and_preview(self):
+        """Save current changes to the resource data, reset widgets to Preview. Called from .ui."""
 
-    def editCollectionDescription(self, value):
-        QgsMessageLog.logMessage(f"Current collection - desc: {self.curCol}")
-        self.yaml_str['resources'][self.curCol]['description'] = value
+        invalid_fields = self.data_from_ui_setter.get_invalid_resource_ui_fields()
+        if len(invalid_fields) > 0:
+            QMessageBox.warning(
+                self,
+                "Warning",
+                f"Invalid fields' values: {invalid_fields}",
+            )
+            return
 
-        
+        self.data_from_ui_setter.set_resource_data_from_ui()
+
+        # reset the current resource name, refresh UI list
+        self.current_res_name = self.lineEditResAlias.text()
+        self.exit_resource_edit()
+
+    def preview_resource(self, model_index: QModelIndex = None):
+        """Display basic Resource info, called from .ui."""
+        self.ui_setter.preview_resource(model_index)
+
+    def delete_resource(self):
+        """Delete selected resource. Called from .ui."""
+        # hide detailed collection UI, show preview
+        self.config_data.delete_resource(self)
+        self.ui_setter.preview_resource()
+        self.ui_setter.refresh_resources_list_ui()
+        self.current_res_name = ""
+
+    def new_resource(self):
+        """Called from .ui."""
+        # add resource and reload UI
+        new_name = self.config_data.add_new_resource()
+        self.ui_setter.refresh_resources_list_ui()
+
+        # visually select new resource
+        self.ui_setter.select_listcollection_item_by_text(new_name)
+
+        # set new resource as current and load details
+        self.current_res_name = new_name
+        self.load_resource()
+
+    def load_resource(self):
+        """Called from .ui and from this class too."""
+
+        # if no resource selected, do nothing
+        if self.current_res_name == "":
+            return
+
+        # hide preview collection UI, show detailed UI
+        self.groupBoxCollectionPreview.hide()
+        self.groupBoxCollectionSelect.hide()
+        self.groupBoxCollectionLoaded.show()
+
+        res_data = self.config_data.resources[self.current_res_name]
+        # self.ui_setter.setup_resouce_loaded_ui(res_data)
+
+        # set the values to UI widgets
+        self.ui_setter.set_resource_ui_from_data(res_data)
