@@ -46,6 +46,8 @@ from PyQt5.QtWidgets import (
     QMessageBox,
     QDialogButtonBox,
     QApplication,
+    QtWidgets,
+    uic,
 )  # or PyQt6.QtWidgets
 
 from PyQt5.QtCore import (
@@ -64,7 +66,6 @@ try:
     )
 
     from qgis.gui import QgsMapCanvas
-    from qgis.PyQt import QtWidgets, uic
 except:
     pass
 
