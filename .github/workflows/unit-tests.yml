@@ -23,4 +23,4 @@ jobs:
         run: pip install pytest-github-actions-annotate-failures
 
       - name: Run unit tests
-        run: PYTHONPATH=${{ github.workspace }} python -m pytest
+        run: PYTHONPATH=${{ github.workspace }} python -m pytest --import-mode=importlib

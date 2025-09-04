@@ -3,11 +3,7 @@ import pytest
 from PyQt5.QtWidgets import QApplication
 import subprocess
 
-import sys
-
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-
-from pygeoapi_config_dialog import PygeoapiConfigDialog
+from ..pygeoapi_config_dialog import PygeoapiConfigDialog
 
 
 @pytest.fixture(scope="session")
