@@ -8,7 +8,7 @@ from ..pygeoapi_config_dialog import PygeoapiConfigDialog
 @pytest.mark.parametrize("sample_yaml", ["docker.config.yml"])
 def test_json_schema(qtbot, sample_yaml: str):
     """Validate YAML against schema.json after loading and saving."""
-
+    print(qtbot)
     # Create the dialog widget and let qtbot manage it
     dialog = PygeoapiConfigDialog()
     qtbot.addWidget(dialog)
@@ -21,8 +21,8 @@ def test_json_schema(qtbot, sample_yaml: str):
     # dialog.open_file(abs_yaml_path)  # now dialog.config_data has the data stored
 
     # Save YAML
-    # new_yaml_name = f"saved_{sample_yaml}"
-    # abs_new_yaml_path = os.path.join(base_dir, new_yaml_name)
+    new_yaml_name = f"saved_{sample_yaml}"
+    abs_new_yaml_path = os.path.join(base_dir, new_yaml_name)
     # dialog.save_to_file(abs_new_yaml_path)
 
     result = subprocess.run(
