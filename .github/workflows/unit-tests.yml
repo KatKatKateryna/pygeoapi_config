@@ -19,12 +19,6 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Install pytest annotation plugin
-        run: pip install pytest-github-actions-annotate-failures
-
-      - name: Install Pytest Qt
-        run: pip install pytest-qt
-
       - name: Install xvfb
         run: sudo apt-get install xvfb
 
