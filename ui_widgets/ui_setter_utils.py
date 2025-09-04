@@ -1,15 +1,20 @@
 from enum import Enum
 from ..models.top_level.utils import STRING_SEPARATOR, is_valid_string
-from qgis.gui import QgsMapCanvas
-from qgis.core import (
-    QgsRasterLayer,
-    QgsVectorLayer,
-    QgsFeature,
-    QgsGeometry,
-    QgsRectangle,
-    QgsCoordinateReferenceSystem,
-    QgsFillSymbol,
-)
+
+# make imports optional for pytests
+try:
+    from qgis.gui import QgsMapCanvas
+    from qgis.core import (
+        QgsRasterLayer,
+        QgsVectorLayer,
+        QgsFeature,
+        QgsGeometry,
+        QgsRectangle,
+        QgsCoordinateReferenceSystem,
+        QgsFillSymbol,
+    )
+except:
+    pass
 
 
 def fill_combo_box(combo_box, enum_class):

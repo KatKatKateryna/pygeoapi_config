@@ -55,14 +55,18 @@ from PyQt5.QtCore import (
     QSortFilterProxyModel,
 )  # Not strictly needed, can use Python file API instead
 
-from qgis.core import (
-    QgsMessageLog,
-    QgsRasterLayer,
-    QgsVectorLayer,
-)
+# make imports optional for pytests
+try:
+    from qgis.core import (
+        QgsMessageLog,
+        QgsRasterLayer,
+        QgsVectorLayer,
+    )
 
-from qgis.gui import QgsMapCanvas
-from qgis.PyQt import QtWidgets, uic
+    from qgis.gui import QgsMapCanvas
+    from qgis.PyQt import QtWidgets, uic
+except:
+    pass
 
 
 # This loads your .ui file so that PyQt can populate your plugin with the elements from Qt Designer

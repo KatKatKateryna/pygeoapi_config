@@ -38,11 +38,15 @@ from PyQt5.QtCore import (
 )
 from PyQt5.QtWidgets import QMessageBox
 
-from qgis.gui import QgsMapCanvas
-from qgis.core import (
-    QgsRasterLayer,
-    QgsCoordinateReferenceSystem,
-)
+# make imports optional for pytests
+try:
+    from qgis.gui import QgsMapCanvas
+    from qgis.core import (
+        QgsRasterLayer,
+        QgsCoordinateReferenceSystem,
+    )
+except:
+    pass
 
 if TYPE_CHECKING:
     # preserve type checking, but don't import in runtime to avoid circular import
