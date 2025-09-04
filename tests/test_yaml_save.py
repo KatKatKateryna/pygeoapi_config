@@ -13,13 +13,12 @@ def test_json_schema(qtbot, sample_yaml: str):
     dialog = PygeoapiConfigDialog()
     qtbot.addWidget(dialog)
 
-    print(dialog.config_data.server.url, flush=True)
-
     base_dir = os.path.dirname(os.path.abspath(__file__))  # directory of current file
 
     # Load YAML
     abs_yaml_path = os.path.join(base_dir, sample_yaml)
-    print(dialog.config_data.server.url, flush=True)
+    print(abs_yaml_path, flush=True)
+
     dialog.open_file(abs_yaml_path)  # now dialog.config_data has the data stored
     print(dialog.config_data.server.url, flush=True)
     assert True

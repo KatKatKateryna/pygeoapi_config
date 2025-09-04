@@ -167,6 +167,7 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
             # QApplication.setOverrideCursor(Qt.WaitCursor)
             with open(file_name, "r", encoding="utf-8") as file:
                 file_content = file.read()
+                print(file_content, flush=True)
 
                 # reset data
                 self.config_data = ConfigData()
