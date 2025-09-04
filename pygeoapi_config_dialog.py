@@ -167,12 +167,13 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
             # QApplication.setOverrideCursor(Qt.WaitCursor)
             with open(file_name, "r", encoding="utf-8") as file:
                 file_content = file.read()
-                print(file_content, flush=True)
 
                 # reset data
                 self.config_data = ConfigData()
                 self.config_data.set_data_from_yaml(yaml.safe_load(file_content))
+                print(file_name, flush=True)
                 self.ui_setter.set_ui_from_data()
+                print(file_name, flush=True)
 
                 # log messages about missing or mistyped values during deserialization
                 QgsMessageLog.logMessage(
