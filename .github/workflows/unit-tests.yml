@@ -22,8 +22,8 @@ jobs:
       - name: Install pytest annotation plugin
         run: pip install pytest-github-actions-annotate-failures
 
-      - name: Install PyQt5 dependencies
-        run: sudo apt-get install -y libxkbcommon-x11-0 libxcb-xinerama0 fontconfig
+      - name: Install Pytest Qt
+        run: pip install pytest-qt
 
       - name: Install xvfb
         run: sudo apt-get install xvfb

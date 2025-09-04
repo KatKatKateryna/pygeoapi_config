@@ -1,25 +1,18 @@
 import os
 import pytest
-from PyQt5.QtWidgets import QApplication
 import subprocess
 
 from ..pygeoapi_config_dialog import PygeoapiConfigDialog
 
 
-@pytest.fixture(scope="session")
-def qapp():
-    """Ensure a QApplication exists for all tests."""
-    app = QApplication.instance()
-    if app is None:
-        app = QApplication([])
-    return app
-
-
 @pytest.mark.parametrize("sample_yaml", ["docker.config.yml"])
-def test_json_schema(sample_yaml: str):
+def test_json_schema(qtbot, sample_yaml: str):
     """Validate YAML against schema.json after loading and saving."""
 
+    # Create the dialog widget and let qtbot manage it
     dialog = PygeoapiConfigDialog()
+    qtbot.addWidget(dialog)
+
     base_dir = os.path.dirname(os.path.abspath(__file__))  # directory of current file
 
     # Load YAML
