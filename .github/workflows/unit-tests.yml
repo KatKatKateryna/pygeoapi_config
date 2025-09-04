@@ -23,5 +23,4 @@ jobs:
         run: pip install pytest-github-actions-annotate-failures
 
       - name: Run unit tests
-        run: |
-          python -m pytest -q
+        run: PYTHONPATH=${{ github.workspace }} python -m pytest
