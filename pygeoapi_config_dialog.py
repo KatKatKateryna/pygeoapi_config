@@ -85,8 +85,8 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
     # these need to be class properties, otherwise, without constant reference, they are not displayed in a widget
     provider_window: QMainWindow
     bbox_map_canvas: "QgsMapCanvas"
-    bbox_base_layer: QgsRasterLayer
-    bbox_extents_layer: QgsVectorLayer
+    bbox_base_layer: "QgsRasterLayer"
+    bbox_extents_layer: "QgsVectorLayer"
 
     def __init__(self, parent=None):
         """Constructor."""
