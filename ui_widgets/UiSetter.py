@@ -441,25 +441,32 @@ class UiSetter:
         self.dialog.addResLinksLengthLineEdit.setValidator(QIntValidator())
 
     def setup_map_widget(self):
-        dialog = self.dialog
+        try:  # using qgis imports, so we should ignore for pytests
+            dialog = self.dialog
 
-        # Define base tile layer (OSM)
-        urlWithParams = "type=xyz&url=https://tile.openstreetmap.org/{z}/{x}/{y}.png"
-        dialog.bbox_base_layer = QgsRasterLayer(urlWithParams, "OpenStreetMap", "wms")
+            # Define base tile layer (OSM)
+            urlWithParams = (
+                "type=xyz&url=https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+            )
+            dialog.bbox_base_layer = QgsRasterLayer(
+                urlWithParams, "OpenStreetMap", "wms"
+            )
 
-        # Create QgsMapCanvas with OSM layer
-        dialog.bbox_map_canvas = QgsMapCanvas()
-        crs = QgsCoordinateReferenceSystem("EPSG:4326")
-        dialog.bbox_map_canvas.setDestinationCrs(crs)
-        dialog.bbox_map_canvas.setCanvasColor(Qt.white)
-        dialog.bbox_map_canvas.setLayers([dialog.bbox_base_layer])
-        dialog.bbox_map_canvas.zoomToFullExtent()
-        # self.canvas.setExtent(layer.extent(), True)
-        # self.canvas.refreshAllLayers()
+            # Create QgsMapCanvas with OSM layer
+            dialog.bbox_map_canvas = QgsMapCanvas()
+            crs = QgsCoordinateReferenceSystem("EPSG:4326")
+            dialog.bbox_map_canvas.setDestinationCrs(crs)
+            dialog.bbox_map_canvas.setCanvasColor(Qt.white)
+            dialog.bbox_map_canvas.setLayers([dialog.bbox_base_layer])
+            dialog.bbox_map_canvas.zoomToFullExtent()
+            # self.canvas.setExtent(layer.extent(), True)
+            # self.canvas.refreshAllLayers()
 
-        # Add QgsMapCanvas as a widget to the Resource Tab
-        clear_layout(dialog.bboxMapPlaceholder)
-        dialog.bboxMapPlaceholder.addWidget(dialog.bbox_map_canvas)
+            # Add QgsMapCanvas as a widget to the Resource Tab
+            clear_layout(dialog.bboxMapPlaceholder)
+            dialog.bboxMapPlaceholder.addWidget(dialog.bbox_map_canvas)
+        except NameError:
+            pass
 
     def preview_resource(self, model_index: "QModelIndex" = None):
         dialog = self.dialog
