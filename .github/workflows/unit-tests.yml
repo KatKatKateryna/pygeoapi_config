@@ -22,7 +22,9 @@ jobs:
       - name: Install pytest annotation plugin
         run: pip install pytest-github-actions-annotate-failures
 
-      - name: Run unit tests
+      - name: Install xvfb
+        run: sudo apt-get install xvfb
+
+      - name: Run tests in virtual display
         run: |
-          export QT_QPA_PLATFORM=offscreen
-          PYTHONPATH=${{ github.workspace }} python -m pytest --import-mode=importlib
+          xvfb-run -a python -m pytest --import-mode=importlib
