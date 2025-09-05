@@ -21,9 +21,11 @@
  *                                                                         *
  ***************************************************************************/
 """
-from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication
-from qgis.PyQt.QtGui import QIcon
-from qgis.PyQt.QtWidgets import QAction
+# make imports optional for pytests
+
+from PyQt5.QtCore import QSettings, QTranslator, QCoreApplication
+from PyQt5.QtGui import QIcon
+from PyQt5.QtWidgets import QAction
 
 # Initialize Qt resources from file resources.py
 from .resources import *
