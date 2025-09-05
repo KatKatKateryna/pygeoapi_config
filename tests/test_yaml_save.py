@@ -34,5 +34,7 @@ def test_json_schema(qtbot, sample_yaml: str):
         capture_output=True,
         text=True,
     )
+    print("_______NEW FILE PATH____________", flush=True)
+    print(abs_new_yaml_path, flush=True)
 
     assert result.returncode == 0, f"Validation failed:\n{result.stderr}"
