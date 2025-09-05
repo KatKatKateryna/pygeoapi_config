@@ -17,11 +17,7 @@ def test_json_schema(qtbot, sample_yaml: str):
 
     # Load YAML
     abs_yaml_path = os.path.join(base_dir, sample_yaml)
-    print(abs_yaml_path, flush=True)
-
     dialog.open_file(abs_yaml_path)  # now dialog.config_data has the data stored
-    print(dialog.config_data.server.url, flush=True)
-    assert True
 
     # Save YAML
     new_yaml_name = f"saved_{sample_yaml}"

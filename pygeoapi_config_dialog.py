@@ -149,7 +149,13 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
                         allow_unicode=True,
                         indent=4,
                     )
-                QgsMessageLog.logMessage(f"File saved to: {file_path}")
+
+                # try/except in case of running it from pytests
+                try:
+                    QgsMessageLog.logMessage(f"File saved to: {file_path}")
+                except:
+                    pass
+
             except Exception as e:
                 QgsMessageLog.logMessage(f"Error saving file: {e}")
             finally:
@@ -171,30 +177,33 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
                 # reset data
                 self.config_data = ConfigData()
                 self.config_data.set_data_from_yaml(yaml.safe_load(file_content))
-                print(file_name, flush=True)
                 self.ui_setter.set_ui_from_data()
                 print(file_name, flush=True)
 
                 # log messages about missing or mistyped values during deserialization
-                QgsMessageLog.logMessage(
-                    f"Errors during deserialization: {self.config_data.error_message}"
-                )
-                QgsMessageLog.logMessage(
-                    f"Default values used for missing YAML fields: {self.config_data.defaults_message}"
-                )
+                # try/except in case of running it from pytests
+                try:
+                    QgsMessageLog.logMessage(
+                        f"Errors during deserialization: {self.config_data.error_message}"
+                    )
+                    QgsMessageLog.logMessage(
+                        f"Default values used for missing YAML fields: {self.config_data.defaults_message}"
+                    )
 
-                # summarize all properties missing/overwitten with defaults
-                # atm, warning with the full list of properties
-                all_missing_props = self.config_data.all_missing_props
-                QgsMessageLog.logMessage(
-                    f"All missing or replaced properties: {self.config_data.all_missing_props}"
-                )
-                if len(all_missing_props) > 0:
-                    ReadOnlyTextDialog(
-                        self,
-                        "Warning",
-                        f"All missing or replaced properties (check logs for more details): {self.config_data.all_missing_props}",
-                    ).exec_()
+                    # summarize all properties missing/overwitten with defaults
+                    # atm, warning with the full list of properties
+                    QgsMessageLog.logMessage(
+                        f"All missing or replaced properties: {self.config_data.all_missing_props}"
+                    )
+
+                    if len(self.config_data.all_missing_props) > 0:
+                        ReadOnlyTextDialog(
+                            self,
+                            "Warning",
+                            f"All missing or replaced properties (check logs for more details): {self.config_data.all_missing_props}",
+                        ).exec_()
+                except:
+                    pass
 
         except Exception as e:
             QMessageBox.warning(self, "Error", f"Cannot open file:\n{str(e)}")
