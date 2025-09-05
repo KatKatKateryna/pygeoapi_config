@@ -22,6 +22,11 @@ def test_json_schema(qtbot, sample_yaml: str):
     abs_yaml_path = os.path.join(base_dir, sample_yaml)
     dialog.open_file(abs_yaml_path)  # now dialog.config_data has the data stored
 
+    # Validate UI data (to follow exactly the user experience after clicking Save button)
+    data_valid, invalid_props = dialog._set_validate_ui_data()
+    if data_valid:
+        assert False, f"UI data is not valid: {invalid_props}"
+
     # Save YAML
     new_yaml_name = f"saved_{sample_yaml}"
     abs_new_yaml_path = os.path.join(base_dir, new_yaml_name)

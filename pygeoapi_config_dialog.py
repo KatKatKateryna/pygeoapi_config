@@ -216,11 +216,11 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
 
         # You can also check the standard button type
         if button == self.buttonBox.button(QDialogButtonBox.Save):
-            self._validate_ui_data()
-            file_path, _ = QFileDialog.getSaveFileName(
-                self, "Save File", "", "YAML Files (*.yml);;All Files (*)"
-            )
-            self.save_to_file(file_path)
+            if self._set_validate_ui_data()[0]:
+                file_path, _ = QFileDialog.getSaveFileName(
+                    self, "Save File", "", "YAML Files (*.yml);;All Files (*)"
+                )
+                self.save_to_file(file_path)
         elif button == self.buttonBox.button(QDialogButtonBox.Open):
             file_name, _ = QFileDialog.getOpenFileName(
                 self, "Open File", "", "YAML Files (*.yml);;All Files (*)"
@@ -229,21 +229,28 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
         elif button == self.buttonBox.button(QDialogButtonBox.Close):
             self.reject()
 
-    def _validate_ui_data(self):
+    def _set_validate_ui_data(self) -> tuple[bool, list]:
         # Set and validate data from UI
         try:
             self.data_from_ui_setter.set_data_from_ui()
             invalid_props = self.config_data.validate_config_data()
             if len(invalid_props) > 0:
-                QgsMessageLog.logMessage(
-                    f"Properties are missing or have invalid values: {invalid_props}"
-                )
-                ReadOnlyTextDialog(
-                    self,
-                    "Warning",
-                    f"Properties are missing or have invalid values: {invalid_props}",
-                ).exec_()
-                return
+
+                # in case of running from pytests
+                try:
+                    QgsMessageLog.logMessage(
+                        f"Properties are missing or have invalid values: {invalid_props}"
+                    )
+                    ReadOnlyTextDialog(
+                        self,
+                        "Warning",
+                        f"Properties are missing or have invalid values: {invalid_props}",
+                    ).exec_()
+                except:
+                    pass
+
+                return False, invalid_props
+            return True, []
 
         except Exception as e:
             QgsMessageLog.logMessage(f"Error deserializing: {e}")
