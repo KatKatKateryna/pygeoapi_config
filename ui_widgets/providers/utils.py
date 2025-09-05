@@ -65,6 +65,8 @@ def add_widgets_to_grid_by_specs(
                 new_widgets = create_label_lineedit_pair(
                     label, default, placeholder, validation_callback
                 )
+                # assign data_widget!
+                data_widget = new_widgets["line_edit"]
                 group_layout.addWidget(new_widgets["label"], i, 0)
                 group_layout.addWidget(new_widgets["line_edit"], i, 1)
 
@@ -73,6 +75,7 @@ def add_widgets_to_grid_by_specs(
 
             elif data_type is list:
 
+                # assign data_widget!
                 data_widget = create_list_widget(
                     label, default_list_entry, validation_callback
                 )
@@ -82,6 +85,7 @@ def add_widgets_to_grid_by_specs(
         else:
             if special_widget_type is QComboBox:
                 all_values: list = placeholder  # case for dropdowns
+                # assign data_widget!
                 label_widget, data_widget = create_label_dropdown_pair(
                     label, all_values
                 )
@@ -90,7 +94,7 @@ def add_widgets_to_grid_by_specs(
 
         # add to list of data widgets and fill with data if available
         all_data_widgets[label] = data_widget
-        if data_list:
+        if data_list:  # e.g. for dropdown
             assign_value_to_field(data_widget, data_list[i])
 
     return all_data_widgets
