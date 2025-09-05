@@ -5,7 +5,10 @@ import subprocess
 from ..pygeoapi_config_dialog import PygeoapiConfigDialog
 
 
-@pytest.mark.parametrize("sample_yaml", ["docker.config.yml"])
+@pytest.mark.parametrize(
+    "sample_yaml",
+    ["docker.config.yml", "pygeoapi-test-config-ogr.yml", "cite.config.yml"],
+)
 def test_json_schema(qtbot, sample_yaml: str):
     """Validate YAML against schema.json after loading and saving."""
 
