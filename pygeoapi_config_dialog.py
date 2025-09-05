@@ -22,6 +22,7 @@
  ***************************************************************************/
 """
 
+from dataclasses import asdict
 from datetime import datetime, timezone
 import os
 import yaml
@@ -141,7 +142,7 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
             try:
                 with open(file_path, "w", encoding="utf-8") as file:
                     yaml.dump(
-                        self.config_data.asdict_enum_safe(self.config_data),
+                        asdict(self.config_data),
                         file,
                         Dumper=self.dumper,
                         default_flow_style=False,
