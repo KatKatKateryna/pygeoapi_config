@@ -124,7 +124,7 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
             # emit as YAML timestamp → plain scalar, no quotes
             return dumper.represent_scalar("tag:yaml.org,2002:timestamp", value)
 
-        # self.dumper.add_representer(datetime, represent_datetime_as_timestamp)
+        self.dumper.add_representer(datetime, represent_datetime_as_timestamp)
 
         # custom assignments
         self.model = QStringListModel()
