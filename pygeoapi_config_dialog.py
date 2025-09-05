@@ -248,8 +248,7 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
                     ).exec_()
                 except:
                     pass
-                print("____________________________________", flush=True)
-                print(invalid_props, flush=True)
+
                 return False, invalid_props
             return True, []
 

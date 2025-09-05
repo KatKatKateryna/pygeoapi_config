@@ -5,27 +5,25 @@ import subprocess
 from ..pygeoapi_config_dialog import PygeoapiConfigDialog
 
 
+@pytest.fixture()
+def base_dir():
+    return os.path.dirname(os.path.abspath(__file__))  # directory of current file
+
+
 @pytest.mark.parametrize(
     "sample_yaml",
     ["docker.config.yml", "pygeoapi-test-config-ogr.yml", "cite.config.yml"],
 )
-def test_json_schema(qtbot, sample_yaml: str):
+def test_json_schema_on_open_save(qtbot, base_dir, sample_yaml: str):
     """Validate YAML against schema.json after loading and saving."""
 
     # Create the dialog widget and let qtbot manage it
     dialog = PygeoapiConfigDialog()
     qtbot.addWidget(dialog)
 
-    base_dir = os.path.dirname(os.path.abspath(__file__))  # directory of current file
-
     # Load YAML
     abs_yaml_path = os.path.join(base_dir, sample_yaml)
     dialog.open_file(abs_yaml_path)  # now dialog.config_data has the data stored
-
-    # Validate UI data (to follow exactly the user experience after clicking Save button)
-    data_valid, invalid_props = dialog._set_validate_ui_data()
-    if data_valid:
-        assert False, f"UI data is not valid: {invalid_props}"
 
     # Save YAML
     new_yaml_name = f"saved_{sample_yaml}"
@@ -43,5 +41,46 @@ def test_json_schema(qtbot, sample_yaml: str):
         text=True,
     )
     print(f"_______File saved as '{abs_new_yaml_path}'", flush=True)
+    assert result.returncode == 0, f"Validation failed:\n{result.stderr}"
 
+
+@pytest.mark.parametrize(
+    "sample_yaml",
+    ["docker.config.yml", "pygeoapi-test-config-ogr.yml", "cite.config.yml"],
+)
+def test_json_schema_on_open_save_with_ui_validation(qtbot, base_dir, sample_yaml: str):
+    """Validate YAML against schema.json after loading and saving."""
+
+    # Create the dialog widget and let qtbot manage it
+    dialog = PygeoapiConfigDialog()
+    qtbot.addWidget(dialog)
+
+    # Load YAML
+    abs_yaml_path = os.path.join(base_dir, sample_yaml)
+    dialog.open_file(abs_yaml_path)  # now dialog.config_data has the data stored
+
+    # Validate UI data (to follow exactly the user experience after clicking Save button)
+    data_valid, invalid_props = dialog._set_validate_ui_data()
+    if not data_valid:
+        # 2 sample files are expected to fail the UI validation (incomplete "Hello" Resource data)
+        # only fail the test if a legit file ("docker.config.yml") did not pass the validation
+        if sample_yaml == "docker.config.yml":
+            assert False, f"UI data is not valid: {invalid_props}"
+
+    # Save YAML
+    new_yaml_name = f"saved_{sample_yaml}"
+    abs_new_yaml_path = os.path.join(base_dir, new_yaml_name)
+    dialog.save_to_file(abs_new_yaml_path)
+
+    result = subprocess.run(
+        [
+            "check-jsonschema",
+            "--schemafile",
+            "https://raw.githubusercontent.com/geopython/pygeoapi/refs/heads/master/pygeoapi/resources/schemas/config/pygeoapi-config-0.x.yml",
+            abs_new_yaml_path,
+        ],
+        capture_output=True,
+        text=True,
+    )
+    print(f"_______File saved as '{abs_new_yaml_path}'", flush=True)
     assert result.returncode == 0, f"Validation failed:\n{result.stderr}"
