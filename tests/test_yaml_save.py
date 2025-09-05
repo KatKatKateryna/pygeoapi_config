@@ -61,11 +61,13 @@ def test_open_file_validate_ui_data(qtbot, base_dir, sample_yaml: str):
 
     # Validate UI data (to follow exactly the user experience after clicking Save button)
     data_valid, invalid_props = dialog._set_validate_ui_data()
-    if not data_valid:
-        # 2 sample files are expected to fail the UI validation (incomplete "Hello" Resource data)
-        # only fail the test if a legit file ("docker.config.yml") did not pass the validation
-        if sample_yaml == "docker.config.yml":
-            assert False, f"'{sample_yaml}' file UI data is not valid: {invalid_props}"
+
+    # 2 sample files are expected to fail the UI validation (incomplete "Hello" Resource data)
+    # fail the test if a legit file ("docker.config.yml") did not pass the validation OR if the broken files passed it
+    if sample_yaml == "docker.config.yml" and not data_valid:
+        assert False, f"'{sample_yaml}' file UI data is not valid: {invalid_props}"
+    elif sample_yaml in ["pygeoapi-test-config-ogr.yml", "cite.config.yml"] and data_valid:
+        assert False, f"'{sample_yaml}' file UI data is not valid: {invalid_props}"
 
     print(f"_________Data validated for '{sample_yaml}'", flush=True)
     assert True
