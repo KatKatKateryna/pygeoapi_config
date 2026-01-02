@@ -32,8 +32,6 @@ def test_pull_then_push_config(mock_msgbox, mock_log, dialog):
     print(f"Pulling data from: {SERVER_URL}", flush=True)
 
     dialog.pull_from_server(SERVER_URL)
-    print("___________________________________________Config data:", flush=True)
-    print(dialog.config_data, flush=True)
 
     if mock_msgbox.critical.called:
         error_call = mock_msgbox.critical.call_args[0][2]
