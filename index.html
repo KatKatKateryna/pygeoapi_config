@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="description" content="None">
+        
+        <link rel="canonical" href="https://pygeoapi-config.byteroad.net/">
+        <link rel="shortcut icon" href="img/favicon.ico">
+        <title>pygeoapi config</title>
+        <link href="css/bootstrap.min.css" rel="stylesheet">
+        <link href="css/fontawesome.min.css" rel="stylesheet">
+        <link href="css/brands.min.css" rel="stylesheet">
+        <link href="css/solid.min.css" rel="stylesheet">
+        <link href="css/v4-font-face.min.css" rel="stylesheet">
+        <link href="css/base.css" rel="stylesheet">
+        <link id="hljs-light" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" >
+        <link id="hljs-dark" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css" disabled>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+        <script>hljs.highlightAll();</script> 
+    </head>
+
+    <body class="homepage">
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-primary">
+            <div class="container">
+                <a class="navbar-brand" href=".">pygeoapi config</a>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+
+                    <ul class="nav navbar-nav ms-md-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-bs-toggle="modal" data-bs-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-bs-toggle="collapse" data-bs-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-body-tertiary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-bs-level="1"><a href="#pygeoapi-configurator-plugin" class="nav-link">pygeoapi configurator plugin 🔧</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-bs-level="2"><a href="#using-a-local-file" class="nav-link">Using a Local File 💾</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#connecting-to-a-server" class="nav-link">Connecting to a Server 📡</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#validation" class="nav-link">Validation 📝</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#supported-resources" class="nav-link">Supported Resources ✅</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#language" class="nav-link">Language 🌎</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#disclaimer" class="nav-link">Disclaimer ⚠️</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9" role="main">
+
+<h1 id="pygeoapi-configurator-plugin">pygeoapi configurator plugin 🔧</h1>
+<p><a href="https://pygeoapi.io/">pygeoapi</a> is a python server implementation of the OGC API suite of standards; it is <a href="https://docs.pygeoapi.io/en/latest/configuration.html">configured using a YAML file</a>.</p>
+<p><a href="https://yaml.org/">YAML</a> is a markdown language for humans, but maybe not all humans are comfortable using it; this plugin is an attempt to lower the barrier to configure pygeoapi, by providing a UI to read and write that configuration. We have chosen <a href="https://qgis.org/">QGIS</a> as the environment to do this; first and foremost because most GIS users are already familiar with that environment, and hopefully this does not require them to install yet another tool; secondly because it suports different plattforms, enabling us to be inclusive.</p>
+<p>After installing the plugin, you can access is it through the <code>Plugins-&gt; pygeoapi configurator-&gt; Configure pygeoapi</code> menus. The plugin will launch a dialog, which is subdivided in three tabs:</p>
+<ul>
+<li><code>Server</code> - lets you configure server options (e.g.: host, port, enable admin api, etc).</li>
+<li><code>Metadata</code> - lets you configure the service metadata (e.g.: service title, contact information, title).</li>
+<li><code>Resources</code> - lets you configure the actual resources; through this tab, you can view/edit/delete collections from the service; read <a href="#supported-resources">here</a> about which OGC APIs and providers are supported in the plugin.</li>
+</ul>
+<p><img alt="server" src="img/screenshot-server.png" width="32%" />
+<img alt="metadata" src="img/screenshot-metadata.png" width="32%" />
+<img alt="resources" src="img/screenshot-resources.png" width="32%" /></p>
+<p>You can read and write a configuration <a href="#using-a-local-file">from a local file</a> or <a href="#connecting-to-a-server">from a server</a>.</p>
+<h2 id="using-a-local-file">Using a Local File 💾</h2>
+<p>The main motivation to develop this plugin is to provide an user friedly tool to read and write the pygeoapi config file. </p>
+<ul>
+<li>An user can open a config file from a pygeoapi instance and view the different options.</li>
+<li>They can go ahead and change options, as needed.</li>
+<li>After saving, they have updated their pygeoapi config file. Then they can go ahead and deploy it in a server with a pygeoapi instance or, if they use GitHub or similar, push it to an integration pipeline.</li>
+</ul>
+<p>It is worth saying that the plugin establishes <a href="#validation">validation steps</a> along the way. </p>
+<p>If you want to read or write the configuration from a local file, scroll all the way to the bottom of the dialog and enable the <code>Local file</code> radio button. Then you can use the <code>Open</code> and <code>Save</code> buttons to load the file, or save the file.</p>
+<p><img alt="local file" src="img/local-file.png" /></p>
+<h2 id="connecting-to-a-server">Connecting to a Server 📡</h2>
+<p>As an experimental feature, this plugin also supports pulling and pushing from/to a pygeoapi instance. This is provided more as an educational feature, for users to be able to play with a pygeoapi instance and immediatly see the effects. It can also be used with a local pygeoapi instance, to generate a pygeoapi config file interactively. Some important notes about this functionality:</p>
+<ul>
+<li>The pygeoapi <a href="https://docs.pygeoapi.io/en/latest/admin-api.html">admin API</a> must be enabled on the pygeoapi running instance.</li>
+<li>The pygeoapi instance must be <em>unprotected</em> (<em>i.e.</em>: without authentication enabled).</li>
+<li>If you want to see the changes without restarting the service, you must <a href="https://docs.pygeoapi.io/en/latest/admin-api.html#pygeoapi-hot-reloading-in-gunicorn">run pygeoapi with hot reload</a>.</li>
+</ul>
+<p>It goes without saying that a combination of an unprotected instance and an enabled admin API creates a security risk that is unaceptable for production scenarios. For that reason it should be used for <strong>testing purposes only, without exposing the service to the Internet</strong>.</p>
+<p>Run a pygeoapi docker container with hot reload, enabling the admin API:</p>
+<pre><code class="language-bash">docker run -p 5000:80 -e PYGEOAPI_SERVER_ADMIN=true geopython/pygeoapi:latest run-with-hot-reload
+</code></pre>
+<p>If you want to pull or push configuration from/to a server, enable the <code>Server Connection</code> radio button at the bottom of the tab. Then a popup will be triggered, which lets you configure the host and port of the running server.</p>
+<p><img alt="server connection" src="img/server-connection.png" /></p>
+<h2 id="validation">Validation 📝</h2>
+<p>Generating a valid pygeoapi config file is one of the main concerns of this plugin. Several levels of validation are introduced in the plugin:</p>
+<ul>
+<li>Some UI widgets have masks which control for particular data types.</li>
+<li>When saving, an extensive validation is run; the plugin lets you open, but does not let you save, an invalid config file; the specific validation errors are flagged in a dialog and on the plugin log.</li>
+</ul>
+<p>When saving the plugin creates a report of the specific changes that were made, and prompts the user to confirm those; this is done for transparency and for catching unintended changes.</p>
+<p>The unit tests capture the consistency of the plugin, by opening and saving a config file.</p>
+<h2 id="supported-resources">Supported Resources ✅</h2>
+<p>The plugin currently supports only a handfull of OGC APIs and providers. Please check the table bellow, for the specific details.</p>
+<table>
+<thead>
+<tr>
+<th>Standard</th>
+<th>Provider</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>OGC API - Maps</td>
+<td>WMSFacade</td>
+</tr>
+<tr>
+<td>OGC API - Features</td>
+<td>PostgreSQL</td>
+</tr>
+<tr>
+<td>OGC API - Tiles</td>
+<td>MVT-proxy</td>
+</tr>
+</tbody>
+</table>
+<p>You can check the details about each provider in the the <a href="https://docs.pygeoapi.io/en/latest/">pygeoapi documentation</a>. Providers that are not supported are set as <code>read-only</code>; <em>i.e.</em>, they are shown in the UI, but cannot be modified.</p>
+<h2 id="language">Language 🌎</h2>
+<p>Some of the configuration keys (e.g.: title, description) can be multilingual, and that is supported through the UI. Bellow we show how to add a Portuguese translation for the instance title.</p>
+<p><img alt="portuguese title" src="img/multilingual.png" /></p>
+<p>Although the plugin itself comes in English, there is <a href="https://github.com/byteroad/pygeoapi_config/?tab=readme-ov-file#translate">some language support built in</a>. This means that someone could create translations for other languages. If you are interested in providing a translation, you should work directly in the <a href="https://github.com/byteroad/pygeoapi_config/">project repository</a> to create a Pull Request.</p>
+<h2 id="disclaimer">Disclaimer ⚠️</h2>
+<p>The code and the contents of this website were carefully crafted by a human for humans, without using AI. If you find any mistakes please be patient: these are errors, not hallucinations. Thank You 🙏</p></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script src="js/bootstrap.bundle.min.js"></script>
+        <script>
+            var base_url = ".",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="js/base.js"></script>
+        <script src="search/main.js"></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>
+
+<!--
+MkDocs version : 1.6.1
+Build Date UTC : 2026-07-06 17:15:51.349261+00:00
+-->
