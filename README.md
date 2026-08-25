@@ -67,11 +67,11 @@ Test with live reload:
 
 ` mkdocs serve --livereload`
 
-Deploy using
+Deploy to `gh-pages` branch of your Github repository using
 
 `mkdocs gh-deploy`
 
-The site is live at: https://pygeoapi-config.byteroad.net
+The original site is live at: https://pygeoapi-config.byteroad.net
 
 
 ## Contributing 🤝
