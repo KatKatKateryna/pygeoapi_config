@@ -1,13 +1,13 @@
 from datetime import datetime
 import json
-from PyQt5.QtWidgets import (
+from qgis.PyQt.QtWidgets import (
     QDialog,
     QVBoxLayout,
     QTextEdit,
     QPushButton,
     QDialogButtonBox,
 )
-from PyQt5.QtCore import Qt
+from qgis.PyQt.QtCore import Qt
 
 
 def default_serializer(obj):
@@ -23,7 +23,7 @@ class ReadOnlyTextDialog(QDialog):
     ):
         super().__init__(parent)
         self.setWindowTitle(title)
-        self.setWindowFlag(Qt.WindowStaysOnTopHint)  # optional: always on top
+        self.setWindowFlag(Qt.WindowType.WindowStaysOnTopHint)  # optional: always on top
         self.setModal(True)  # blocks parent
 
         layout = QVBoxLayout(self)
@@ -51,7 +51,7 @@ class ReadOnlyTextDialog(QDialog):
 
         else:
             # OK / Cancel buttons
-            button_box = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+            button_box = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
             button_box.accepted.connect(self.accept)
             button_box.rejected.connect(self.reject)
             layout.addWidget(button_box)

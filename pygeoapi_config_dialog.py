@@ -47,8 +47,8 @@ from .models.top_level.utils import (
 )
 from .models.top_level.utils import STRING_SEPARATOR
 
-from PyQt5 import QtWidgets, uic
-from PyQt5.QtWidgets import (
+from qgis.PyQt import QtWidgets, uic
+from qgis.PyQt.QtWidgets import (
     QMainWindow,
     QFileDialog,
     QMessageBox,
@@ -57,7 +57,7 @@ from PyQt5.QtWidgets import (
     QApplication,
 )  # or PyQt6.QtWidgets
 
-from PyQt5.QtCore import (
+from qgis.PyQt.QtCore import (
     Qt,
     QModelIndex,
     QStringListModel,
@@ -173,7 +173,7 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
         print(f"Button clicked: {button.text()}, Role: {role}")
 
         # You can also check the standard button type
-        if button == self.buttonBox.button(QDialogButtonBox.Save):
+        if button == self.buttonBox.button(QDialogButtonBox.StandardButton.Save):
             # proceed only if UI data inputs are valid
             if self._set_validate_ui_data()[0]:
 
@@ -201,7 +201,7 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
                     if file_path:
                         self.save_to_file(processed_config_data, file_path)
 
-        elif button == self.buttonBox.button(QDialogButtonBox.Open):
+        elif button == self.buttonBox.button(QDialogButtonBox.StandardButton.Open):
             if self.serverRadio.isChecked():
                 self.server_config(data_to_push=None)
             else:
@@ -210,7 +210,7 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
                 )
                 self.open_file(file_name)
 
-        elif button == self.buttonBox.button(QDialogButtonBox.Close):
+        elif button == self.buttonBox.button(QDialogButtonBox.StandardButton.Close):
             self.reject()
             return
 
@@ -218,7 +218,7 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
 
         dialog = ServerConfigDialog(self)
 
-        if dialog.exec_():
+        if dialog.exec():
             url = dialog.get_server_url()
             if data_to_push is not None:
                 self.push_to_server(url, data_to_push)
@@ -294,7 +294,7 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
     def save_to_file(self, new_config_data: dict, file_path: str):
 
         if file_path:
-            QApplication.setOverrideCursor(Qt.WaitCursor)
+            QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
             try:
                 with open(file_path, "w", encoding="utf-8") as file:
                     yaml.dump(
@@ -374,7 +374,7 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
                     self,
                     "Warning",
                     f"All missing or replaced properties (check logs for more details): {all_missing_props}",
-                ).exec_()
+                ).exec()
         except:
         # QgsMessageLog import error in pytests, ignore
             pass  # nosec
@@ -395,7 +395,7 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
                         self,
                         "Warning",
                         f"Properties are missing or have invalid values: {invalid_props}",
-                    ).exec_()
+                    ).exec()
                 except:
                     pass # nosec
 
@@ -444,9 +444,9 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
         # if diff detected, show a window with the choice to approve the diff
         QgsMessageLog.logMessage(f"{diff_data}")
         dialog = ReadOnlyTextDialog(self, "Warning", diff_data, True)
-        result = dialog.exec_()  # returns QDialog.Accepted (1) or QDialog.Rejected (0)
+        result = dialog.exec()  # returns QDialog.Accepted (1) or QDialog.Rejected (0)
 
-        if result == QDialog.Accepted:
+        if result == QDialog.DialogCode.Accepted:
             return True, new_config_data
         else:
             return False, None
@@ -714,9 +714,9 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
             self,
             "Confirm action",
             f"Delete resource '{self.current_res_name}'?",
-            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
         )
-        if reply == QMessageBox.Yes:
+        if reply == QMessageBox.StandardButton.Yes:
             self.config_data.delete_resource(self)
             self.ui_setter.preview_resource()
             self.ui_setter.refresh_resources_list_ui()

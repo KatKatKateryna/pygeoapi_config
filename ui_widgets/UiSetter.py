@@ -33,11 +33,11 @@ from .ui_setter_utils import (
 from .utils import get_widget_text_value, reset_widget
 
 
-from PyQt5.QtGui import QIntValidator, QDoubleValidator
-from PyQt5.QtCore import (
+from qgis.PyQt.QtGui import QIntValidator, QDoubleValidator
+from qgis.PyQt.QtCore import (
     Qt,
 )
-from PyQt5.QtWidgets import QMessageBox
+from qgis.PyQt.QtWidgets import QMessageBox
 
 # make imports optional for pytests
 try:
@@ -582,7 +582,7 @@ class UiSetter:
             dialog.bbox_map_canvas = QgsMapCanvas()
             crs = QgsCoordinateReferenceSystem("EPSG:4326")
             dialog.bbox_map_canvas.setDestinationCrs(crs)
-            dialog.bbox_map_canvas.setCanvasColor(Qt.white)
+            dialog.bbox_map_canvas.setCanvasColor(Qt.GlobalColor.white)
             dialog.bbox_map_canvas.setLayers([dialog.bbox_base_layer])
             dialog.bbox_map_canvas.zoomToFullExtent()
             # self.canvas.setExtent(layer.extent(), True)

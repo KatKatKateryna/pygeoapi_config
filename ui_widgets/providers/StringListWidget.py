@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import (
+from qgis.PyQt.QtWidgets import (
     QWidget,
     QVBoxLayout,
     QListWidget,
@@ -11,7 +11,7 @@ from PyQt5.QtWidgets import (
     QDialog,
     QDialogButtonBox,
 )
-from PyQt5.QtGui import QFontMetrics
+from qgis.PyQt.QtGui import QFontMetrics
 
 
 class StringListWidget(QWidget):
@@ -61,7 +61,7 @@ class StringListWidget(QWidget):
         dialog = InputWithValidateDialog(
             self.default_new_string, validation_callback, self
         )
-        if dialog.exec_() == QDialog.Accepted:
+        if dialog.exec() == QDialog.DialogCode.Accepted:
             text = dialog.line_edit.text().strip()
             if text:
                 self.list_widget.addItem(text)
@@ -112,7 +112,7 @@ class InputWithValidateDialog(QDialog):
 
         # Standard OK/Cancel buttons
         self.button_box = QDialogButtonBox(
-            QDialogButtonBox.Ok | QDialogButtonBox.Cancel
+            QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel
         )
         self.button_box.accepted.connect(self.accept)
         self.button_box.rejected.connect(self.reject)

@@ -21,9 +21,12 @@
  *                                                                         *
  ***************************************************************************/
 """
-from PyQt5.QtCore import QSettings, QTranslator, QCoreApplication
-from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import QAction
+from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication
+from qgis.PyQt.QtGui import QIcon
+try:
+    from qgis.PyQt.QtGui import QAction  # QGIS 4 / Qt6
+except ImportError:
+    from qgis.PyQt.QtWidgets import QAction  # QGIS 3 / Qt5
 
 # Initialize Qt resources from file resources.py
 from .resources import *
@@ -187,7 +190,7 @@ class PygeoapiConfig:
         # show the dialog
         self.dlg.show()
         # Run the dialog event loop
-        result = self.dlg.exec_()
+        result = self.dlg.exec()
         # See if OK was pressed
         if result:
             # Do something useful here - delete the line containing pass and

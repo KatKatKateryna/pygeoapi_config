@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import (
+from qgis.PyQt.QtWidgets import (
     QHBoxLayout,
     QLabel,
     QLineEdit,
@@ -6,7 +6,7 @@ from PyQt5.QtWidgets import (
     QComboBox,
     QPushButton,
 )
-from PyQt5.QtGui import QIntValidator
+from qgis.PyQt.QtGui import QIntValidator
 
 from .StringListWidget import StringListWidget
 from ..utils import get_url_status, set_combo_box_value_from_data

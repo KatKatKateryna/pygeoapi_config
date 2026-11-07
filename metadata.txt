@@ -5,6 +5,7 @@
 [general]
 name=pygeoapi configurator
 qgisMinimumVersion=3.0
+supportsQt6=True
 description=Read and write a pygeoapi configuration
 version=0.24
 author=DGT,ByteRoad

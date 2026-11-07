@@ -2,7 +2,7 @@ from enum import Enum
 import requests
 from urllib.parse import urlparse
 
-from PyQt5.QtWidgets import QComboBox, QLineEdit, QMessageBox
+from qgis.PyQt.QtWidgets import QComboBox, QLineEdit, QMessageBox
 
 
 def get_widget_text_value(widget):

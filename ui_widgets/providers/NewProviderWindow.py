@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import (
+from qgis.PyQt.QtWidgets import (
     QWidget,
     QComboBox,
     QLineEdit,
@@ -10,8 +10,8 @@ from PyQt5.QtWidgets import (
     QGridLayout,
     QDialog,
 )
-from PyQt5.QtCore import pyqtSignal, Qt
-from PyQt5.QtGui import QIntValidator
+from qgis.PyQt.QtCore import pyqtSignal, Qt
+from qgis.PyQt.QtGui import QIntValidator
 
 from ...models.top_level.providers import (
     ProviderPostgresql,
@@ -41,7 +41,7 @@ class NewProviderWindow(QDialog):
 
         self.setWindowTitle(f"{provider_type.value.title()} Provider Configuration")
 
-        self.setWindowFlag(Qt.WindowStaysOnTopHint)  # always on top
+        self.setWindowFlag(Qt.WindowType.WindowStaysOnTopHint)  # always on top
         self.setModal(True)  # parent becomes unclickable
 
         self.main_layout = QVBoxLayout(self)
